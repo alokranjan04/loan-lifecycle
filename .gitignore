@@ -1,0 +1,39 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment / secrets
+.env
+*.env
+.env.*
+
+# Pipeline output (generated at runtime — not source)
+prototype/output/
+
+# Eval results (large generated files)
+prototype/evals/results/
+
+# User-created sample applications (created at runtime via the portal)
+prototype/data/applications/APP-2026-[0-9][0-9][0-9][1-9]/
+prototype/data/applications/APP-202[7-9]-*/
+prototype/data/applications/APP-20[3-9][0-9]-*/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code memory (local only)
+.archify/

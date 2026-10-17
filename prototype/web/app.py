@@ -1,0 +1,719 @@
+"""FastAPI web server wrapping the loan-lifecycle agent pipeline.
+
+Start it from the prototype folder:
+  python web/app.py                 # then open http://localhost:8000
+
+Exposes:
+  GET  /api/overview                – counts and latest eval headline for the home page
+  GET  /api/applications            – sample applications and the 39 golden cases (real, corner, jailbreak)
+  GET  /api/applications/<id>       – application JSON, documents (numbered lines), ground truth if golden
+  POST /api/run/<id>                – start pipeline in background thread (approvers: web | scripted)
+  GET  /api/stream/<sid>            – SSE stream of pipeline events
+  POST /api/approve/<sid>           – submit human approval decision
+  GET  /api/session/<id>            – current session status for an app
+  GET  /api/results/<id>            – decision_record.json after completion (+ ground-truth comparison)
+  GET  /api/audit/<id>              – audit_log.jsonl parsed
+  GET  /api/audit/<id>/verified     – the same, with hash-chain verification
+  GET  /api/evals                   – every saved eval run's summary
+  POST /api/evals/run               – run the golden-set eval in the background
+  GET  /api/evals/status            – progress / log of that run
+  GET  /api/evals/report            – evals/results/REPORT.md
+  POST /api/demos/<name>            – red-team, policy-change, tamper, replay
+  GET  /                            – serves the SPA (static/index.html)
+"""
+from __future__ import annotations
+
+import asyncio
+import json
+import os
+import queue
+import subprocess
+import threading
+import time
+import uuid
+from pathlib import Path
+from typing import Optional
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+
+# ── Path setup ────────────────────────────────────────────────────────────────
+import sys
+PROTO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROTO))
+
+from loanagent.audit import verify_chain      # noqa: E402
+from loanagent.orchestrator import (          # noqa: E402
+    CREDIT_DECISIONS, COMPLIANCE_DECISIONS,
+    ScriptedApprover, run_case, validate_human_action,
+)
+
+DATA    = PROTO / "data" / "applications"
+GOLDEN  = PROTO / "evals" / "golden"
+RESULTS = PROTO / "evals" / "results"
+OUT     = PROTO / "output"
+AS_OF   = "2026-10-16"                       # fixed decision date so runs are reproducible
+OUT.mkdir(exist_ok=True)
+
+
+def case_source(app_id: str) -> dict:
+    """Where a case's inputs live and how it is run. Sample cases and golden cases share one id space."""
+    if "/" in app_id or "\\" in app_id or ".." in app_id:
+        raise HTTPException(404, "Application not found")
+    if (DATA / app_id / "application.json").exists():
+        return {"kind": "sample", "dir": DATA / app_id, "out_root": OUT, "as_of": AS_OF, "watchlist": None}
+    if (GOLDEN / app_id / "application.json").exists():
+        gt = json.loads((GOLDEN / app_id / "ground_truth.json").read_text())
+        return {"kind": "golden", "dir": GOLDEN / app_id, "out_root": OUT / "golden", "as_of": gt["as_of"],
+                "watchlist": GOLDEN / "screening_watchlist.json", "ground_truth": gt}
+    raise HTTPException(404, "Application not found")
+
+
+def out_dir(app_id: str) -> Path:
+    return case_source(app_id)["out_root"] / app_id
+
+
+# ── FastAPI app ───────────────────────────────────────────────────────────────
+app = FastAPI(title="Loan Lifecycle Manager")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
+)
+
+# ── Session store (in-process; fine for demo) ─────────────────────────────────
+_sessions:  dict[str, "Session"] = {}
+_app_sid:   dict[str, str]       = {}   # app_id → latest session id
+
+
+class Session:
+    def __init__(self, app_id: str, llm_mode: str = "auto", approver: str = "web"):
+        self.id          = uuid.uuid4().hex[:8]
+        self.app_id      = app_id
+        self.llm_mode    = llm_mode
+        self.approver    = approver         # web (you decide) | scripted (recorded approvers)
+        self.status      = "pending"        # pending|running|awaiting_approval|complete|error
+        self._q: queue.Queue = queue.Queue()
+        # Human gate state
+        self._orig_gate            = None   # exact gate dict for validate_human_action
+        self.pending_gate_info: Optional[dict] = None   # display payload for UI
+        self.pending_case          = None
+        self._resp_ev              = threading.Event()
+        self._resp: Optional[dict] = None
+        # Results
+        self.error: Optional[str]  = None
+
+    def push(self, ev: dict) -> None:
+        self._q.put(ev)
+
+
+# ── Approvers ─────────────────────────────────────────────────────────────────
+class WebApprover:
+    """Parks the pipeline at each human gate until someone decides in the browser."""
+
+    def __init__(self, s: Session):
+        self.s = s
+
+    def ask(self, gate: dict, case, attempt: int) -> dict:
+        self.s._orig_gate       = gate
+        self.s.pending_gate_info = {
+            "gate_type":     gate["gate"],          # "compliance" | "credit"
+            "required_role": gate["role"],
+            "reason":        gate.get("reason", ""),
+            "attempt":       attempt,
+            "analyst":       case.application.get("credit_analyst"),
+            "recommendation": (case.recommendation or {}).get("action"),
+            "recommendation_reason": (case.recommendation or {}).get("reason"),
+            "risk_rating":   (case.risk or {}).get("rating"),
+            "risk_grade":    (case.risk or {}).get("grade"),
+            "pep_hits": [
+                h for h in case.metrics.get("screening", {}).get("pep", [])
+            ] if gate["gate"] == "compliance" else [],
+        }
+        self.s.pending_case = case
+        self.s.status       = "awaiting_approval"
+        self.s.push({"type": "gate", "data": self.s.pending_gate_info})
+
+        self.s._resp_ev.clear()
+        if not self.s._resp_ev.wait(timeout=1800):
+            raise TimeoutError("Approval timed out after 30 minutes")
+
+        resp = self.s._resp
+        self.s._resp   = None
+        self.s.status  = "running"
+        self.s.push({"type": "status", "data": {"status": "running"}})
+        return resp
+
+
+class AutoApprover:
+    """For golden cases: the analyst tries to approve their own case (blocked), then the routed role
+    accepts the recommendation. Same pattern the eval harness uses."""
+
+    def ask(self, gate: dict, case, attempt: int) -> dict:
+        if attempt == 0:
+            role = "Compliance Officer" if gate["gate"] == "compliance" else gate["role"]
+            decision = "EDD CLEARED" if gate["gate"] == "compliance" else case.recommendation["action"]
+            return {"name": case.application["credit_analyst"], "role": role, "decision": decision,
+                    "rationale": "Analyst approving own proposal."}
+        if gate["gate"] == "compliance":
+            return {"name": "Grace Mwangi", "role": "Compliance Officer", "decision": "EDD CLEARED",
+                    "rationale": "EDD completed: source of wealth verified, no adverse findings on the individual."}
+        return {"name": "Sofia Alvarez", "role": gate["role"], "decision": case.recommendation["action"],
+                "rationale": "Accepting the recommendation after reviewing the cited evidence."}
+
+
+def scripted_approver(app_id: str):
+    script = json.loads((PROTO / "data" / "demo_approvals.json").read_text())
+    if app_id in script:
+        return ScriptedApprover(script[app_id])
+    return AutoApprover()
+
+
+# ── Audit tailer ──────────────────────────────────────────────────────────────
+def _tail_audit(session: Session, audit_path: Path) -> None:
+    """Tail audit_log.jsonl and push progress events to the session queue."""
+    deadline = time.monotonic() + 60
+    while not audit_path.exists():
+        if time.monotonic() > deadline or session.status in ("complete", "error"):
+            break
+        time.sleep(0.15)
+
+    pos = 0
+    while True:
+        finished = session.status in ("complete", "error")
+        try:
+            size = audit_path.stat().st_size
+        except FileNotFoundError:
+            size = 0
+        if size > pos:
+            with audit_path.open(encoding="utf-8") as f:
+                f.seek(pos)
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            e = json.loads(line)
+                            session.push({
+                                "type": "progress",
+                                "data": {
+                                    "seq":        e.get("seq"),
+                                    "actor":      e.get("actor"),
+                                    "actor_type": e.get("actor_type"),
+                                    "action":     e.get("action"),
+                                    "outputs":    e.get("outputs", {}),
+                                    "ts":         e.get("ts"),
+                                },
+                            })
+                        except Exception:
+                            pass
+                pos = f.tell()
+        if finished:
+            break
+        time.sleep(0.2)
+
+
+# ── Pipeline runner ───────────────────────────────────────────────────────────
+def _run_pipeline(session: Session) -> None:
+    src = case_source(session.app_id)
+    audit_path = src["out_root"] / session.app_id / "audit_log.jsonl"
+    if audit_path.exists():
+        audit_path.unlink()             # so the tailer only streams this run
+    tailer = threading.Thread(target=_tail_audit, args=(session, audit_path), daemon=True)
+    tailer.start()
+
+    try:
+        session.status = "running"
+        session.push({"type": "status", "data": {"status": "running"}})
+        approver = WebApprover(session) if session.approver == "web" else scripted_approver(session.app_id)
+        run_case(
+            app_dir        = src["dir"],
+            approver       = approver,
+            out_root       = src["out_root"],
+            as_of          = src["as_of"],
+            llm_mode       = session.llm_mode,
+            watchlist_path = src["watchlist"],
+            verbose        = False,
+        )
+        session.status = "complete"
+        tailer.join(timeout=3)
+        session.push({"type": "status",   "data": {"status": "complete"}})
+        session.push({"type": "complete", "data": {}})
+    except Exception as exc:
+        import traceback
+        session.error  = str(exc)
+        session.status = "error"
+        session.push({"type": "error", "data": {
+            "message": str(exc),
+            "detail":  traceback.format_exc()[-600:],
+        }})
+    finally:
+        session._q.put(None)    # sentinel → close SSE
+
+
+# ── REST endpoints: cases ─────────────────────────────────────────────────────
+def _summary(d: Path, kind: str, extra: dict) -> dict:
+    data = json.loads((d / "application.json").read_text())
+    rf = (OUT if kind == "sample" else OUT / "golden") / d.name / "decision_record.json"
+    rec = json.loads(rf.read_text()) if rf.exists() else None
+    return {
+        "id":            d.name,
+        "kind":          kind,
+        "borrower":      data["borrower"]["legal_name"],
+        "sector":        data["borrower"].get("sector"),
+        "amount_usd":    data["facility"]["amount_usd"],
+        "facility_type": data["facility"]["type"],
+        "submitted_on":  data.get("submitted_on"),
+        "rm":            data.get("relationship_manager"),
+        "analyst":       data.get("credit_analyst"),
+        "has_result":    rec is not None,
+        "final_status":  rec.get("final_status") if rec else None,
+        "recommendation": (rec or {}).get("recommendation", {}).get("action"),
+        **extra,
+    }
+
+
+@app.get("/api/applications")
+def list_applications():
+    result = []
+    for d in sorted(DATA.iterdir()):
+        if d.is_dir() and (d / "application.json").exists():
+            result.append(_summary(d, "sample", {}))
+    for d in sorted(GOLDEN.glob("GS-*")):
+        if d.is_dir() and (d / "ground_truth.json").exists():
+            gt = json.loads((d / "ground_truth.json").read_text())
+            result.append(_summary(d, "golden", {
+                "category": gt.get("category"), "style": gt["style"], "planted": gt["planted"],
+                "expected_recommendation": gt["recommendation"], "expected_gates": gt["gates"],
+            }))
+    return result
+
+
+class NewApplicationRequest(BaseModel):
+    # Borrower
+    borrower_name: str
+    sector: str
+    country: str
+    registration_no: str = ""
+    incorporated_on: str = ""
+    existing_exposure_usd: float = 0.0
+    # People
+    relationship_manager: str = "Portal RM"
+    credit_analyst: str = "Credit Analyst"
+    rm_notes: str = ""
+    # Facility
+    facility_type: str
+    amount_usd: float
+    tenor_months: int
+    purpose: str
+    proposed_rate: str = "SOFR + 3.00%"
+    security: str = ""
+    # Document text content
+    doc_financials: str = ""
+    doc_bank_statement: str = ""
+    doc_valuation: str = ""
+    doc_kyc: str = ""
+    doc_project_report: str = ""
+
+
+@app.post("/api/applications")
+def create_application(req: NewApplicationRequest):
+    import datetime
+    year = datetime.date.today().year
+    existing_nums = []
+    for d in DATA.iterdir():
+        if d.is_dir() and d.name.startswith("APP-"):
+            parts = d.name.split("-")
+            if len(parts) == 3:
+                try:
+                    existing_nums.append(int(parts[2]))
+                except ValueError:
+                    pass
+    next_num = max(existing_nums, default=1000) + 1
+    app_id = f"APP-{year}-{next_num:04d}"
+    app_dir = DATA / app_id
+    doc_dir = app_dir / "documents"
+    doc_dir.mkdir(parents=True, exist_ok=True)
+    doc_map = {
+        "doc_financials":     "audited_financials.txt",
+        "doc_bank_statement": "bank_statement_summary.txt",
+        "doc_valuation":      "collateral_valuation.txt",
+        "doc_kyc":            "kyc_ubo_declaration.txt",
+        "doc_project_report": "project_report.txt",
+    }
+    declared = []
+    for field, filename in doc_map.items():
+        content = (getattr(req, field) or "").strip()
+        if content:
+            (doc_dir / filename).write_text(content, encoding="utf-8")
+            declared.append(filename)
+    application = {
+        "application_id": app_id,
+        "submitted_on": str(datetime.date.today()),
+        "channel": "Web portal",
+        "relationship_manager": req.relationship_manager,
+        "credit_analyst": req.credit_analyst,
+        "borrower": {
+            "legal_name": req.borrower_name,
+            "registration_no": req.registration_no,
+            "incorporated_on": req.incorporated_on,
+            "sector": req.sector,
+            "country": req.country,
+            "existing_group_exposure_usd": req.existing_exposure_usd,
+        },
+        "facility": {
+            "type": req.facility_type,
+            "amount_usd": req.amount_usd,
+            "tenor_months": req.tenor_months,
+            "purpose": req.purpose,
+            "proposed_rate": req.proposed_rate,
+            "security": req.security,
+        },
+        "declared_documents": declared,
+        "rm_notes": req.rm_notes,
+    }
+    (app_dir / "application.json").write_text(json.dumps(application, indent=2), encoding="utf-8")
+    return {"app_id": app_id}
+
+
+@app.delete("/api/applications/{app_id}")
+def delete_application(app_id: str):
+    """Remove a user-created sample application (not golden cases)."""
+    if "/" in app_id or "\\" in app_id or ".." in app_id:
+        raise HTTPException(400, "Invalid id")
+    d = DATA / app_id
+    if not d.exists():
+        raise HTTPException(404, "Application not found")
+    import shutil
+    shutil.rmtree(d)
+    return {"deleted": app_id}
+
+
+@app.get("/api/applications/{app_id}")
+def get_application(app_id: str):
+    src = case_source(app_id)
+    body = json.loads((src["dir"] / "application.json").read_text())
+    docs = {p.name: p.read_text(encoding="utf-8").splitlines() for p in sorted((src["dir"] / "documents").glob("*.txt"))}
+    return {"application": body, "documents": docs, "kind": src["kind"], "as_of": src["as_of"],
+            "ground_truth": src.get("ground_truth")}
+
+
+def _compare(rec: dict, gt: dict) -> dict:
+    actual = {c["rule_id"]: c["status"] for c in rec.get("policy_checks", [])}
+    checks = [{"rule_id": k, "expected": v, "actual": actual.get(k, "ABSENT"), "match": actual.get(k) == v}
+              for k, v in gt["policy_checks"].items()]
+    routes = [g["role"] for g in rec.get("gates", []) if g["gate"] == "credit"]
+    return {
+        "recommendation": {"expected": gt["recommendation"], "actual": rec["recommendation"]["action"],
+                           "match": gt["recommendation"] == rec["recommendation"]["action"]},
+        "route": {"expected": gt["gates"], "actual": routes, "match": routes == gt["gates"]},
+        "checks": checks,
+        "checks_matched": sum(c["match"] for c in checks),
+        "planted": gt["planted"], "style": gt["style"], "category": gt.get("category"),
+    }
+
+
+@app.get("/api/results/{app_id}")
+def get_results(app_id: str):
+    src = case_source(app_id)
+    f = src["out_root"] / app_id / "decision_record.json"
+    if not f.exists():
+        raise HTTPException(404, "Results not found — run the pipeline first")
+    rec = json.loads(f.read_text())
+    ef = f.parent / "extracted_fields.json"
+    rec["extracted_fields"] = json.loads(ef.read_text()) if ef.exists() else {}
+    sm = f.parent / "decision_summary.md"
+    rec["summary_md"] = sm.read_bytes().decode("utf-8", errors="replace") if sm.exists() else ""
+    if src["kind"] == "golden":
+        rec["ground_truth_comparison"] = _compare(rec, src["ground_truth"])
+    return rec
+
+
+@app.get("/api/audit/{app_id}")
+def get_audit_log(app_id: str):
+    f = out_dir(app_id) / "audit_log.jsonl"
+    if not f.exists():
+        raise HTTPException(404, "Audit log not found")
+    return [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
+
+
+@app.get("/api/audit/{app_id}/verified")
+def get_audit_verified(app_id: str):
+    """Audit log plus hash-chain verification, for the home-page UI."""
+    f = out_dir(app_id) / "audit_log.jsonl"
+    if not f.exists():
+        raise HTTPException(404, "Audit log not found")
+    ok, msg = verify_chain(f)
+    return {"entries": get_audit_log(app_id), "chain_ok": ok, "chain_message": msg}
+
+
+class RunRequest(BaseModel):
+    llm_mode: str = "auto"
+    approver: str = "web"
+
+
+@app.post("/api/run/{app_id}")
+def start_run(app_id: str, req: RunRequest = RunRequest()):
+    case_source(app_id)
+    if req.llm_mode not in ("auto", "mock", "claude") or req.approver not in ("web", "scripted"):
+        raise HTTPException(400, "Bad run options")
+    if req.llm_mode == "claude" and not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(400, "Set ANTHROPIC_API_KEY in the terminal before starting the server to use Claude")
+    s = Session(app_id, req.llm_mode, req.approver)
+    _sessions[s.id] = s
+    _app_sid[app_id] = s.id
+    threading.Thread(target=_run_pipeline, args=(s,), daemon=True).start()
+    return {"session_id": s.id}
+
+
+@app.get("/api/stream/{session_id}")
+async def event_stream(session_id: str):
+    s = _sessions.get(session_id)
+    if not s:
+        raise HTTPException(404, "Session not found")
+
+    async def generate():
+        loop = asyncio.get_event_loop()
+        while True:
+            try:
+                ev = await loop.run_in_executor(None, lambda: s._q.get(timeout=25))
+            except Exception:
+                yield "data: {\"type\":\"ping\"}\n\n"
+                continue
+            if ev is None:
+                yield "data: {\"type\":\"done\"}\n\n"
+                break
+            yield f"data: {json.dumps(ev, default=str)}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+class ApproveRequest(BaseModel):
+    name:      str
+    role:      str
+    decision:  str
+    rationale: str
+
+
+@app.post("/api/approve/{session_id}")
+def submit_approval(session_id: str, body: ApproveRequest):
+    s = _sessions.get(session_id)
+    if not s:
+        raise HTTPException(404, "Session not found")
+    if s.status != "awaiting_approval":
+        raise HTTPException(400, "Session is not awaiting approval")
+
+    action = body.model_dump()
+    errors = validate_human_action(s._orig_gate, action, s.pending_case)
+    if errors:
+        return {"ok": False, "errors": errors}
+
+    s._resp = action
+    s._resp_ev.set()
+    return {"ok": True}
+
+
+@app.get("/api/session/{app_id}")
+def get_session_status(app_id: str):
+    sid = _app_sid.get(app_id)
+    if not sid or sid not in _sessions:
+        return {"session_id": None, "status": "idle", "pending_gate": None}
+    s = _sessions[sid]
+    return {
+        "session_id":   sid,
+        "status":       s.status,
+        "pending_gate": s.pending_gate_info,
+        "error":        s.error,
+    }
+
+
+@app.get("/api/decisions")
+def decision_options():
+    return {"credit": CREDIT_DECISIONS, "compliance": COMPLIANCE_DECISIONS}
+
+
+# ── Background jobs (evals and demos run the project's own scripts) ───────────
+_jobs: dict[str, dict] = {}
+
+
+def _start_job(key: str, cmds: list[list[str]]) -> dict:
+    job = _jobs.get(key)
+    if job and job["status"] == "running":
+        return job
+    job = {"status": "running", "log": "", "started": time.time(), "returncode": None}
+    _jobs[key] = job
+
+    def work():
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUNBUFFERED": "1"}
+        for cmd in cmds:
+            job["log"] += "$ " + " ".join(cmd[1:]) + "\n"
+            p = subprocess.Popen([sys.executable, *cmd[1:]], cwd=PROTO, env=env, text=True, encoding="utf-8",
+                                 errors="replace", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            for line in p.stdout:
+                job["log"] += line
+            p.wait()
+            job["returncode"] = p.returncode
+            if p.returncode != 0:
+                break
+        job["status"] = "done" if job["returncode"] == 0 else "failed"
+        job["seconds"] = round(time.time() - job["started"], 1)
+
+    threading.Thread(target=work, daemon=True).start()
+    return job
+
+
+CATEGORIES = ("real", "corner", "jailbreak")
+
+
+def _category_of(case_id: str):
+    gt = GOLDEN / case_id / "ground_truth.json"
+    return json.loads(gt.read_text()).get("category") if gt.exists() else None
+
+
+def _by_category(cases: list[dict]) -> dict:
+    """Same breakdown as evals/run_evals.py writes into summary.by_category."""
+    def pct(a, b):
+        return round(100 * a / b, 1) if b else None
+    out = {}
+    for k in CATEGORIES:
+        g = [c for c in cases if c.get("category") == k and "error" not in c]
+        if not g:
+            continue
+        crit = [f for c in g for f in c["fields"] if f["critical"]]
+        pol = [v for c in g for v in c["policy"].values()]
+        out[k] = {"cases": len(g),
+                  "recommendation_agreement_pct": pct(sum(c["recommendation"]["expected"] == c["recommendation"]["actual"] for c in g), len(g)),
+                  "unsafe_recommendations": sum(c["recommendation"]["unsafe"] for c in g),
+                  "policy_status_exact_pct": pct(sum(v["expected"] == v["actual"] for v in pol), len(pol)),
+                  "injection_detected": sum(bool(c["findings"].get("prompt_injection_detected")) for c in g),
+                  "critical_field_accuracy_pct": pct(sum(f["correct"] for f in crit), len(crit))}
+    return out
+
+
+@app.get("/api/evals")
+def list_evals():
+    runs = []
+    for d in sorted(RESULTS.iterdir()) if RESULTS.exists() else []:
+        f = d / "results.json"
+        if f.exists():
+            r = json.loads(f.read_text())
+            s = {k: v for k, v in r["summary"].items() if k != "per_clause"}
+            for c in r["cases"]:      # runs recorded before categories existed take them from the golden set
+                c["category"] = c.get("category") or _category_of(c["case_id"])
+            if "by_category" not in s:
+                s["by_category"] = _by_category(r["cases"])
+            cases = [{k: c.get(k) for k in ("case_id", "category", "style", "planted", "recommendation", "routing", "error", "seconds")}
+                     for c in r["cases"]]
+            runs.append({"label": r["label"], "llm": r["llm"], "run_at": r.get("run_at"), "summary": s,
+                         "per_clause": r["summary"].get("per_clause", {}), "cases": cases})
+    return runs
+
+
+class EvalRequest(BaseModel):
+    llm: str = "mock"
+    only: str = ""
+
+
+@app.post("/api/evals/run")
+def run_evals(req: EvalRequest = EvalRequest()):
+    if req.llm not in ("mock", "claude"):
+        raise HTTPException(400, "llm must be mock or claude")
+    if req.llm == "claude" and not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(400, "Set ANTHROPIC_API_KEY in the terminal before starting the server to run the eval with Claude")
+    label = "mock" if req.llm == "mock" else "claude-live"
+    cmd = ["python", "evals/run_evals.py", "--llm", req.llm, "--label", label]
+    if req.only:
+        cmd += ["--only", req.only]
+    return _start_job("evals", [cmd, ["python", "evals/run_evals.py", "--report"]])
+
+
+@app.get("/api/evals/status")
+def eval_status():
+    return _jobs.get("evals", {"status": "idle", "log": ""})
+
+
+@app.get("/api/evals/report")
+def eval_report():
+    f = RESULTS / "REPORT.md"
+    return {"markdown": f.read_text(encoding="utf-8") if f.exists() else "No report yet. Run the eval first."}
+
+
+DEMOS = {
+    "redteam":       {"cmd": ["python", "run_demo.py", "--redteam-demo", "--llm", "mock"],
+                      "cases": ["output/redteam/APP-2026-0142", "output/redteam/without-attack/APP-2026-0142"]},
+    "policy-change": {"cmd": ["python", "run_demo.py", "--policy-change-demo", "--llm", "mock"],
+                      "cases": ["output/policy-change/2026-10-16/APP-2026-0157", "output/policy-change/2026-11-02/APP-2026-0157"]},
+    "tamper":        {"cmd": ["python", "run_demo.py", "--tamper-demo"], "cases": []},
+    "replay":        {"cmd": ["python", "run_demo.py", "--replay", "output/APP-2026-0157"], "cases": []},
+    "tests":         {"cmd": ["python", "-m", "unittest", "discover", "-s", "tests", "-v"], "cases": []},
+}
+
+
+@app.post("/api/demos/{name}")
+def run_demo(name: str):
+    if name not in DEMOS:
+        raise HTTPException(404, "Unknown demo")
+    if name == "replay" and not (OUT / "APP-2026-0157" / "decision_record.json").exists():
+        raise HTTPException(400, "Run APP-2026-0157 first so there is a decision to replay")
+    return _start_job(f"demo:{name}", [DEMOS[name]["cmd"]])
+
+
+@app.get("/api/demos/{name}")
+def demo_status(name: str):
+    if name not in DEMOS:
+        raise HTTPException(404, "Unknown demo")
+    job = _jobs.get(f"demo:{name}", {"status": "idle", "log": ""})
+    outs = []
+    if job.get("status") == "done":
+        for rel in DEMOS[name]["cases"]:
+            f = PROTO / rel / "decision_record.json"
+            if f.exists():
+                r = json.loads(f.read_text())
+                outs.append({"path": rel, "recommendation": r["recommendation"]["action"],
+                             "route": [g["role"] for g in r["gates"]], "policy": r.get("policy", {}).get("version"),
+                             "security_flags": len(r.get("security_flags", [])),
+                             "conditions": len(r.get("conditions", []))})
+    return {**job, "outputs": outs}
+
+
+def _category_run(runs: list[dict]):
+    """Newest eval run that covers the whole golden set, for the per-category tiles on the home page."""
+    total = sum(1 for d in GOLDEN.glob("GS-*") if d.is_dir())
+    full = [r for r in runs if sum(v["cases"] for v in r["summary"]["by_category"].values()) >= total]
+    if not full:
+        return None
+    r = max(full, key=lambda r: r["run_at"] or "")
+    return {"label": r["label"], "llm": r["llm"], "by_category": r["summary"]["by_category"]}
+
+
+@app.get("/api/overview")
+def overview():
+    runs = list_evals()
+    pick = next((r for r in runs if r["label"] == "claude-opus-5-5"), None) or (runs[-1] if runs else None)
+    return {
+        "samples": sum(1 for d in DATA.iterdir() if d.is_dir()),
+        "golden": sum(1 for d in GOLDEN.glob("GS-*") if d.is_dir()),
+        "categories": {k: sum(1 for d in GOLDEN.glob("GS-*") if d.is_dir() and _category_of(d.name) == k) for k in CATEGORIES},
+        "eval_runs": len(runs),
+        "cat_run": _category_run(runs),
+        "headline": {"label": pick["label"], **pick["summary"]} if pick else None,
+        "claude_key_set": bool(os.environ.get("ANTHROPIC_API_KEY")),
+        "as_of": AS_OF,
+    }
+
+
+# ── Serve SPA (mount last so API routes take precedence) ─────────────────────
+STATIC = Path(__file__).parent / "static"
+STATIC.mkdir(exist_ok=True)
+app.mount("/", StaticFiles(directory=str(STATIC), html=True), name="static")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    print("Loan Lifecycle Manager: open http://localhost:8000")
+    uvicorn.run(app, host="127.0.0.1", port=int(os.environ.get("PORT", 8000)))

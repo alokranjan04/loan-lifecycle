@@ -1,0 +1,173 @@
+{
+  "case_id": "GS-009",
+  "category": "real",
+  "style": "standard",
+  "planted": [
+    "projected DSCR about 1.14x"
+  ],
+  "as_of": "2026-10-16",
+  "policy_checks": {
+    "POL-2.1": "PASS",
+    "POL-2.2": "PASS",
+    "POL-2.3": "FAIL",
+    "POL-2.5": "PASS",
+    "POL-2.4": "PASS",
+    "POL-3.1": "PASS",
+    "POL-3.2": "PASS",
+    "POL-3.3": "PASS",
+    "POL-3.4": "PASS",
+    "POL-4.1": "PASS",
+    "POL-4.2": "PASS",
+    "POL-5.1": "PASS",
+    "POL-5.2": "PASS"
+  },
+  "missing_documents": [],
+  "findings": [],
+  "recommendation": "DECLINE",
+  "gates": [
+    "Senior Credit Manager"
+  ],
+  "fields": {
+    "financials": {
+      "audit_opinion": {
+        "line": 4,
+        "value": "Unqualified"
+      },
+      "revenue_fy2023": {
+        "line": 7,
+        "value": 12340000
+      },
+      "revenue_fy2024": {
+        "line": 7,
+        "value": 13370000
+      },
+      "revenue_fy2025": {
+        "line": 7,
+        "value": 14440000
+      },
+      "ebitda_fy2023": {
+        "line": 8,
+        "value": 2340000
+      },
+      "ebitda_fy2024": {
+        "line": 8,
+        "value": 2510000
+      },
+      "ebitda_fy2025": {
+        "line": 8,
+        "value": 1000000
+      },
+      "interest_fy2025": {
+        "line": 9,
+        "value": 120000
+      },
+      "net_profit_fy2025": {
+        "line": 10,
+        "value": 1480000
+      },
+      "total_debt": {
+        "line": 13,
+        "value": 500000
+      },
+      "current_assets": {
+        "line": 14,
+        "value": 5780000
+      },
+      "current_liabilities": {
+        "line": 15,
+        "value": 3980000
+      },
+      "equity": {
+        "line": 16,
+        "value": 7220000
+      },
+      "principal_fy2025": {
+        "line": 19,
+        "value": 400000
+      }
+    },
+    "bank_statement": {
+      "period": {
+        "line": 4,
+        "value": "01-Oct-2025 to 30-Sep-2026"
+      },
+      "total_credits": {
+        "line": 6,
+        "value": 13140000
+      },
+      "lowest_balance": {
+        "line": 8,
+        "value": 130000
+      },
+      "returned_items": {
+        "line": 10,
+        "value": 0
+      }
+    },
+    "kyc": {
+      "directors": {
+        "line": 6,
+        "value": [
+          {
+            "name": "Ingrid Tanaka",
+            "id_expiry": "2033-05-21"
+          },
+          {
+            "name": "Nadia Tanaka",
+            "id_expiry": "2028-06-19"
+          },
+          {
+            "name": "Hana Ueda",
+            "id_expiry": "2028-03-04"
+          }
+        ]
+      },
+      "declaration_date": {
+        "line": 9,
+        "value": "2026-10-01"
+      }
+    },
+    "valuation": {
+      "valuer": {
+        "line": 3,
+        "value": "Oakridge Valuers (empanelled valuer)"
+      },
+      "valuation_date": {
+        "line": 4,
+        "value": "2026-06-08"
+      },
+      "market_value": {
+        "line": 5,
+        "value": 3460000
+      },
+      "realisable_value": {
+        "line": 6,
+        "value": 2930000
+      }
+    },
+    "tax_return": {
+      "tax_year": {
+        "line": 3,
+        "value": 2025
+      },
+      "gross_receipts": {
+        "line": 4,
+        "value": 14440000
+      },
+      "status": {
+        "line": 6,
+        "value": "Accepted"
+      }
+    },
+    "board_resolution": {
+      "amount": {
+        "line": 2,
+        "value": 1500000
+      },
+      "date": {
+        "line": 3,
+        "value": "2026-09-29"
+      }
+    }
+  }
+}

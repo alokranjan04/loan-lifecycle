@@ -1,0 +1,30 @@
+{
+  "application_id": "GS-004",
+  "submitted_on": "2026-10-05",
+  "channel": "Relationship Manager portal",
+  "relationship_manager": "Lena Ueda",
+  "credit_analyst": "Daniel Okafor",
+  "borrower": {
+    "legal_name": "Eastwind Precision Works LLC",
+    "incorporated_on": "2018-01-17",
+    "sector": "Industrial manufacturing",
+    "country": "Germany",
+    "existing_group_exposure_usd": 2800000
+  },
+  "facility": {
+    "type": "Secured term loan (equipment)",
+    "amount_usd": 2400000,
+    "tenor_months": 60,
+    "purpose": "Purchase and installation of production equipment",
+    "proposed_rate": "SOFR + 2.75%",
+    "security": "First charge on the financed assets"
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "board_resolution.txt",
+    "collateral_valuation.txt",
+    "kyc_ubo_declaration.txt",
+    "tax_returns.txt"
+  ]
+}

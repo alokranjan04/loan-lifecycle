@@ -1,0 +1,175 @@
+{
+  "case_id": "GS-019",
+  "category": "real",
+  "style": "standard",
+  "planted": [
+    "tax return 20% below audited revenue"
+  ],
+  "as_of": "2026-10-16",
+  "policy_checks": {
+    "POL-2.1": "PASS",
+    "POL-2.2": "PASS",
+    "POL-2.3": "PASS",
+    "POL-2.5": "PASS",
+    "POL-2.4": "PASS",
+    "POL-3.1": "PASS",
+    "POL-3.2": "PASS",
+    "POL-3.3": "PASS",
+    "POL-3.4": "PASS",
+    "POL-4.1": "PASS",
+    "POL-4.2": "PASS",
+    "POL-5.1": "PASS",
+    "POL-5.2": "PASS"
+  },
+  "missing_documents": [],
+  "findings": [
+    "tax_return_mismatch"
+  ],
+  "recommendation": "APPROVE WITH CONDITIONS",
+  "gates": [
+    "Senior Credit Manager"
+  ],
+  "fields": {
+    "financials": {
+      "audit_opinion": {
+        "line": 4,
+        "value": "Unqualified"
+      },
+      "revenue_fy2023": {
+        "line": 7,
+        "value": 10280000
+      },
+      "revenue_fy2024": {
+        "line": 7,
+        "value": 11140000
+      },
+      "revenue_fy2025": {
+        "line": 7,
+        "value": 12030000
+      },
+      "ebitda_fy2023": {
+        "line": 8,
+        "value": 2140000
+      },
+      "ebitda_fy2024": {
+        "line": 8,
+        "value": 2300000
+      },
+      "ebitda_fy2025": {
+        "line": 8,
+        "value": 2460000
+      },
+      "interest_fy2025": {
+        "line": 9,
+        "value": 150000
+      },
+      "net_profit_fy2025": {
+        "line": 10,
+        "value": 1350000
+      },
+      "total_debt": {
+        "line": 13,
+        "value": 1560000
+      },
+      "current_assets": {
+        "line": 14,
+        "value": 4810000
+      },
+      "current_liabilities": {
+        "line": 15,
+        "value": 3320000
+      },
+      "equity": {
+        "line": 16,
+        "value": 6020000
+      },
+      "principal_fy2025": {
+        "line": 19,
+        "value": 370000
+      }
+    },
+    "bank_statement": {
+      "period": {
+        "line": 4,
+        "value": "01-Oct-2025 to 30-Sep-2026"
+      },
+      "total_credits": {
+        "line": 6,
+        "value": 11430000
+      },
+      "lowest_balance": {
+        "line": 8,
+        "value": 260000
+      },
+      "returned_items": {
+        "line": 10,
+        "value": 0
+      }
+    },
+    "kyc": {
+      "directors": {
+        "line": 6,
+        "value": [
+          {
+            "name": "Mei Quinn",
+            "id_expiry": "2033-02-21"
+          },
+          {
+            "name": "Carlos Duarte",
+            "id_expiry": "2031-04-25"
+          },
+          {
+            "name": "Yuki Lindqvist",
+            "id_expiry": "2032-09-12"
+          }
+        ]
+      },
+      "declaration_date": {
+        "line": 9,
+        "value": "2026-10-01"
+      }
+    },
+    "valuation": {
+      "valuer": {
+        "line": 3,
+        "value": "Oakridge Valuers (empanelled valuer)"
+      },
+      "valuation_date": {
+        "line": 4,
+        "value": "2026-06-05"
+      },
+      "market_value": {
+        "line": 5,
+        "value": 2960000
+      },
+      "realisable_value": {
+        "line": 6,
+        "value": 2510000
+      }
+    },
+    "tax_return": {
+      "tax_year": {
+        "line": 3,
+        "value": 2025
+      },
+      "gross_receipts": {
+        "line": 4,
+        "value": 9620000
+      },
+      "status": {
+        "line": 6,
+        "value": "Accepted"
+      }
+    },
+    "board_resolution": {
+      "amount": {
+        "line": 2,
+        "value": 1500000
+      },
+      "date": {
+        "line": 3,
+        "value": "2026-09-29"
+      }
+    }
+  }
+}

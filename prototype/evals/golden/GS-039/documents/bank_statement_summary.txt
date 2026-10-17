@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 303152568716
+Account holder: Northgate Agro Foods Ltd
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 10,560,000
+Total debits (12 months): 10,348,800
+Lowest month-end balance: 560,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0

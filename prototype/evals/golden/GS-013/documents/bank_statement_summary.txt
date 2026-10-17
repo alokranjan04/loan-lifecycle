@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 360798267267
+Account holder: Sunvale Power Generation Ltd
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 10,640,000
+Total debits (12 months): 10,427,200
+Lowest month-end balance: 230,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0

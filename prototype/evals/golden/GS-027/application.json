@@ -1,0 +1,30 @@
+{
+  "application_id": "GS-027",
+  "submitted_on": "2026-10-05",
+  "channel": "Relationship Manager portal",
+  "relationship_manager": "Viktor Ekstr\u00f6m",
+  "credit_analyst": "Daniel Okafor",
+  "borrower": {
+    "legal_name": "Eastwind Precision Works Ltd",
+    "incorporated_on": "2014-01-15",
+    "sector": "Industrial manufacturing",
+    "country": "United Kingdom",
+    "existing_group_exposure_usd": 600000
+  },
+  "facility": {
+    "type": "Secured term loan (equipment)",
+    "amount_usd": 1700000,
+    "tenor_months": 60,
+    "purpose": "Purchase and installation of production equipment",
+    "proposed_rate": "SOFR + 2.75%",
+    "security": "First charge on the financed assets"
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "board_resolution.txt",
+    "collateral_valuation.txt",
+    "kyc_ubo_declaration.txt",
+    "tax_returns.txt"
+  ]
+}

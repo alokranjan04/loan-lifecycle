@@ -1,0 +1,204 @@
+{
+  "case_id": "GS-012",
+  "category": "real",
+  "style": "standard",
+  "planted": [
+    "promoter contribution 18%"
+  ],
+  "as_of": "2026-10-16",
+  "policy_checks": {
+    "POL-2.1": "PASS",
+    "POL-2.2": "PASS",
+    "POL-2.3": "PASS",
+    "POL-2.5": "PASS",
+    "POL-2.4": "PASS",
+    "POL-2.6": "FAIL",
+    "POL-3.1": "PASS",
+    "POL-3.2": "PASS",
+    "POL-3.3": "PASS",
+    "POL-3.4": "PASS",
+    "POL-4.1": "PASS",
+    "POL-4.2": "PASS",
+    "POL-5.1": "PASS",
+    "POL-5.2": "PASS"
+  },
+  "missing_documents": [],
+  "findings": [],
+  "recommendation": "DECLINE",
+  "gates": [
+    "Regional Credit Committee"
+  ],
+  "fields": {
+    "financials": {
+      "audit_opinion": {
+        "line": 4,
+        "value": "Unqualified"
+      },
+      "revenue_fy2023": {
+        "line": 7,
+        "value": 9830000
+      },
+      "revenue_fy2024": {
+        "line": 7,
+        "value": 10650000
+      },
+      "revenue_fy2025": {
+        "line": 7,
+        "value": 11500000
+      },
+      "ebitda_fy2023": {
+        "line": 8,
+        "value": 1720000
+      },
+      "ebitda_fy2024": {
+        "line": 8,
+        "value": 1850000
+      },
+      "ebitda_fy2025": {
+        "line": 8,
+        "value": 1980000
+      },
+      "interest_fy2025": {
+        "line": 9,
+        "value": 120000
+      },
+      "net_profit_fy2025": {
+        "line": 10,
+        "value": 1090000
+      },
+      "total_debt": {
+        "line": 13,
+        "value": 1590000
+      },
+      "current_assets": {
+        "line": 14,
+        "value": 4600000
+      },
+      "current_liabilities": {
+        "line": 15,
+        "value": 3170000
+      },
+      "equity": {
+        "line": 16,
+        "value": 5750000
+      },
+      "principal_fy2025": {
+        "line": 19,
+        "value": 300000
+      }
+    },
+    "bank_statement": {
+      "period": {
+        "line": 4,
+        "value": "01-Oct-2025 to 30-Sep-2026"
+      },
+      "total_credits": {
+        "line": 6,
+        "value": 11240000
+      },
+      "lowest_balance": {
+        "line": 8,
+        "value": 210000
+      },
+      "returned_items": {
+        "line": 10,
+        "value": 0
+      }
+    },
+    "kyc": {
+      "directors": {
+        "line": 6,
+        "value": [
+          {
+            "name": "Mateo Brandt",
+            "id_expiry": "2031-11-08"
+          },
+          {
+            "name": "Ravi Haddad",
+            "id_expiry": "2033-04-08"
+          },
+          {
+            "name": "Omar Ueda",
+            "id_expiry": "2033-01-31"
+          }
+        ]
+      },
+      "declaration_date": {
+        "line": 9,
+        "value": "2026-10-01"
+      }
+    },
+    "valuation": {
+      "valuer": {
+        "line": 3,
+        "value": "Oakridge Valuers (empanelled valuer)"
+      },
+      "valuation_date": {
+        "line": 4,
+        "value": "2026-07-27"
+      },
+      "market_value": {
+        "line": 5,
+        "value": 13100000
+      },
+      "realisable_value": {
+        "line": 6,
+        "value": 11100000
+      }
+    },
+    "project_report": {
+      "total_project_cost": {
+        "line": 4,
+        "value": 6100000
+      },
+      "promoter_equity": {
+        "line": 5,
+        "value": 1100000
+      },
+      "cod": {
+        "line": 7,
+        "value": "2027-09-30"
+      },
+      "dscr_by_year": {
+        "line": 9,
+        "value": [
+          1.42,
+          1.48,
+          1.55,
+          1.6,
+          1.62,
+          1.58,
+          1.52
+        ]
+      },
+      "dscr_avg": {
+        "line": 10,
+        "value": 1.54
+      }
+    },
+    "tax_return": {
+      "tax_year": {
+        "line": 3,
+        "value": 2025
+      },
+      "gross_receipts": {
+        "line": 4,
+        "value": 11500000
+      },
+      "status": {
+        "line": 6,
+        "value": "Accepted"
+      }
+    },
+    "board_resolution": {
+      "amount": {
+        "line": 2,
+        "value": 5000000
+      },
+      "date": {
+        "line": 3,
+        "value": "2026-09-29"
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 541596238999
+Account holder: Harbor Precision Works LLC
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 9,370,000
+Total debits (12 months): 9,182,600
+Lowest month-end balance: 160,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0

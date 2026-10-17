@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 662471354034
+Account holder: Brightpath Precision Works LLC
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 7,340,000
+Total debits (12 months): 7,193,200
+Lowest month-end balance: 180,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0

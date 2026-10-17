@@ -1,0 +1,31 @@
+{
+  "application_id": "GS-012",
+  "submitted_on": "2026-10-05",
+  "channel": "Relationship Manager portal",
+  "relationship_manager": "Carlos Ekstr\u00f6m",
+  "credit_analyst": "Daniel Okafor",
+  "borrower": {
+    "legal_name": "Eastwind Agro Foods LLC",
+    "incorporated_on": "2009-01-14",
+    "sector": "Agri and food processing",
+    "country": "India",
+    "existing_group_exposure_usd": 1700000
+  },
+  "facility": {
+    "type": "Secured term loan (project finance)",
+    "amount_usd": 5000000,
+    "tenor_months": 84,
+    "purpose": "Construction of a new processing facility",
+    "proposed_rate": "SOFR + 2.75%",
+    "security": "First charge on the financed assets"
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "board_resolution.txt",
+    "collateral_valuation.txt",
+    "kyc_ubo_declaration.txt",
+    "project_report.txt",
+    "tax_returns.txt"
+  ]
+}

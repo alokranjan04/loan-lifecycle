@@ -1,0 +1,173 @@
+{
+  "case_id": "GS-013",
+  "category": "real",
+  "style": "standard",
+  "planted": [
+    "Exit sector"
+  ],
+  "as_of": "2026-10-16",
+  "policy_checks": {
+    "POL-2.1": "PASS",
+    "POL-2.2": "PASS",
+    "POL-2.3": "PASS",
+    "POL-2.5": "PASS",
+    "POL-2.4": "PASS",
+    "POL-3.1": "PASS",
+    "POL-3.2": "PASS",
+    "POL-3.3": "PASS",
+    "POL-3.4": "PASS",
+    "POL-4.1": "FAIL",
+    "POL-4.2": "PASS",
+    "POL-5.1": "PASS",
+    "POL-5.2": "PASS"
+  },
+  "missing_documents": [],
+  "findings": [],
+  "recommendation": "DECLINE",
+  "gates": [
+    "Regional Credit Committee"
+  ],
+  "fields": {
+    "financials": {
+      "audit_opinion": {
+        "line": 4,
+        "value": "Unqualified"
+      },
+      "revenue_fy2023": {
+        "line": 7,
+        "value": 9680000
+      },
+      "revenue_fy2024": {
+        "line": 7,
+        "value": 10490000
+      },
+      "revenue_fy2025": {
+        "line": 7,
+        "value": 11330000
+      },
+      "ebitda_fy2023": {
+        "line": 8,
+        "value": 2060000
+      },
+      "ebitda_fy2024": {
+        "line": 8,
+        "value": 2210000
+      },
+      "ebitda_fy2025": {
+        "line": 8,
+        "value": 2370000
+      },
+      "interest_fy2025": {
+        "line": 9,
+        "value": 140000
+      },
+      "net_profit_fy2025": {
+        "line": 10,
+        "value": 1300000
+      },
+      "total_debt": {
+        "line": 13,
+        "value": 1700000
+      },
+      "current_assets": {
+        "line": 14,
+        "value": 4530000
+      },
+      "current_liabilities": {
+        "line": 15,
+        "value": 3130000
+      },
+      "equity": {
+        "line": 16,
+        "value": 5660000
+      },
+      "principal_fy2025": {
+        "line": 19,
+        "value": 360000
+      }
+    },
+    "bank_statement": {
+      "period": {
+        "line": 4,
+        "value": "01-Oct-2025 to 30-Sep-2026"
+      },
+      "total_credits": {
+        "line": 6,
+        "value": 10640000
+      },
+      "lowest_balance": {
+        "line": 8,
+        "value": 230000
+      },
+      "returned_items": {
+        "line": 10,
+        "value": 0
+      }
+    },
+    "kyc": {
+      "directors": {
+        "line": 6,
+        "value": [
+          {
+            "name": "Jonas Lindqvist",
+            "id_expiry": "2031-01-25"
+          },
+          {
+            "name": "Zara Tanaka",
+            "id_expiry": "2029-10-07"
+          },
+          {
+            "name": "Kwame Weiss",
+            "id_expiry": "2032-02-04"
+          }
+        ]
+      },
+      "declaration_date": {
+        "line": 9,
+        "value": "2026-10-01"
+      }
+    },
+    "valuation": {
+      "valuer": {
+        "line": 3,
+        "value": "Oakridge Valuers (empanelled valuer)"
+      },
+      "valuation_date": {
+        "line": 4,
+        "value": "2026-06-11"
+      },
+      "market_value": {
+        "line": 5,
+        "value": 6280000
+      },
+      "realisable_value": {
+        "line": 6,
+        "value": 5320000
+      }
+    },
+    "tax_return": {
+      "tax_year": {
+        "line": 3,
+        "value": 2025
+      },
+      "gross_receipts": {
+        "line": 4,
+        "value": 11330000
+      },
+      "status": {
+        "line": 6,
+        "value": "Accepted"
+      }
+    },
+    "board_resolution": {
+      "amount": {
+        "line": 2,
+        "value": 3000000
+      },
+      "date": {
+        "line": 3,
+        "value": "2026-09-29"
+      }
+    }
+  }
+}

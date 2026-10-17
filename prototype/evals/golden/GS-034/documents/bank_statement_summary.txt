@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 886712232183
+Account holder: Clearwater Precision Works LLC
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 11,290,000
+Total debits (12 months): 11,064,200
+Lowest month-end balance: 460,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0

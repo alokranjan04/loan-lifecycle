@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loan Lifecycle Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    [x-cloak] { display: none !important; }
+    .step-line { position: absolute; left: 19px; top: 40px; bottom: -8px; width: 2px; background: currentColor; }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
+    @keyframes pulse-ring { 0%{opacity:1;transform:scale(.8)} 100%{opacity:0;transform:scale(1.6)} }
+    .fade-in { animation: fadeIn .3s ease-out; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .slide-up { animation: slideUp .25s ease-out; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; }
+    .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,.08); }
+    .metric-card { transition: all .2s; }
+    .app-card:hover { border-color: #818cf8; box-shadow: 0 4px 20px rgba(79,70,229,.12); }
+    .app-card { transition: all .2s; }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca',900:'#1e1b4b' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full bg-slate-50 text-slate-800" x-data="loanApp()" x-init="init()" x-cloak>
+
+<!-- ══════════════════════ LAYOUT ══════════════════════ -->
+<div class="flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-60 flex-shrink-0 bg-slate-900 text-white flex flex-col">
+    <!-- Logo -->
+    <div class="px-5 py-5 border-b border-slate-700">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">LC</div>
+        <div>
+          <div class="text-sm font-semibold leading-tight">Loan Lifecycle</div>
+          <div class="text-xs text-slate-400">Credit Decision System</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <button @click="view='dashboard'; selectedApp=null"
+        :class="view==='dashboard'?'bg-slate-700 text-white':'text-slate-400 hover:bg-slate-800 hover:text-white'"
+        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        Applications
+      </button>
+      <button @click="openArchDiagram()"
+        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+        Architecture Diagram
+      </button>
+    </nav>
+
+    <!-- Footer -->
+    <div class="px-4 py-4 border-t border-slate-700 text-xs text-slate-500">
+      <div class="font-medium text-slate-400">Policy KB v3.2</div>
+      <div class="mt-1">Agentic · Auditable · Compliant</div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 overflow-y-auto">
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <div x-show="view==='dashboard'" class="fade-in">
+      <div class="px-8 py-6 border-b border-slate-200 bg-white">
+        <h1 class="text-xl font-semibold text-slate-900">Applications</h1>
+        <p class="text-sm text-slate-500 mt-1">Select an application to run the agentic credit decision pipeline</p>
+      </div>
+      <div class="px-8 py-6">
+        <div x-show="loading" class="flex items-center justify-center py-20 text-slate-400">
+          <svg class="spin w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+          Loading applications…
+        </div>
+        <div x-show="!loading" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <template x-for="a in applications" :key="a.id">
+            <div class="app-card bg-white rounded-xl border border-slate-200 p-5 cursor-pointer"
+                 @click="selectApp(a)">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <div class="text-sm font-semibold text-slate-900" x-text="a.borrower"></div>
+                  <div class="text-xs text-slate-400 mt-0.5" x-text="a.id"></div>
+                </div>
+                <template x-if="a.has_result">
+                  <span class="text-xs font-medium px-2 py-1 rounded-full"
+                    :class="statusBadgeClass(a.final_status)" x-text="a.final_status"></span>
+                </template>
+                <template x-if="!a.has_result">
+                  <span class="text-xs font-medium px-2 py-1 rounded-full bg-slate-100 text-slate-500">Not run</span>
+                </template>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-slate-50 rounded-lg px-3 py-2">
+                  <div class="text-slate-400 mb-0.5">Facility Amount</div>
+                  <div class="font-semibold text-slate-700" x-text="formatUSD(a.amount_usd)"></div>
+                </div>
+                <div class="bg-slate-50 rounded-lg px-3 py-2">
+                  <div class="text-slate-400 mb-0.5">Sector</div>
+                  <div class="font-medium text-slate-700 capitalize" x-text="a.sector"></div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs text-slate-400">
+                <span>RM: <span class="text-slate-600" x-text="a.rm"></span></span>
+                <span x-text="a.submitted_on"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ PIPELINE VIEW ══════════ -->
+    <div x-show="view==='pipeline'" class="fade-in">
+      <!-- App header -->
+      <div class="px-8 py-5 border-b border-slate-200 bg-white flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <button @click="view='dashboard'" class="text-slate-400 hover:text-slate-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <div>
+            <h1 class="text-base font-semibold text-slate-900" x-text="selectedApp?.borrower"></h1>
+            <p class="text-xs text-slate-400" x-text="selectedApp?.id + ' · ' + formatUSD(selectedApp?.amount_usd)"></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <template x-if="sessionStatus==='complete'">
+            <button @click="loadResults()" class="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors">
+              View Results →
+            </button>
+          </template>
+          <button @click="runPipeline()"
+            :disabled="['running','awaiting_approval'].includes(sessionStatus)"
+            :class="['running','awaiting_approval'].includes(sessionStatus) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-brand-700'"
+            class="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
+            <template x-if="['running','awaiting_approval'].includes(sessionStatus)">
+              <svg class="spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+            </template>
+            <span x-text="['running','awaiting_approval'].includes(sessionStatus) ? 'Running…' : 'Run Pipeline'"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="px-8 py-6 grid grid-cols-5 gap-6">
+        <!-- Pipeline steps (left 2 cols) -->
+        <div class="col-span-2 space-y-1">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Agent Pipeline</div>
+          <template x-for="(step, i) in pipelineSteps" :key="step.id">
+            <div class="relative">
+              <!-- Connector line -->
+              <template x-if="i < pipelineSteps.length - 1">
+                <div class="absolute left-[19px] top-10 bottom-0 w-0.5"
+                  :class="step.status==='complete' ? 'bg-emerald-300' : 'bg-slate-200'"></div>
+              </template>
+              <div class="flex items-start gap-3 py-2">
+                <!-- Status circle -->
+                <div class="relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium z-10"
+                  :class="{
+                    'bg-emerald-100 text-emerald-600 ring-2 ring-emerald-200': step.status==='complete',
+                    'bg-brand-600 text-white shadow-md': step.status==='running',
+                    'bg-slate-100 text-slate-400': step.status==='pending',
+                    'bg-red-100 text-red-600': step.status==='error'
+                  }">
+                  <template x-if="step.status==='complete'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                  </template>
+                  <template x-if="step.status==='running'">
+                    <svg class="spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                  </template>
+                  <template x-if="step.status==='pending'">
+                    <span x-text="i+1" class="text-xs"></span>
+                  </template>
+                  <template x-if="step.status==='error'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </template>
+                </div>
+                <!-- Step info -->
+                <div class="flex-1 min-w-0 pt-1">
+                  <div class="text-sm font-medium leading-tight"
+                    :class="step.status==='complete'?'text-slate-700':step.status==='running'?'text-brand-700 font-semibold':'text-slate-400'"
+                    x-text="step.label"></div>
+                  <div class="text-xs text-slate-400 mt-0.5 leading-tight" x-text="step.desc"></div>
+                  <template x-if="step.status==='running'">
+                    <div class="mt-1.5 flex items-center gap-1.5 text-xs text-brand-600 font-medium">
+                      <div class="w-1.5 h-1.5 bg-brand-500 rounded-full pulse-ring"></div>
+                      Processing…
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Human gates section -->
+          <template x-if="sessionStatus==='awaiting_approval' || humanDecisions.length > 0">
+            <div class="mt-2 pt-2 border-t border-slate-200">
+              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Human Gates</div>
+              <template x-for="d in humanDecisions" :key="d.gate">
+                <div class="flex items-center gap-2 py-1.5">
+                  <div class="w-10 h-10 flex-shrink-0 rounded-full bg-indigo-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-xs font-medium text-slate-700" x-text="d.name + ' (' + d.role + ')'"></div>
+                    <div class="text-xs text-slate-500" x-text="d.decision"></div>
+                  </div>
+                </div>
+              </template>
+              <template x-if="sessionStatus==='awaiting_approval'">
+                <div class="flex items-center gap-2 py-1.5 cursor-pointer" @click="showModal=true">
+                  <div class="w-10 h-10 flex-shrink-0 rounded-full bg-amber-100 flex items-center justify-center animate-pulse">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold text-amber-700">Awaiting Approval</div>
+                    <div class="text-xs text-amber-600 underline">Click to review gate →</div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+
+        <!-- Event log (right 3 cols) -->
+        <div class="col-span-3">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Live Event Log</div>
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div class="h-[520px] overflow-y-auto p-4 space-y-2 font-mono text-xs" id="log-container">
+              <template x-if="progressLog.length === 0 && sessionStatus === 'idle'">
+                <div class="flex flex-col items-center justify-center h-full text-slate-300 gap-2">
+                  <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>Click "Run Pipeline" to start</span>
+                </div>
+              </template>
+              <template x-for="(e, i) in progressLog" :key="i">
+                <div class="flex items-start gap-2 py-1 border-b border-slate-50 last:border-0">
+                  <span class="text-slate-300 text-[10px] pt-0.5 w-6 text-right flex-shrink-0" x-text="e.seq || ''"></span>
+                  <span class="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium"
+                    :class="e.actor_type==='agent'?'bg-brand-100 text-brand-700':e.actor_type==='human'?'bg-violet-100 text-violet-700':'bg-slate-100 text-slate-500'"
+                    x-text="e.actor_type || 'sys'"></span>
+                  <span class="font-medium text-slate-600 flex-shrink-0" x-text="e.action"></span>
+                  <span class="text-slate-400 truncate" x-text="formatOutputSummary(e.outputs)"></span>
+                </div>
+              </template>
+            </div>
+            <!-- Status bar -->
+            <div class="px-4 py-2 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span class="text-slate-400" x-text="progressLog.length + ' events'"></span>
+              <span class="font-medium"
+                :class="{'text-brand-600':sessionStatus==='running','text-amber-600':sessionStatus==='awaiting_approval','text-emerald-600':sessionStatus==='complete','text-red-600':sessionStatus==='error','text-slate-400':sessionStatus==='idle'}"
+                x-text="sessionStatus.replace('_',' ').toUpperCase()"></span>
+            </div>
+          </div>
+          <!-- Error display -->
+          <template x-if="errorMsg">
+            <div class="mt-3 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+              <div class="font-semibold mb-1">Pipeline Error</div>
+              <div class="font-mono text-xs" x-text="errorMsg"></div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ RESULTS VIEW ══════════ -->
+    <div x-show="view==='results'" class="fade-in">
+      <!-- Decision banner -->
+      <template x-if="results">
+        <div class="bg-gradient-to-r px-8 py-6 text-white"
+          :class="decisionGradient(results.final_status)">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <button @click="view='pipeline'" class="text-white/70 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <div>
+                <div class="text-sm text-white/70 uppercase tracking-widest font-medium">Final Decision</div>
+                <div class="text-2xl font-bold mt-0.5" x-text="results.final_status"></div>
+                <div class="text-sm text-white/80 mt-1" x-text="results.recommendation?.summary || results.recommendation?.reason"></div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-white/70">Risk Rating</div>
+              <div class="text-4xl font-bold" x-text="results.risk?.rating"></div>
+              <div class="text-sm text-white/80" x-text="'Grade ' + results.risk?.grade + '  ·  PD ' + ((results.risk?.pd_1y || 0)*100).toFixed(2) + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Tabs -->
+      <div class="bg-white border-b border-slate-200 px-8">
+        <div class="flex gap-6 text-sm font-medium text-slate-500">
+          <template x-for="t in ['overview','policy','risk','conditions','audit']" :key="t">
+            <button @click="activeTab=t"
+              :class="activeTab===t ? 'tab-active' : 'hover:text-slate-700'"
+              class="py-3 capitalize transition-colors" x-text="t"></button>
+          </template>
+        </div>
+      </div>
+
+      <div class="px-8 py-6" x-show="results">
+
+        <!-- ── OVERVIEW TAB ── -->
+        <div x-show="activeTab==='overview'" class="fade-in space-y-6">
+          <!-- Key metrics -->
+          <div>
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Key Metrics</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <template x-for="m in keyMetrics" :key="m.label">
+                <div class="metric-card bg-white rounded-xl border border-slate-200 p-4">
+                  <div class="text-xs text-slate-400 mb-1" x-text="m.label"></div>
+                  <div class="text-xl font-bold" :class="m.color || 'text-slate-800'" x-text="m.value"></div>
+                  <div class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                    <span x-text="m.threshold"></span>
+                    <template x-if="m.ok !== null">
+                      <svg class="w-3 h-3 flex-shrink-0" :class="m.ok ? 'text-emerald-500' : 'text-red-500'" fill="currentColor" viewBox="0 0 20 20">
+                        <path x-show="m.ok" fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        <path x-show="!m.ok" fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                      </svg>
+                    </template>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Human decisions + findings side by side -->
+          <div class="grid grid-cols-2 gap-6">
+            <!-- Human decisions -->
+            <div>
+              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Human Decisions</h3>
+              <div class="space-y-3">
+                <template x-for="d in results?.human_decisions || []" :key="d.gate">
+                  <div class="bg-white border border-slate-200 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" x-text="d.gate + ' gate'"></span>
+                      <span class="text-xs font-medium px-2 py-0.5 rounded-full"
+                        :class="d.decision.includes('CLEARED')||d.decision==='APPROVE'?'bg-emerald-100 text-emerald-700':'d.decision.includes(\'CONDITIONS\')?\'bg-amber-100 text-amber-700\':\'bg-red-100 text-red-700\'"
+                        x-text="d.decision"></span>
+                    </div>
+                    <div class="text-sm font-medium text-slate-700" x-text="d.name + ' — ' + d.role"></div>
+                    <div x-show="d.rationale" class="text-xs text-slate-500 mt-1 italic" x-text="'&quot;' + d.rationale + '&quot;'"></div>
+                    <template x-if="d.override">
+                      <div class="mt-1.5 flex items-center gap-1 text-xs text-amber-600 font-medium">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>
+                        Override of system recommendation
+                      </div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Top findings -->
+            <div>
+              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                Key Findings (<span x-text="results?.findings?.length || 0"></span>)
+              </h3>
+              <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                <template x-for="f in (results?.findings || []).slice(0,8)" :key="f.title">
+                  <div class="bg-white border border-slate-200 rounded-xl px-4 py-3">
+                    <div class="flex items-start gap-2">
+                      <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                        :class="f.severity==='critical'?'bg-red-500':f.severity==='high'?'bg-orange-500':f.severity==='medium'?'bg-amber-400':'bg-slate-300'"></div>
+                      <div>
+                        <div class="text-xs font-medium text-slate-700" x-text="f.title"></div>
+                        <div class="text-xs text-slate-400 mt-0.5 leading-relaxed" x-text="f.detail"></div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── POLICY TAB ── -->
+        <div x-show="activeTab==='policy'" class="fade-in">
+          <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-20">Clause</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Check</th>
+                  <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-20">Result</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actual</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Requirement</th>
+                  <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Note</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <template x-for="pc in results?.policy_checks || []" :key="pc.rule_id">
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-4 py-3 font-mono text-xs text-slate-500" x-text="pc.rule_id"></td>
+                    <td class="px-4 py-3 text-sm font-medium text-slate-700" x-text="pc.name"></td>
+                    <td class="px-4 py-3 text-center">
+                      <span class="text-xs font-semibold px-2 py-1 rounded-full"
+                        :class="policyBadge(pc.status)" x-text="pc.status"></span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-slate-600" x-text="pc.actual"></td>
+                    <td class="px-4 py-3 text-sm text-slate-500" x-text="pc.threshold"></td>
+                    <td class="px-4 py-3 text-xs text-slate-400 italic" x-text="pc.note"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── RISK TAB ── -->
+        <div x-show="activeTab==='risk'" class="fade-in">
+          <div class="grid grid-cols-3 gap-6">
+            <!-- Rating display -->
+            <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center">
+              <div class="text-xs text-slate-400 uppercase tracking-wider mb-2">Risk Rating</div>
+              <div class="text-6xl font-bold mb-2" :class="ratingColor(results?.risk?.rating)" x-text="results?.risk?.rating"></div>
+              <div class="text-2xl font-semibold text-slate-600" x-text="results?.risk?.grade"></div>
+              <div class="mt-3 text-sm text-slate-500">
+                1-year PD: <span class="font-semibold" x-text="((results?.risk?.pd_1y || 0)*100).toFixed(2) + '%'"></span>
+              </div>
+              <!-- Rating bar -->
+              <div class="w-full mt-4">
+                <div class="flex justify-between text-xs text-slate-300 mb-1"><span>A</span><span>BBB</span><span>BB</span><span>B</span><span>CCC</span></div>
+                <div class="h-2 bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500 rounded-full relative">
+                  <div class="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-slate-600 rounded-full shadow"
+                    :style="'left: ' + ((results?.risk?.rating - 1) / 9 * 100) + '%'"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Scorecard -->
+            <div class="col-span-2 bg-white border border-slate-200 rounded-xl p-5">
+              <div class="text-sm font-semibold text-slate-700 mb-4">Risk Scorecard</div>
+              <div class="space-y-3">
+                <template x-for="(val, factor) in results?.risk?.scorecard || {}" :key="factor">
+                  <div class="flex items-center gap-3">
+                    <div class="text-xs text-slate-500 w-36 capitalize" x-text="factor.replace('_',' ')"></div>
+                    <div class="flex-1 bg-slate-100 rounded-full h-2">
+                      <div class="h-2 rounded-full transition-all"
+                        :class="val >= 3 ? 'bg-emerald-400' : val >= 2 ? 'bg-amber-400' : 'bg-red-400'"
+                        :style="'width: ' + (val / 4 * 100) + '%'"></div>
+                    </div>
+                    <div class="text-xs font-semibold text-slate-600 w-8 text-right" x-text="val + '/4'"></div>
+                  </div>
+                </template>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+                <span class="text-xs text-slate-400">Total score</span>
+                <span class="font-bold text-slate-700"
+                  x-text="results?.risk?.score + '/' + results?.risk?.max_score"></span>
+              </div>
+            </div>
+            <!-- Narrative -->
+            <div class="col-span-3 bg-white border border-slate-200 rounded-xl p-5">
+              <div class="text-sm font-semibold text-slate-700 mb-3">Risk Observations</div>
+              <div class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap" x-text="results?.risk?.narrative || 'No narrative available.'"></div>
+              <template x-if="(results?.risk?.mitigants||[]).length > 0">
+                <div class="mt-3 pt-3 border-t border-slate-100">
+                  <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mitigants</div>
+                  <ul class="space-y-1">
+                    <template x-for="m in results.risk.mitigants" :key="m">
+                      <li class="flex items-start gap-2 text-sm text-slate-600">
+                        <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span x-text="m"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CONDITIONS TAB ── -->
+        <div x-show="activeTab==='conditions'" class="fade-in">
+          <div x-show="(results?.conditions||[]).length===0" class="text-center py-16 text-slate-400">
+            <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            No conditions precedent — clean approval
+          </div>
+          <div x-show="(results?.conditions||[]).length > 0">
+            <!-- Disbursement status -->
+            <div class="mb-4 px-4 py-3 rounded-xl text-sm font-medium"
+              :class="results?.controls?.disbursement_status?.includes('READY') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'"
+              x-text="results?.controls?.disbursement_status || 'BLOCKED: conditions precedent open'"></div>
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-12">ID</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Condition</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Stage</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Owner</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Due</th>
+                    <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <template x-for="c in results?.conditions || []" :key="c.id">
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-4 py-3 font-mono text-xs text-slate-500" x-text="c.id"></td>
+                      <td class="px-4 py-3 text-sm text-slate-700">
+                        <div x-text="c.text"></div>
+                        <div class="text-xs text-slate-400 mt-0.5" x-text="c.source_ref"></div>
+                      </td>
+                      <td class="px-4 py-3">
+                        <span class="text-xs px-2 py-1 rounded-full"
+                          :class="c.stage.includes('pre-disbursement')?'bg-orange-100 text-orange-700':c.stage.includes('post')?'bg-blue-100 text-blue-700':'bg-slate-100 text-slate-600'"
+                          x-text="c.stage"></span>
+                      </td>
+                      <td class="px-4 py-3 text-sm text-slate-600" x-text="c.owner"></td>
+                      <td class="px-4 py-3 text-sm text-slate-500" x-text="c.due"></td>
+                      <td class="px-4 py-3 text-center">
+                        <span class="text-xs px-2 py-1 rounded-full"
+                          :class="c.status==='open'?'bg-amber-100 text-amber-700':'bg-emerald-100 text-emerald-700'"
+                          x-text="c.status"></span>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── AUDIT TAB ── -->
+        <div x-show="activeTab==='audit'" class="fade-in">
+          <div class="space-y-2">
+            <template x-for="e in auditEntries" :key="e.seq">
+              <div class="bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-start gap-4">
+                <div class="text-xs font-mono text-slate-300 w-6 text-right flex-shrink-0 pt-0.5" x-text="e.seq"></div>
+                <div class="flex-shrink-0">
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                    :class="e.actor_type==='agent'?'bg-brand-100 text-brand-700':e.actor_type==='human'?'bg-violet-100 text-violet-700':'bg-slate-100 text-slate-500'"
+                    x-text="e.actor_type"></span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-slate-700" x-text="e.actor"></span>
+                    <span class="text-xs text-slate-400">·</span>
+                    <span class="text-xs text-slate-500 font-mono" x-text="e.action"></span>
+                  </div>
+                  <div x-show="e.outputs && typeof e.outputs === 'object' && Object.keys(e.outputs).length > 0"
+                    class="text-xs text-slate-400 mt-0.5 truncate font-mono" x-text="JSON.stringify(e.outputs).slice(0,120)"></div>
+                </div>
+                <div class="text-xs text-slate-300 flex-shrink-0 font-mono" x-text="e.ts?.slice(11,19)"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════ APPROVAL MODAL ══════════ -->
+<div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center" x-cloak>
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showModal=false"></div>
+
+  <!-- Dialog -->
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 slide-up overflow-hidden">
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between"
+      :class="pendingGate?.gate_type==='compliance' ? 'bg-violet-50' : 'bg-amber-50'">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center"
+          :class="pendingGate?.gate_type==='compliance' ? 'bg-violet-200' : 'bg-amber-200'">
+          <svg class="w-5 h-5" :class="pendingGate?.gate_type==='compliance' ? 'text-violet-700' : 'text-amber-700'"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="font-semibold text-slate-900 text-sm capitalize"
+            x-text="(pendingGate?.gate_type || 'Credit') + ' Gate Approval'"></div>
+          <div class="text-xs text-slate-500" x-text="pendingGate?.reason || pendingGate?.required_role + ' sign-off required'"></div>
+        </div>
+      </div>
+      <button @click="showModal=false" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Context info -->
+    <div class="px-6 py-3 bg-slate-50 border-b border-slate-100 flex gap-6 text-xs">
+      <div>
+        <span class="text-slate-400">Recommendation</span>
+        <div class="font-semibold text-slate-700 mt-0.5" x-text="pendingGate?.recommendation || '—'"></div>
+      </div>
+      <div>
+        <span class="text-slate-400">Risk Rating</span>
+        <div class="font-semibold mt-0.5" :class="ratingColor(pendingGate?.risk_rating)"
+          x-text="(pendingGate?.risk_rating || '—') + ' (' + (pendingGate?.risk_grade || '?') + ')'"></div>
+      </div>
+      <div x-show="pendingGate?.gate_type==='compliance' && pendingGate?.pep_hits?.length > 0">
+        <span class="text-slate-400">PEP Matches</span>
+        <div class="font-semibold text-red-600 mt-0.5" x-text="pendingGate?.pep_hits?.length + ' match(es)'"></div>
+      </div>
+      <div x-show="pendingGate?.attempt > 0" class="ml-auto">
+        <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium"
+          x-text="'Attempt ' + (pendingGate?.attempt + 1)"></span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="px-6 py-5 space-y-4">
+      <!-- Errors -->
+      <template x-if="approvalErrors.length > 0">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 space-y-1">
+          <template x-for="e in approvalErrors" :key="e">
+            <div class="flex items-start gap-2 text-xs text-red-700">
+              <svg class="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>
+              <span x-text="e"></span>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Your Name</label>
+          <input x-model="approval.name" type="text" placeholder="Full name"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Your Role</label>
+          <select x-model="approval.role"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+            <option value="">Select role…</option>
+            <template x-for="r in availableRoles" :key="r">
+              <option :value="r" x-text="r"></option>
+            </template>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Decision</label>
+          <select x-model="approval.decision"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+            <option value="">Select decision…</option>
+            <template x-for="d in availableDecisions" :key="d">
+              <option :value="d" x-text="d"></option>
+            </template>
+          </select>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+            Rationale
+            <span class="text-slate-300 font-normal normal-case">(required if overriding recommendation)</span>
+          </label>
+          <textarea x-model="approval.rationale" rows="2" placeholder="Briefly explain your decision…"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+      <button @click="showModal=false"
+        class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 transition-colors">Cancel</button>
+      <button @click="submitApproval()"
+        :disabled="submittingApproval || !approval.name || !approval.role || !approval.decision"
+        :class="submittingApproval || !approval.name || !approval.role || !approval.decision ? 'opacity-50 cursor-not-allowed' : 'hover:bg-brand-700'"
+        class="px-5 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
+        <template x-if="submittingApproval">
+          <svg class="spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+        </template>
+        Submit Decision
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ JAVASCRIPT ══════════ -->
+<script>
+const AGENT_ORDER = [
+  'IntakeAgent','DocumentIntelligenceAgent','CompletenessAgent',
+  'DueDiligenceAgent','PolicyEligibilityAgent','RiskAgent',
+  'ApprovalWorkflowAgent','DisbursementConditionAgent'
+];
+
+function loanApp() {
+  return {
+    // ── State ────────────────────────────────────────────────────────────────
+    view: 'dashboard',
+    loading: false,
+    applications: [],
+    selectedApp: null,
+    appDetail: null,
+    // Pipeline
+    sessionId: null,
+    sessionStatus: 'idle',
+    pipelineSteps: [
+      { id:'IntakeAgent',              label:'Intake Agent',           desc:'Form completeness · document checklist',    status:'pending' },
+      { id:'DocumentIntelligenceAgent',label:'Document Intelligence',  desc:'Extract fields · cross-check evidence',     status:'pending' },
+      { id:'CompletenessAgent',        label:'Completeness Check',     desc:'Identify missing docs · draft RM request',  status:'pending' },
+      { id:'DueDiligenceAgent',        label:'Due Diligence',          desc:'KYC · sanctions · account conduct',         status:'pending' },
+      { id:'PolicyEligibilityAgent',   label:'Policy Eligibility',     desc:'13 credit policy clauses · DSCR · LTV',     status:'pending' },
+      { id:'RiskAgent',                label:'Risk Assessment',        desc:'8-factor scorecard · 1–10 rating',          status:'pending' },
+      { id:'ApprovalWorkflowAgent',    label:'Approval Routing',       desc:'Authority routing · conditions drafting',   status:'pending' },
+      { id:'DisbursementConditionAgent',label:'Disbursement Agent',    desc:'Conditions precedent tracker',              status:'pending' },
+    ],
+    progressLog: [],
+    humanDecisions: [],
+    // Approval gate
+    pendingGate: null,
+    showModal: false,
+    approval: { name:'', role:'', decision:'', rationale:'' },
+    approvalErrors: [],
+    submittingApproval: false,
+    // Results
+    results: null,
+    activeTab: 'overview',
+    auditEntries: [],
+    // Error
+    errorMsg: null,
+    _sse: null,
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+    async init() { await this.loadApps(); },
+
+    async loadApps() {
+      this.loading = true;
+      const r = await fetch('/api/applications');
+      this.applications = await r.json();
+      this.loading = false;
+    },
+
+    async selectApp(a) {
+      this.selectedApp = a;
+      this.view = 'pipeline';
+      this.resetPipeline();
+
+      // Load full app detail
+      const r = await fetch(`/api/applications/${a.id}`);
+      this.appDetail = await r.json();
+
+      // Resume running session if any
+      const sr = await fetch(`/api/session/${a.id}`);
+      const sess = await sr.json();
+      if (sess.session_id && ['running','awaiting_approval'].includes(sess.status)) {
+        this.sessionId = sess.session_id;
+        this.sessionStatus = sess.status;
+        if (sess.pending_gate && sess.status === 'awaiting_approval') {
+          this.pendingGate = sess.pending_gate;
+          this.showModal = true;
+        }
+        this.connectSSE();
+      }
+    },
+
+    resetPipeline() {
+      this.pipelineSteps.forEach(s => { s.status = 'pending'; });
+      this.progressLog = [];
+      this.humanDecisions = [];
+      this.pendingGate = null;
+      this.showModal = false;
+      this.sessionId = null;
+      this.sessionStatus = 'idle';
+      this.errorMsg = null;
+      this.results = null;
+      if (this._sse) { this._sse.close(); this._sse = null; }
+    },
+
+    async runPipeline() {
+      this.resetPipeline();
+      const r = await fetch(`/api/run/${this.selectedApp.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ llm_mode: 'auto' })
+      });
+      const d = await r.json();
+      this.sessionId = d.session_id;
+      this.sessionStatus = 'running';
+      this.connectSSE();
+    },
+
+    connectSSE() {
+      if (!this.sessionId) return;
+      if (this._sse) this._sse.close();
+      const es = new EventSource(`/api/stream/${this.sessionId}`);
+      es.onmessage = e => this.handleEvent(JSON.parse(e.data));
+      es.onerror = () => { /* keep open — auto-reconnect */ };
+      this._sse = es;
+    },
+
+    handleEvent(ev) {
+      if (ev.type === 'ping' || ev.type === 'done') {
+        if (ev.type === 'done' && this._sse) { this._sse.close(); this._sse = null; }
+        return;
+      }
+      if (ev.type === 'status') { this.sessionStatus = ev.data.status; return; }
+      if (ev.type === 'error') {
+        this.sessionStatus = 'error';
+        this.errorMsg = ev.data.message;
+        return;
+      }
+      if (ev.type === 'gate') {
+        this.pendingGate = ev.data;
+        this.approval = { name:'', role:'', decision:'', rationale:'' };
+        this.approvalErrors = [];
+        this.showModal = true;
+        return;
+      }
+      if (ev.type === 'complete') {
+        this.sessionStatus = 'complete';
+        setTimeout(() => this.loadResults(), 600);
+        return;
+      }
+      if (ev.type === 'progress') this.handleProgress(ev.data);
+    },
+
+    handleProgress(d) {
+      this.progressLog.push(d);
+      // Scroll log to bottom
+      this.$nextTick(() => {
+        const el = document.getElementById('log-container');
+        if (el) el.scrollTop = el.scrollHeight;
+      });
+
+      const action = d.action;
+      const idx = AGENT_ORDER.indexOf(action);
+
+      if (action === 'case_opened') {
+        this.pipelineSteps[0].status = 'running';
+        return;
+      }
+      if (idx >= 0) {
+        this.pipelineSteps[idx].status = 'complete';
+        // Advance to next step
+        const next = idx + 1;
+        if (next < this.pipelineSteps.length) {
+          this.pipelineSteps[next].status = 'running';
+        }
+        return;
+      }
+      // Human decisions appear in audit log
+      if (['compliance_decision','credit_decision'].includes(action)) {
+        this.humanDecisions.push({ ...d.outputs, gate: action.replace('_decision','') });
+        // After final credit decision, last agent (DisbursementConditionAgent) is next
+        if (action === 'credit_decision') {
+          const disbIdx = AGENT_ORDER.indexOf('DisbursementConditionAgent');
+          if (this.pipelineSteps[disbIdx].status === 'pending') {
+            this.pipelineSteps[disbIdx].status = 'running';
+          }
+        }
+      }
+    },
+
+    async submitApproval() {
+      this.submittingApproval = true;
+      this.approvalErrors = [];
+      const r = await fetch(`/api/approve/${this.sessionId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.approval)
+      });
+      const d = await r.json();
+      if (d.ok) {
+        this.showModal = false;
+        this.pendingGate = null;
+      } else {
+        this.approvalErrors = d.errors;
+      }
+      this.submittingApproval = false;
+    },
+
+    async loadResults() {
+      const r = await fetch(`/api/results/${this.selectedApp.id}`);
+      if (!r.ok) return;
+      this.results = await r.json();
+      this.view = 'results';
+      // Load audit log
+      const ar = await fetch(`/api/audit/${this.selectedApp.id}`);
+      if (ar.ok) this.auditEntries = await ar.json();
+      // Refresh app list
+      await this.loadApps();
+    },
+
+    openArchDiagram() {
+      const p = '../../../.archify/architecture-loan-lifecycle-20261017-020900/loan-lifecycle.html';
+      window.open(p, '_blank');
+    },
+
+    // ── Computed ──────────────────────────────────────────────────────────────
+    get availableDecisions() {
+      if (!this.pendingGate) return [];
+      return this.pendingGate.gate_type === 'compliance'
+        ? ['EDD CLEARED', 'EDD NOT CLEARED']
+        : ['APPROVE WITH CONDITIONS', 'APPROVE', 'DECLINE', 'RETURN TO RM'];
+    },
+
+    get availableRoles() {
+      if (!this.pendingGate) return [];
+      if (this.pendingGate.gate_type === 'compliance') {
+        return ['Compliance Officer'];
+      }
+      const all = ['Senior Credit Manager', 'Regional Credit Committee', 'Board Credit Committee'];
+      const req = this.pendingGate.required_role;
+      const idx = all.indexOf(req);
+      return idx >= 0 ? all.slice(idx) : all;
+    },
+
+    get keyMetrics() {
+      const m = this.results?.metrics || {};
+      const pc = (id) => (this.results?.policy_checks || []).find(c => c.rule_id === id);
+      return [
+        {
+          label: 'DSCR (Projected)',
+          value: m.dscr_proj != null ? m.dscr_proj.toFixed(2) + 'x' : '—',
+          threshold: '≥ 1.25x',
+          ok: m.dscr_proj != null ? m.dscr_proj >= 1.25 : null,
+          color: m.dscr_proj != null ? (m.dscr_proj >= 1.40 ? 'text-emerald-600' : m.dscr_proj >= 1.25 ? 'text-amber-600' : 'text-red-600') : 'text-slate-500',
+        },
+        {
+          label: 'Debt / EBITDA',
+          value: m.debt_ebitda_post != null ? m.debt_ebitda_post.toFixed(1) + 'x' : '—',
+          threshold: '≤ 4.0x',
+          ok: m.debt_ebitda_post != null ? m.debt_ebitda_post <= 4.0 : null,
+          color: m.debt_ebitda_post != null ? (m.debt_ebitda_post <= 3.5 ? 'text-emerald-600' : m.debt_ebitda_post <= 4.0 ? 'text-amber-600' : 'text-red-600') : 'text-slate-500',
+        },
+        {
+          label: 'LTV',
+          value: m.ltv != null ? (m.ltv * 100).toFixed(0) + '%' : '—',
+          threshold: '≤ 70%',
+          ok: m.ltv != null ? m.ltv <= 0.70 : null,
+          color: m.ltv != null ? (m.ltv <= 0.60 ? 'text-emerald-600' : m.ltv <= 0.70 ? 'text-amber-600' : 'text-red-600') : 'text-slate-500',
+        },
+        {
+          label: 'Vintage',
+          value: m.vintage_years != null ? m.vintage_years.toFixed(1) + ' yrs' : '—',
+          threshold: '≥ 3 yrs',
+          ok: m.vintage_years != null ? m.vintage_years >= 3 : null,
+          color: 'text-slate-700',
+        },
+        {
+          label: 'Current Ratio',
+          value: m.current_ratio != null ? m.current_ratio.toFixed(2) + 'x' : '—',
+          threshold: '≥ 1.10x',
+          ok: m.current_ratio != null ? m.current_ratio >= 1.10 : null,
+          color: m.current_ratio != null ? (m.current_ratio >= 1.5 ? 'text-emerald-600' : m.current_ratio >= 1.1 ? 'text-amber-600' : 'text-red-600') : 'text-slate-500',
+        },
+        {
+          label: 'Bank Credit Ratio',
+          value: m.bank_credit_ratio != null ? (m.bank_credit_ratio * 100).toFixed(0) + '%' : '—',
+          threshold: '≥ 80%',
+          ok: m.bank_credit_ratio != null ? m.bank_credit_ratio >= 0.80 : null,
+          color: 'text-slate-700',
+        },
+      ];
+    },
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    formatUSD(n) {
+      if (!n) return '—';
+      return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 }).format(n);
+    },
+
+    formatOutputSummary(o) {
+      if (!o || typeof o !== 'object') return '';
+      const keys = Object.keys(o).slice(0, 3);
+      return keys.map(k => `${k}: ${JSON.stringify(o[k])?.slice(0,30)}`).join('  ');
+    },
+
+    statusBadgeClass(s) {
+      if (!s) return 'bg-slate-100 text-slate-500';
+      if (s.startsWith('APPROVED') && s.includes('CONDITIONS')) return 'bg-amber-100 text-amber-700';
+      if (s.startsWith('APPROVED')) return 'bg-emerald-100 text-emerald-700';
+      if (s.startsWith('DECLINED')) return 'bg-red-100 text-red-700';
+      return 'bg-slate-100 text-slate-600';
+    },
+
+    policyBadge(s) {
+      return s === 'PASS' ? 'bg-emerald-100 text-emerald-700'
+           : s === 'FLAG' ? 'bg-amber-100 text-amber-700'
+           : s === 'FAIL' ? 'bg-red-100 text-red-700'
+           : 'bg-slate-100 text-slate-500';
+    },
+
+    ratingColor(r) {
+      if (!r) return 'text-slate-500';
+      if (r <= 2) return 'text-emerald-600';
+      if (r <= 4) return 'text-green-600';
+      if (r <= 6) return 'text-amber-500';
+      if (r <= 8) return 'text-orange-600';
+      return 'text-red-600';
+    },
+
+    decisionGradient(s) {
+      if (!s) return 'from-slate-600 to-slate-700';
+      if (s.startsWith('APPROVED') && s.includes('CONDITIONS')) return 'from-amber-500 to-amber-600';
+      if (s.startsWith('APPROVED')) return 'from-emerald-600 to-emerald-700';
+      if (s.startsWith('DECLINED')) return 'from-red-600 to-red-700';
+      return 'from-slate-600 to-slate-700';
+    },
+  }
+}
+</script>
+</body>
+</html>

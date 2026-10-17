@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 296821445091
+Account holder: Oakridge Precision Works Ltd
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 8,130,000
+Total debits (12 months): 7,967,400
+Lowest month-end balance: 500,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0

@@ -1,0 +1,12 @@
+{
+  "_note": "Fictional stand-in for a sanctions / PEP / adverse media screening API.",
+  "sanctions": [
+    {"name": "Viktor Halden", "list": "Illustrative consolidated sanctions list"}
+  ],
+  "pep": [
+    {"name": "Rajiv Menon", "detail": "Member of district planning board 2019-2023 (domestic PEP, Tier 3)", "match_score": 0.93}
+  ],
+  "adverse_media": [
+    {"name": "Menon Fresh Exports FZE", "detail": "2025 trade press report of a customs valuation dispute, since settled", "severity": "low"}
+  ]
+}

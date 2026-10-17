@@ -1,0 +1,173 @@
+{
+  "case_id": "GS-001",
+  "category": "real",
+  "style": "standard",
+  "planted": [
+    "clean fast path"
+  ],
+  "as_of": "2026-10-16",
+  "policy_checks": {
+    "POL-2.1": "PASS",
+    "POL-2.2": "PASS",
+    "POL-2.3": "PASS",
+    "POL-2.5": "PASS",
+    "POL-2.4": "PASS",
+    "POL-3.1": "PASS",
+    "POL-3.2": "PASS",
+    "POL-3.3": "PASS",
+    "POL-3.4": "PASS",
+    "POL-4.1": "PASS",
+    "POL-4.2": "PASS",
+    "POL-5.1": "PASS",
+    "POL-5.2": "PASS"
+  },
+  "missing_documents": [],
+  "findings": [],
+  "recommendation": "APPROVE",
+  "gates": [
+    "Senior Credit Manager"
+  ],
+  "fields": {
+    "financials": {
+      "audit_opinion": {
+        "line": 4,
+        "value": "Unqualified"
+      },
+      "revenue_fy2023": {
+        "line": 7,
+        "value": 7150000
+      },
+      "revenue_fy2024": {
+        "line": 7,
+        "value": 7740000
+      },
+      "revenue_fy2025": {
+        "line": 7,
+        "value": 8360000
+      },
+      "ebitda_fy2023": {
+        "line": 8,
+        "value": 1440000
+      },
+      "ebitda_fy2024": {
+        "line": 8,
+        "value": 1550000
+      },
+      "ebitda_fy2025": {
+        "line": 8,
+        "value": 1660000
+      },
+      "interest_fy2025": {
+        "line": 9,
+        "value": 100000
+      },
+      "net_profit_fy2025": {
+        "line": 10,
+        "value": 910000
+      },
+      "total_debt": {
+        "line": 13,
+        "value": 710000
+      },
+      "current_assets": {
+        "line": 14,
+        "value": 3340000
+      },
+      "current_liabilities": {
+        "line": 15,
+        "value": 2310000
+      },
+      "equity": {
+        "line": 16,
+        "value": 4180000
+      },
+      "principal_fy2025": {
+        "line": 19,
+        "value": 250000
+      }
+    },
+    "bank_statement": {
+      "period": {
+        "line": 4,
+        "value": "01-Oct-2025 to 30-Sep-2026"
+      },
+      "total_credits": {
+        "line": 6,
+        "value": 8130000
+      },
+      "lowest_balance": {
+        "line": 8,
+        "value": 500000
+      },
+      "returned_items": {
+        "line": 10,
+        "value": 0
+      }
+    },
+    "kyc": {
+      "directors": {
+        "line": 6,
+        "value": [
+          {
+            "name": "Yuki Ekstr\u00f6m",
+            "id_expiry": "2027-12-03"
+          },
+          {
+            "name": "Arjun Varga",
+            "id_expiry": "2031-11-25"
+          },
+          {
+            "name": "Jonas Rahman",
+            "id_expiry": "2031-12-02"
+          }
+        ]
+      },
+      "declaration_date": {
+        "line": 9,
+        "value": "2026-10-01"
+      }
+    },
+    "valuation": {
+      "valuer": {
+        "line": 3,
+        "value": "Oakridge Valuers (empanelled valuer)"
+      },
+      "valuation_date": {
+        "line": 4,
+        "value": "2026-06-18"
+      },
+      "market_value": {
+        "line": 5,
+        "value": 3130000
+      },
+      "realisable_value": {
+        "line": 6,
+        "value": 2650000
+      }
+    },
+    "tax_return": {
+      "tax_year": {
+        "line": 3,
+        "value": 2025
+      },
+      "gross_receipts": {
+        "line": 4,
+        "value": 8360000
+      },
+      "status": {
+        "line": 6,
+        "value": "Accepted"
+      }
+    },
+    "board_resolution": {
+      "amount": {
+        "line": 2,
+        "value": 1400000
+      },
+      "date": {
+        "line": 3,
+        "value": "2026-09-29"
+      }
+    }
+  }
+}

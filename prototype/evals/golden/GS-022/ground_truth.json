@@ -1,0 +1,208 @@
+{
+  "case_id": "GS-022",
+  "category": "corner",
+  "style": "standard",
+  "planted": [
+    "stale valuation",
+    "expired ID",
+    "PEP match",
+    "3 returned payments"
+  ],
+  "as_of": "2026-10-16",
+  "policy_checks": {
+    "POL-2.1": "PASS",
+    "POL-2.2": "PASS",
+    "POL-2.3": "PASS",
+    "POL-2.5": "PASS",
+    "POL-2.4": "PASS",
+    "POL-2.6": "PASS",
+    "POL-3.1": "FAIL",
+    "POL-3.2": "FAIL",
+    "POL-3.3": "FLAG",
+    "POL-3.4": "PASS",
+    "POL-4.1": "PASS",
+    "POL-4.2": "PASS",
+    "POL-5.1": "FLAG",
+    "POL-5.2": "PASS"
+  },
+  "missing_documents": [],
+  "findings": [],
+  "recommendation": "APPROVE WITH CONDITIONS",
+  "gates": [
+    "Compliance Officer",
+    "Board Credit Committee"
+  ],
+  "fields": {
+    "financials": {
+      "audit_opinion": {
+        "line": 4,
+        "value": "Unqualified"
+      },
+      "revenue_fy2023": {
+        "line": 7,
+        "value": 11090000
+      },
+      "revenue_fy2024": {
+        "line": 7,
+        "value": 12020000
+      },
+      "revenue_fy2025": {
+        "line": 7,
+        "value": 12980000
+      },
+      "ebitda_fy2023": {
+        "line": 8,
+        "value": 2100000
+      },
+      "ebitda_fy2024": {
+        "line": 8,
+        "value": 2260000
+      },
+      "ebitda_fy2025": {
+        "line": 8,
+        "value": 2420000
+      },
+      "interest_fy2025": {
+        "line": 9,
+        "value": 150000
+      },
+      "net_profit_fy2025": {
+        "line": 10,
+        "value": 1330000
+      },
+      "total_debt": {
+        "line": 13,
+        "value": 1950000
+      },
+      "current_assets": {
+        "line": 14,
+        "value": 5190000
+      },
+      "current_liabilities": {
+        "line": 15,
+        "value": 3580000
+      },
+      "equity": {
+        "line": 16,
+        "value": 6490000
+      },
+      "principal_fy2025": {
+        "line": 19,
+        "value": 360000
+      }
+    },
+    "bank_statement": {
+      "period": {
+        "line": 4,
+        "value": "01-Oct-2025 to 30-Sep-2026"
+      },
+      "total_credits": {
+        "line": 6,
+        "value": 12640000
+      },
+      "lowest_balance": {
+        "line": 8,
+        "value": 540000
+      },
+      "returned_items": {
+        "line": 10,
+        "value": 3
+      }
+    },
+    "kyc": {
+      "directors": {
+        "line": 6,
+        "value": [
+          {
+            "name": "Viktor Zhou",
+            "id_expiry": "2030-12-04"
+          },
+          {
+            "name": "Zara Okoye",
+            "id_expiry": "2026-09-30"
+          },
+          {
+            "name": "Hugo Costa",
+            "id_expiry": "2028-07-19"
+          }
+        ]
+      },
+      "declaration_date": {
+        "line": 9,
+        "value": "2026-10-01"
+      }
+    },
+    "valuation": {
+      "valuer": {
+        "line": 3,
+        "value": "Oakridge Valuers (empanelled valuer)"
+      },
+      "valuation_date": {
+        "line": 4,
+        "value": "2026-02-10"
+      },
+      "market_value": {
+        "line": 5,
+        "value": 8630000
+      },
+      "realisable_value": {
+        "line": 6,
+        "value": 7310000
+      }
+    },
+    "project_report": {
+      "total_project_cost": {
+        "line": 4,
+        "value": 6620000
+      },
+      "promoter_equity": {
+        "line": 5,
+        "value": 2120000
+      },
+      "cod": {
+        "line": 7,
+        "value": "2027-09-30"
+      },
+      "dscr_by_year": {
+        "line": 9,
+        "value": [
+          1.42,
+          1.48,
+          1.55,
+          1.6,
+          1.62,
+          1.58,
+          1.52
+        ]
+      },
+      "dscr_avg": {
+        "line": 10,
+        "value": 1.54
+      }
+    },
+    "tax_return": {
+      "tax_year": {
+        "line": 3,
+        "value": 2025
+      },
+      "gross_receipts": {
+        "line": 4,
+        "value": 12980000
+      },
+      "status": {
+        "line": 6,
+        "value": "Accepted"
+      }
+    },
+    "board_resolution": {
+      "amount": {
+        "line": 2,
+        "value": 4500000
+      },
+      "date": {
+        "line": 3,
+        "value": "2026-09-29"
+      }
+    }
+  }
+}

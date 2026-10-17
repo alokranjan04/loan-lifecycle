@@ -1,0 +1,49 @@
+{
+  "_note": "Scripted human responses so the demo runs unattended. Each gate lists attempts in order; the first attempts are deliberately invalid to show the controls blocking them (segregation of duties, and authority: APP-2026-0142 carries open policy exceptions, so POL-6.1 escalates it from the Regional to the Board Credit Committee). Use --interactive to type the decisions yourself.",
+  "APP-2026-0142": {
+    "compliance": [
+      {
+        "name": "Daniel Okafor",
+        "role": "Compliance Officer",
+        "decision": "EDD CLEARED",
+        "rationale": "Analyst attempting to clear own case"
+      },
+      {
+        "name": "Grace Mwangi",
+        "role": "Compliance Officer",
+        "decision": "EDD CLEARED",
+        "rationale": "EDD complete. PEP role (district planning board) ended 2023; source of wealth verified from 3 years of personal tax filings; no adverse findings on the individual. Annual PEP review set."
+      }
+    ],
+    "credit": [
+      {
+        "name": "Kenji Watanabe",
+        "role": "Senior Credit Manager",
+        "decision": "APPROVE WITH CONDITIONS",
+        "rationale": ""
+      },
+      {
+        "name": "Sofia Alvarez",
+        "role": "Regional Credit Committee",
+        "decision": "APPROVE WITH CONDITIONS",
+        "rationale": "Approved as recommended; within Regional Credit Committee limits for USD 4.5M."
+      },
+      {
+        "name": "Amara Osei",
+        "role": "Board Credit Committee",
+        "decision": "APPROVE WITH CONDITIONS",
+        "rationale": "Approved as recommended. Committee reviewed RM explanations for the returned items and the bank credit gap (export receipts routed through an EEFC account at a second bank); C05 and C06 closed in committee. Policy exceptions POL-3.1, POL-3.2 and POL-3.4 accepted as conditions precedent."
+      }
+    ]
+  },
+  "APP-2026-0157": {
+    "credit": [
+      {
+        "name": "Kenji Watanabe",
+        "role": "Senior Credit Manager",
+        "decision": "APPROVE",
+        "rationale": "Meets all policy criteria; standard DSCR covenant."
+      }
+    ]
+  }
+}

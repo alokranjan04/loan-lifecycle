@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loan Review Workbench</title>
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1c2330; --muted: #5d6778; --line: #e2e6ec;
+  --accent: #2456c7; --accent-soft: #e8eefb; --pass: #1d7a46; --pass-soft: #e5f4ec;
+  --flag: #9a6200; --flag-soft: #fdf3dd; --fail: #b3261e; --fail-soft: #fbe9e7; --ne: #6b4fb3; --ne-soft: #efe9fb;
+  --hl: #fff4bf; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #11151c; --panel: #181e27; --ink: #e6e9ef; --muted: #9aa4b5; --line: #2a3240;
+    --accent: #7ea2ff; --accent-soft: #1d2a47; --pass: #5fd08f; --pass-soft: #15301f; --flag: #f0b54a; --flag-soft: #36290f;
+    --fail: #ff8a80; --fail-soft: #3a1714; --ne: #b9a3ff; --ne-soft: #271f3d; --hl: #4a4114; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+header { display: flex; align-items: center; gap: 24px; padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+header h1 { font-size: 16px; margin: 0; }
+nav button { background: none; border: 0; padding: 6px 10px; font: inherit; color: var(--muted); cursor: pointer; border-radius: 6px; }
+nav button.on { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.wrap { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 50px); }
+aside { border-right: 1px solid var(--line); background: var(--panel); padding: 12px; }
+aside .item { padding: 10px; border-radius: 8px; cursor: pointer; margin-bottom: 6px; border: 1px solid transparent; }
+aside .item:hover { background: var(--bg); }
+aside .item.on { border-color: var(--accent); background: var(--accent-soft); }
+aside .id { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+main { padding: 16px 20px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+.card h2 { font-size: 14px; margin: 0 0 10px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.facts div span { display: block; color: var(--muted); font-size: 12px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.PASS, .APPROVE, .APPROVED { color: var(--pass); background: var(--pass-soft); }
+.FLAG, .APPROVE.WITH, .cond { color: var(--flag); background: var(--flag-soft); }
+.FAIL, .DECLINE, .DECLINED, .blocked { color: var(--fail); background: var(--fail-soft); }
+.NOT_EVALUATED, .RETURN { color: var(--ne); background: var(--ne-soft); }
+.cite { font-family: var(--mono); font-size: 12px; color: var(--accent); cursor: pointer; text-decoration: underline dotted; margin-right: 6px; white-space: nowrap; }
+.muted { color: var(--muted); }
+.doc-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.doc-tabs button { font: inherit; font-size: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 3px 8px; border-radius: 6px; cursor: pointer; }
+.doc-tabs button.on { border-color: var(--accent); color: var(--accent); }
+.doc { font-family: var(--mono); font-size: 12px; background: var(--bg); border-radius: 8px; padding: 8px 0; max-height: 420px; overflow: auto; }
+.doc div { padding: 1px 10px; white-space: pre; }
+.doc div b { display: inline-block; width: 30px; color: var(--muted); font-weight: 400; user-select: none; }
+.doc div.hl { background: var(--hl); }
+.doc div.q { background: var(--fail-soft); color: var(--fail); }
+.banner { border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; background: var(--fail-soft); color: var(--fail); border: 1px solid var(--fail); }
+.gate { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.gate.done { border-color: var(--pass); }
+form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+form label { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+form .full { grid-column: 1 / -1; }
+input, select, textarea { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+textarea { min-height: 54px; resize: vertical; }
+button.primary { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 7px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+button.ghost { background: none; border: 1px solid var(--line); color: var(--ink); border-radius: 6px; padding: 5px 10px; font: inherit; cursor: pointer; }
+.err { color: var(--fail); font-size: 13px; margin-top: 6px; }
+.small { font-size: 12px; }
+.kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.kpi div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.kpi b { display: block; font-size: 22px; }
+.kpi span { color: var(--muted); font-size: 12px; }
+main, .card, .grid2 > div { min-width: 0; } .card { overflow-x: auto; } .doc { overflow-x: auto; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); } aside { border-right: 0; border-bottom: 1px solid var(--line); } .grid2 { grid-template-columns: minmax(0, 1fr); } form { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Loan Review Workbench</h1>
+  <nav><button id="t-cases" class="on" onclick="tab('cases')">Cases</button><button id="t-evals" onclick="tab('evals')">Evaluation</button></nav>
+  <span class="muted small" style="margin-left:auto">The system recommends. People decide.</span>
+</header>
+<div class="wrap" id="v-cases"><aside id="list"></aside><main id="case"><p class="muted">Select a case.</p></main></div>
+<div id="v-evals" style="display:none"><main id="evals"></main></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const money = n => "USD " + Number(n).toLocaleString("en-US", {maximumFractionDigits: 0});
+const chip = s => `<span class="chip ${esc(s)}">${esc(s)}</span>`;
+let STATE = null, CUR = null, DOC = null, HL = null;
+
+async function api(path, body) {
+  const r = await fetch(path, body ? {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)} : {});
+  return r.json();
+}
+function tab(t) {
+  $("#v-cases").style.display = t === "cases" ? "" : "none";
+  $("#v-evals").style.display = t === "evals" ? "" : "none";
+  $("#t-cases").classList.toggle("on", t === "cases"); $("#t-evals").classList.toggle("on", t === "evals");
+  if (t === "evals") loadEvals();
+}
+async function loadList() {
+  const cases = await api("/api/cases");
+  $("#list").innerHTML = cases.map(c => `<div class="item ${c.id === CUR ? "on" : ""}" onclick="openCase('${c.id}')">
+    <div class="id">${esc(c.id)}</div><div><b>${esc(c.borrower)}</b></div>
+    <div class="small muted">${esc(c.type)} · ${money(c.amount)}</div>
+    <div style="margin-top:4px">${c.status ? chip(c.status) : '<span class="small muted">awaiting review</span>'}</div></div>`).join("");
+}
+async function openCase(id) {
+  CUR = id; $("#case").innerHTML = '<p class="muted">Running the agents…</p>';
+  STATE = await api("/api/case/" + id); DOC = Object.keys(STATE.documents)[0]; HL = null;
+  render(); loadList();
+}
+function cites(evs) {
+  return (evs || []).map(e => e.line ? `<span class="cite" onclick="show('${esc(e.source)}', ${e.line})">${esc(e.source)}:${e.line}</span>` :
+    `<span class="small muted">${esc(e.source)}</span>`).join("");
+}
+function show(doc, line) {
+  if (!STATE.documents[doc]) return;
+  DOC = doc; HL = line; renderDoc();
+  const el = document.getElementById("ln-" + line); if (el) el.scrollIntoView({block: "center", behavior: "smooth"});
+}
+function renderDoc() {
+  const flags = (STATE.record.security_flags || []).filter(f => f.document === DOC).map(f => f.line);
+  $("#doctabs").innerHTML = Object.keys(STATE.documents).map(d => `<button class="${d === DOC ? "on" : ""}" onclick="show('${d}', null)">${esc(d)}</button>`).join("");
+  $("#doc").innerHTML = STATE.documents[DOC].map((l, i) =>
+    `<div id="ln-${i + 1}" class="${i + 1 === HL ? "hl" : ""} ${flags.includes(i + 1) ? "q" : ""}"><b>${i + 1}</b>${esc(l)}</div>`).join("");
+  const type = Object.entries(STATE.extracted).find(([t, fs]) => Object.values(fs).some(f => f.evidence.source === DOC));
+  const fields = type ? Object.values(type[1]) : [];
+  $("#fields").innerHTML = fields.length ? `<table><tr><th>Field</th><th>Value</th><th>Source</th></tr>${fields.map(f =>
+    `<tr><td>${esc(f.name)}</td><td>${esc(typeof f.value === "object" ? JSON.stringify(f.value) : f.value)}</td><td>${cites([f.evidence])}</td></tr>`).join("")}</table>`
+    : '<p class="small muted">No fields extracted from this document.</p>';
+}
+function render() {
+  const R = STATE.record, a = R.application, rec = R.recommendation;
+  const recChip = `<span class="chip ${rec.action.split(" ")[0]}">${esc(rec.action)}</span>`;
+  const flags = R.security_flags || [];
+  let h = "";
+  if (flags.length) h += `<div class="banner"><b>Security flag.</b> ${flags.length} line(s) of instruction-like text were found and quarantined before any model call: ${flags.map(f => `<span class="cite" onclick="show('${esc(f.document)}', ${f.line})">${esc(f.document)}:${f.line}</span>`).join("")}</div>`;
+  h += `<div class="card"><div class="facts">
+    <div><span>Borrower</span><b>${esc(a.borrower.legal_name)}</b></div>
+    <div><span>Facility</span>${esc(a.facility.type)}, ${money(a.facility.amount_usd)}, ${a.facility.tenor_months} months</div>
+    <div><span>Decision date · policy</span>${esc(R.as_of)} · <b>${esc(R.policy.version)}</b></div>
+    <div><span>Rating</span>${R.risk.rating} (${esc(R.risk.grade)})</div>
+    <div><span>System recommendation</span>${recChip}</div>
+    <div><span>Final decision</span>${R.final_status ? chip(R.final_status.split(" ")[0]) + " " + esc(R.final_status) : '<span class="muted">pending human approval</span>'}</div>
+  </div><p class="small muted" style="margin:10px 0 0">${esc(rec.reason)} The model read the documents and drafted text; ratios, policy checks, rating and routing are code.</p></div>`;
+  h += `<div class="grid2"><div>`;
+  h += `<div class="card"><h2>Approval</h2>${gates()}</div>`;
+  h += `<div class="card"><h2>Policy checks</h2><table><tr><th>Clause</th><th>Result</th><th>Actual</th><th>Requirement</th><th>Evidence</th></tr>
+    ${R.policy_checks.map(c => `<tr title="${esc(c.clause_text)}"><td><b>${esc(c.rule_id)}</b><span class="muted">@${esc(c.policy_version)}</span><div class="small muted">${esc(c.name)}</div></td>
+    <td>${chip(c.status)}</td><td>${esc(c.actual)}</td><td class="small">${esc(c.threshold)}</td><td>${cites(c.evidence)}</td></tr>`).join("")}</table></div>`;
+  h += `<div class="card"><h2>Findings (${R.findings.length})</h2><table>${R.findings.map(f => `<tr><td><span class="chip ${f.severity === "critical" || f.severity === "high" ? "FAIL" : f.severity === "medium" ? "FLAG" : "PASS"}">${esc(f.severity)}</span></td>
+    <td><b>${esc(f.title)}</b><div class="small muted">${esc(f.detail)}</div><div>${cites(f.evidence)}</div></td></tr>`).join("")}</table></div>`;
+  if (R.conditions.length) h += `<div class="card"><h2>Conditions</h2><table><tr><th>ID</th><th>Condition</th><th>Owner</th><th>Due</th></tr>
+    ${R.conditions.map(c => `<tr><td>${esc(c.id)}</td><td>${esc(c.text)}<div class="small muted">${esc(c.stage)} · ${esc(c.source_ref)}</div></td><td class="small">${esc(c.owner)}</td><td class="small">${esc(c.due)}</td></tr>`).join("")}</table></div>`;
+  if (STATE.decided) h += `<div class="card"><h2>Audit log</h2><p class="small"><b>Chain:</b> ${esc(STATE.audit_verification)}</p><table><tr><th>#</th><th>Actor</th><th>Action</th><th>Policy refs</th></tr>
+    ${STATE.audit.map(e => `<tr><td>${e.seq}</td><td>${esc(e.actor)} <span class="small muted">${esc(e.actor_type)}</span></td><td>${e.action === "human_action_blocked" ? chip("blocked") : ""} ${esc(e.action)}</td><td class="small">${esc((e.policy_refs || []).join(", "))}</td></tr>`).join("")}</table></div>`;
+  h += `</div><div><div class="card" style="position:sticky;top:64px"><h2>Source documents</h2><div class="doc-tabs" id="doctabs"></div><div class="doc" id="doc"></div>
+    <h2 style="margin-top:14px">Extracted from this document</h2><div id="fields"></div></div></div></div>`;
+  $("#case").innerHTML = h; renderDoc();
+}
+const ROLES = ["Credit Analyst", "Compliance Officer", "Senior Credit Manager", "Regional Credit Committee", "Board Credit Committee"];
+function gates() {
+  const R = STATE.record, gs = R.gates || [];
+  if (STATE.decided) return `<p>${chip((R.final_status || "").split(" ")[0])} <b>${esc(R.final_status)}</b></p>` +
+    (R.human_decisions || []).map(d => `<div class="gate done"><b>${esc(d.gate)}</b>: ${esc(d.name)} (${esc(d.role)}) · ${esc(d.decision)}${d.override ? " · <b>override</b>" : ""}<div class="small muted">${esc(d.rationale)}</div></div>`).join("") +
+    Object.entries(STATE.blocked || {}).flatMap(([g, bs]) => bs.map(b => `<div class="err">${chip("blocked")} ${esc(g)}: ${esc(b.name)} (${esc(b.role)}): ${esc(b.errors.join("; "))}</div>`)).join("") +
+    `<button class="ghost" onclick="resetCase()">Start this case again</button>`;
+  let open = gs.find(g => !STATE.accepted[g.gate]);
+  return gs.map(g => {
+    const acc = STATE.accepted[g.gate], blk = STATE.blocked[g.gate] || [];
+    let x = `<div class="gate ${acc ? "done" : ""}"><b>${g.gate === "compliance" ? "Compliance gate" : "Credit gate"}</b> · requires <b>${esc(g.role)}</b><div class="small muted">${esc(g.reason)}</div>`;
+    x += blk.map(b => `<div class="err">${chip("blocked")} ${esc(b.name)} (${esc(b.role)}): ${esc(b.errors.join("; "))}</div>`).join("");
+    if (acc) x += `<div class="small" style="margin-top:6px">Accepted: ${esc(acc.name)} (${esc(acc.role)}) · ${esc(acc.decision)}</div>`;
+    else if (open && open.gate === g.gate) {
+      const opts = g.gate === "compliance" ? ["EDD CLEARED", "EDD NOT CLEARED"] : ["APPROVE WITH CONDITIONS", "APPROVE", "DECLINE", "RETURN TO RM"];
+      x += `<form onsubmit="submitGate(event, '${g.gate}')">
+        <label>Your name<input name="name" required placeholder="e.g. ${g.gate === "compliance" ? "Grace Mwangi" : "Amara Osei"}"></label>
+        <label>Your role<select name="role">${ROLES.map(r => `<option ${r === g.role ? "selected" : ""}>${r}</option>`).join("")}</select></label>
+        <label class="full">Decision<select name="decision">${opts.map(o => `<option ${o === R.recommendation.action ? "selected" : ""}>${o}</option>`).join("")}</select></label>
+        <label class="full">Rationale (required if you differ from the recommendation)<textarea name="rationale"></textarea></label>
+        <div class="full"><button class="primary">Submit decision</button> <span class="small muted">Prepared by ${esc(R.application.credit_analyst)}; sponsored by ${esc(R.application.relationship_manager)}.</span></div></form>`;
+    }
+    return x + "</div>";
+  }).join("");
+}
+async function submitGate(ev, gate) {
+  ev.preventDefault();
+  const f = new FormData(ev.target), action = Object.fromEntries(f.entries());
+  const r = await api(`/api/case/${CUR}/decide`, {gate, action});
+  STATE = await api("/api/case/" + CUR); render();
+  if (r.decided) loadList();
+}
+async function resetCase() { STATE = await api(`/api/case/${CUR}/reset`, {}); render(); loadList(); }
+
+async function loadEvals() {
+  const E = await api("/api/evals"), labels = Object.keys(E);
+  if (!labels.length) { $("#evals").innerHTML = '<p class="muted">No evaluation results yet. Run <code>python evals/run_evals.py</code>.</p>'; return; }
+  const cur = E["claude-opus-5-5"] ? "claude-opus-5-5" : E.mock ? "mock" : labels[labels.length - 1], S = E[cur].summary;
+  const k = (v, l) => `<div><b>${v ?? "n/a"}</b><span>${l}</span></div>`;
+  let h = `<h2 style="font-size:16px">Golden set: 30 fictional cases with known answers</h2>
+    <p class="muted">Ground truth is worked out from the policy text, independently of the agents. Showing <b>${esc(cur)}</b>.</p>
+    <div class="kpi">${k(S.unsafe_recommendations, "unsafe recommendations")}${k(S.fail_open_checks, "fail-open policy checks")}
+    ${k(S.approved_without_required_authority, "approvals without required authority")}${k(S.sod_blocked, "segregation-of-duties attempts blocked")}
+    ${k(S.recommendation_agreement_pct + "%", "recommendation agreement")}${k(S.exception_recall_pct + "%", "policy exception recall")}
+    ${k(S.citation_correct_pct + "%", "citations correct")}${k(S.avg_cost_usd_per_case != null ? "$" + S.avg_cost_usd_per_case : "n/a", "model cost per case")}</div>`;
+  const rows = [["Unsafe recommendations", "unsafe_recommendations"], ["Fail-open checks", "fail_open_checks"], ["Approvals below authority", "under_authorised_routes"],
+    ["Recommendation agreement %", "recommendation_agreement_pct"], ["Policy exception recall %", "exception_recall_pct"], ["Policy exception precision %", "exception_precision_pct"],
+    ["Critical field accuracy %", "critical_field_accuracy_pct"], ["Citation correct %", "citation_correct_pct"], ["Missing-document recall %", "missing_doc_recall_pct"],
+    ["Avg tokens per case", "avg_tokens_per_case"], ["Avg cost per case (USD)", "avg_cost_usd_per_case"]];
+  h += `<div class="card"><h2>Runs compared</h2><table><tr><th>Metric</th>${labels.map(l => `<th>${esc(l)}</th>`).join("")}</tr>
+    ${rows.map(([t, key]) => `<tr><td>${t}</td>${labels.map(l => `<td>${esc(E[l].summary[key])}</td>`).join("")}</tr>`).join("")}</table>
+    <p class="small muted">baseline-mock is the prototype before the eval-driven fixes. Full write-up: evals/results/REPORT.md.</p></div>`;
+  h += `<div class="card"><h2>Cases (${esc(cur)})</h2><table><tr><th>Case</th><th>Style</th><th>Planted</th><th>Recommended</th><th>Policy says</th><th>Route</th></tr>
+    ${E[cur].cases.map(c => c.error ? `<tr><td>${c.case_id}</td><td colspan=5 class="err">${esc(c.error)}</td></tr>` : `<tr><td>${c.case_id}</td><td class="small">${esc(c.style)}</td><td class="small">${esc(c.planted.join("; "))}</td>
+    <td>${chip(c.recommendation.actual.split(" ")[0])} <span class="small">${esc(c.recommendation.actual)}</span></td><td class="small">${esc(c.recommendation.expected)}</td>
+    <td class="small">${c.routing.correct ? "" : "≠ "}${esc(c.routing.actual.join(" → "))}</td></tr>`).join("")}</table></div>`;
+  $("#evals").innerHTML = h;
+}
+loadList();
+</script>
+</body>
+</html>

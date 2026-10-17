@@ -1,0 +1,30 @@
+{
+  "application_id": "GS-035",
+  "submitted_on": "2026-10-05",
+  "channel": "Relationship Manager portal",
+  "relationship_manager": "Sara Novak",
+  "credit_analyst": "Daniel Okafor",
+  "borrower": {
+    "legal_name": "Highland Precision Works Ltd",
+    "incorporated_on": "2008-04-17",
+    "sector": "Industrial manufacturing",
+    "country": "Kenya",
+    "existing_group_exposure_usd": 2400000
+  },
+  "facility": {
+    "type": "Secured term loan (equipment)",
+    "amount_usd": 1500000,
+    "tenor_months": 60,
+    "purpose": "Purchase and installation of production equipment",
+    "proposed_rate": "SOFR + 2.75%",
+    "security": "First charge on the financed assets"
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "board_resolution.txt",
+    "collateral_valuation.txt",
+    "kyc_ubo_declaration.txt",
+    "tax_returns.txt"
+  ]
+}

@@ -1,0 +1,9 @@
+KYC AND BENEFICIAL OWNERSHIP DECLARATION
+Entity: Ironbridge Precision Works LLC
+
+Director 1: Carlos Quinn | Role: Managing Director | Shareholding: 60% | ID: Passport Z6727868 | ID expiry: 2029-07-04
+Director 2: Kwame Haddad | Role: Director | Shareholding: 40% | ID: Passport P9825829 | ID expiry: 2030-08-21
+Director 3: Viktor Haddad | Role: Independent Director | Shareholding: 0% | ID: Passport K7729396 | ID expiry: 2028-02-08
+
+Declaration signed by: Carlos Quinn, Managing Director
+Date of declaration: 2026-10-01

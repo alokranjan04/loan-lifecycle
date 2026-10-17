@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 649675717534
+Account holder: Sunvale Precision Works Ltd
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 11,640,000
+Total debits (12 months): 11,407,200
+Lowest month-end balance: 110,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0

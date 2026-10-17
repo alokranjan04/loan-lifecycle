@@ -1,0 +1,173 @@
+{
+  "case_id": "GS-010",
+  "category": "corner",
+  "style": "standard",
+  "planted": [
+    "leverage about 3.8x (flag band)"
+  ],
+  "as_of": "2026-10-16",
+  "policy_checks": {
+    "POL-2.1": "PASS",
+    "POL-2.2": "FLAG",
+    "POL-2.3": "PASS",
+    "POL-2.5": "PASS",
+    "POL-2.4": "PASS",
+    "POL-3.1": "PASS",
+    "POL-3.2": "PASS",
+    "POL-3.3": "PASS",
+    "POL-3.4": "PASS",
+    "POL-4.1": "PASS",
+    "POL-4.2": "PASS",
+    "POL-5.1": "PASS",
+    "POL-5.2": "PASS"
+  },
+  "missing_documents": [],
+  "findings": [],
+  "recommendation": "APPROVE WITH CONDITIONS",
+  "gates": [
+    "Senior Credit Manager"
+  ],
+  "fields": {
+    "financials": {
+      "audit_opinion": {
+        "line": 4,
+        "value": "Unqualified"
+      },
+      "revenue_fy2023": {
+        "line": 7,
+        "value": 12750000
+      },
+      "revenue_fy2024": {
+        "line": 7,
+        "value": 13810000
+      },
+      "revenue_fy2025": {
+        "line": 7,
+        "value": 14920000
+      },
+      "ebitda_fy2023": {
+        "line": 8,
+        "value": 2630000
+      },
+      "ebitda_fy2024": {
+        "line": 8,
+        "value": 2820000
+      },
+      "ebitda_fy2025": {
+        "line": 8,
+        "value": 3020000
+      },
+      "interest_fy2025": {
+        "line": 9,
+        "value": 180000
+      },
+      "net_profit_fy2025": {
+        "line": 10,
+        "value": 1660000
+      },
+      "total_debt": {
+        "line": 13,
+        "value": 9480000
+      },
+      "current_assets": {
+        "line": 14,
+        "value": 5970000
+      },
+      "current_liabilities": {
+        "line": 15,
+        "value": 4120000
+      },
+      "equity": {
+        "line": 16,
+        "value": 7460000
+      },
+      "principal_fy2025": {
+        "line": 19,
+        "value": 450000
+      }
+    },
+    "bank_statement": {
+      "period": {
+        "line": 4,
+        "value": "01-Oct-2025 to 30-Sep-2026"
+      },
+      "total_credits": {
+        "line": 6,
+        "value": 14370000
+      },
+      "lowest_balance": {
+        "line": 8,
+        "value": 420000
+      },
+      "returned_items": {
+        "line": 10,
+        "value": 0
+      }
+    },
+    "kyc": {
+      "directors": {
+        "line": 6,
+        "value": [
+          {
+            "name": "Carlos Quinn",
+            "id_expiry": "2029-07-04"
+          },
+          {
+            "name": "Kwame Haddad",
+            "id_expiry": "2030-08-21"
+          },
+          {
+            "name": "Viktor Haddad",
+            "id_expiry": "2028-02-08"
+          }
+        ]
+      },
+      "declaration_date": {
+        "line": 9,
+        "value": "2026-10-01"
+      }
+    },
+    "valuation": {
+      "valuer": {
+        "line": 3,
+        "value": "Oakridge Valuers (empanelled valuer)"
+      },
+      "valuation_date": {
+        "line": 4,
+        "value": "2026-09-10"
+      },
+      "market_value": {
+        "line": 5,
+        "value": 3880000
+      },
+      "realisable_value": {
+        "line": 6,
+        "value": 3290000
+      }
+    },
+    "tax_return": {
+      "tax_year": {
+        "line": 3,
+        "value": 2025
+      },
+      "gross_receipts": {
+        "line": 4,
+        "value": 14920000
+      },
+      "status": {
+        "line": 6,
+        "value": "Accepted"
+      }
+    },
+    "board_resolution": {
+      "amount": {
+        "line": 2,
+        "value": 2000000
+      },
+      "date": {
+        "line": 3,
+        "value": "2026-09-29"
+      }
+    }
+  }
+}

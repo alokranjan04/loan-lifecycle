@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 698077250035
+Account holder: Redwood Precision Works Ltd
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 13,020,000
+Total debits (12 months): 12,759,600
+Lowest month-end balance: 490,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0

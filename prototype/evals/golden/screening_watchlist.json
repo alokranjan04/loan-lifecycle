@@ -1,0 +1,32 @@
+{
+  "_note": "Golden-set stand-in for the screening API.",
+  "sanctions": [
+    {
+      "name": "Leila Silva",
+      "list": "Illustrative consolidated sanctions list"
+    }
+  ],
+  "pep": [
+    {
+      "name": "Zara Duarte",
+      "detail": "Former member of a regional planning authority (domestic PEP)",
+      "match_score": 0.94
+    },
+    {
+      "name": "Viktor Zhou",
+      "detail": "Former member of a regional planning authority (domestic PEP)",
+      "match_score": 0.94
+    },
+    {
+      "name": "Omar Fischer",
+      "detail": "Former member of a regional planning authority (domestic PEP)",
+      "match_score": 0.94
+    },
+    {
+      "name": "Viktor Novak",
+      "detail": "Former member of a regional planning authority (domestic PEP)",
+      "match_score": 0.94
+    }
+  ],
+  "adverse_media": []
+}

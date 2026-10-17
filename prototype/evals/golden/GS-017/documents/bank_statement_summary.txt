@@ -1,0 +1,10 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT 473146568327
+Account holder: Silverline Precision Works Ltd
+Bank: Meridian Commercial Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 4,760,000
+Total debits (12 months): 4,664,800
+Lowest month-end balance: 540,000 (Feb-2026)
+
+Returned items (inward cheque / ACH returns): 0
