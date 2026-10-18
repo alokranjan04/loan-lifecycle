@@ -19,6 +19,10 @@ Exposes:
   GET  /api/evals/status            – progress / log of that run
   GET  /api/evals/report            – evals/results/REPORT.md
   POST /api/demos/<name>            – red-team, policy-change, tamper, replay
+  GET  /api/rag/status              – RAG layer status (vector_ready, embed_model, collection, …)
+  GET  /api/policy/docs             – list all policy documents with metadata
+  GET  /api/policy/docs/{name}      – fetch markdown content of a policy document
+  PUT  /api/policy/docs/{name}      – save updated markdown content (triggers RAG re-index)
   GET  /                            – serves the SPA (static/index.html)
 """
 from __future__ import annotations
@@ -44,6 +48,26 @@ from pydantic import BaseModel
 import sys
 PROTO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROTO))
+
+
+# ── Load environment from .env.local (secrets) then .env (defaults) ──────────
+def _load_env(*paths: Path) -> None:
+    """Parse KEY=VALUE lines from env files. Already-set env vars take precedence."""
+    for p in paths:
+        if not p.exists():
+            continue
+        for line in p.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            if k and k not in os.environ:   # never overwrite a key set in the shell
+                os.environ[k] = v
+
+
+_load_env(PROTO / ".env.local", PROTO / ".env")
 
 from loanagent.audit import verify_chain      # noqa: E402
 from loanagent.orchestrator import (          # noqa: E402
@@ -290,6 +314,28 @@ def list_applications():
     return result
 
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+@app.post("/api/auth/login")
+def auth_login(body: LoginRequest):
+    """Validate credentials and return role + display name."""
+    DEMO_PASSWORD = "demo123"
+    if body.password != DEMO_PASSWORD:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    if body.username.lower() == "newuser":
+        return {"role": "applicant", "name": "New User", "username": "newuser"}
+    # Approver accounts — username is first.last (case-insensitive)
+    for a in list_approvers():
+        parts = a["name"].split()
+        if len(parts) >= 2:
+            if body.username.lower() == f"{parts[0].lower()}.{parts[-1].lower()}":
+                return {"role": "admin", "name": a["name"], "username": body.username.lower(), "approver_role": a["role"]}
+    raise HTTPException(status_code=401, detail="Invalid credentials. Admins: first.last / demo123  ·  New users: newuser / demo123")
+
+
 class NewApplicationRequest(BaseModel):
     # Borrower
     borrower_name: str
@@ -456,10 +502,12 @@ class RunRequest(BaseModel):
 @app.post("/api/run/{app_id}")
 def start_run(app_id: str, req: RunRequest = RunRequest()):
     case_source(app_id)
-    if req.llm_mode not in ("auto", "mock", "claude") or req.approver not in ("web", "scripted"):
+    if req.llm_mode not in ("auto", "mock", "claude", "openrouter") or req.approver not in ("web", "scripted"):
         raise HTTPException(400, "Bad run options")
     if req.llm_mode == "claude" and not os.environ.get("ANTHROPIC_API_KEY"):
-        raise HTTPException(400, "Set ANTHROPIC_API_KEY in the terminal before starting the server to use Claude")
+        raise HTTPException(400, "Set ANTHROPIC_API_KEY to use Claude directly")
+    if req.llm_mode == "openrouter" and not os.environ.get("OPENROUTER_API_KEY"):
+        raise HTTPException(400, "Set OPENROUTER_API_KEY to use OpenRouter")
     s = Session(app_id, req.llm_mode, req.approver)
     _sessions[s.id] = s
     _app_sid[app_id] = s.id
@@ -535,6 +583,210 @@ def get_session_status(app_id: str):
 @app.get("/api/decisions")
 def decision_options():
     return {"credit": CREDIT_DECISIONS, "compliance": COMPLIANCE_DECISIONS}
+
+
+@app.get("/api/decision-log")
+def decision_log():
+    """All completed human decisions across every case, with timestamps from the audit log."""
+    rows = []
+    # scan both sample output and golden output dirs
+    search_roots = [OUT, OUT / "golden"]
+    for root in search_roots:
+        if not root.exists():
+            continue
+        for rec_path in sorted(root.rglob("decision_record.json")):
+            try:
+                rec = json.loads(rec_path.read_text())
+            except Exception:
+                continue
+            if not rec.get("human_decisions"):
+                continue
+            # build a ts map from the audit log: action -> ts
+            ts_map: dict[str, str] = {}
+            audit_path = rec_path.parent / "audit_log.jsonl"
+            if audit_path.exists():
+                for line in audit_path.read_text().splitlines():
+                    try:
+                        e = json.loads(line)
+                        if e.get("actor_type") == "human" and "decision" in e.get("action", ""):
+                            key = f"{e['actor']}:{e['action']}"
+                            ts_map[key] = e.get("ts", "")
+                    except Exception:
+                        pass
+            app_data = rec.get("application", {})
+            b = app_data.get("borrower", {})
+            f = app_data.get("facility", {})
+            decisions = []
+            for h in rec["human_decisions"]:
+                gate_action = f"{h['gate']}_decision"
+                key = f"{h['name']}:{gate_action}"
+                decisions.append({
+                    "gate": h["gate"],
+                    "decided_by": h["name"],
+                    "role": h["role"],
+                    "required_role": h.get("required_role", ""),
+                    "decision": h["decision"],
+                    "rationale": h.get("rationale", ""),
+                    "override": h.get("override", False),
+                    "decided_at": ts_map.get(key, rec.get("as_of", "")),
+                })
+            rows.append({
+                "case_id": rec["case_id"],
+                "borrower": b.get("legal_name", rec["case_id"]),
+                "sector": b.get("sector", ""),
+                "facility_type": f.get("type", ""),
+                "amount_usd": f.get("amount_usd", 0),
+                "final_status": rec.get("final_status", ""),
+                "as_of": rec.get("as_of", ""),
+                "decisions": decisions,
+            })
+    # newest first
+    rows.sort(key=lambda r: r["as_of"] or "", reverse=True)
+    return rows
+
+
+@app.get("/api/approvers")
+def list_approvers():
+    """Deduplicated list of {name, role} from demo_approvals.json, sorted by role then name."""
+    raw = json.loads((PROTO / "data" / "demo_approvals.json").read_text())
+    seen: dict[str, str] = {}
+    for case in raw.values():
+        if isinstance(case, dict):
+            for gate_entries in case.values():
+                for entry in gate_entries:
+                    if isinstance(entry, dict) and "name" in entry and "role" in entry:
+                        seen[entry["name"]] = entry["role"]
+    order = ["Compliance Officer", "Senior Credit Manager", "Regional Credit Committee", "Board Credit Committee", "Credit Analyst"]
+    approvers = sorted(seen.items(), key=lambda x: (order.index(x[1]) if x[1] in order else 99, x[0]))
+    return [{"name": n, "role": r} for n, r in approvers]
+
+
+@app.get("/api/rag/status")
+def rag_status():
+    """Return the RAG layer status: whether vector search (Qdrant + Voyage AI) is active."""
+    from loanagent.rag import get_knowledge_base, _auth_key, QDRANT_DEFAULT_URL, _Qdrant
+    import os
+    from datetime import date
+    key_set = bool(_auth_key())
+    qdrant_url = os.environ.get("QDRANT_URL", QDRANT_DEFAULT_URL)
+    qdrant_alive = _Qdrant(qdrant_url).alive() if key_set else False
+    if key_set and qdrant_alive:
+        try:
+            kb = get_knowledge_base(PROTO / "data" / "policy", date.today().isoformat())
+            if hasattr(kb, "rag_status"):
+                return kb.rag_status()
+        except Exception as exc:
+            return {"vector_ready": False, "error": str(exc), "key_set": key_set, "qdrant_alive": qdrant_alive}
+    return {
+        "vector_ready": False,
+        "key_set": key_set,
+        "qdrant_alive": qdrant_alive,
+        "qdrant_url": qdrant_url,
+        "error": (None if key_set and qdrant_alive else
+                  ("No OPENROUTER_API_KEY / VOYAGE_API_KEY / ANTHROPIC_API_KEY" if not key_set else f"Qdrant not reachable at {qdrant_url}")),
+    }
+
+
+# ── Policy document library ──────────────────────────────────────────────────
+POLICY_DOCS_DIR = PROTO / "data" / "policy" / "docs"
+POLICY_MAIN_DIR = PROTO / "data" / "policy"
+
+_POLICY_DISPLAY_NAMES = {
+    "credit_policy.md": "Commercial Credit Policy",
+    "credit_policy_v3.3.md": "Commercial Credit Policy v3.3",
+    "delegation_of_authority.md": "Delegation of Authority Matrix",
+    "kyc_aml_cdd_policy.md": "KYC, AML & Customer Due Diligence",
+    "enhanced_due_diligence_pep.md": "Enhanced Due Diligence & PEP Procedure",
+    "sanctions_screening.md": "Sanctions Screening Procedure",
+    "collateral_valuation_policy.md": "Collateral & Valuation Policy",
+    "risk_rating_methodology.md": "Internal Risk Rating Methodology",
+    "risk_appetite_concentration.md": "Risk Appetite Statement & Concentration Limits",
+    "product_programme_guide.md": "Product Programme Guide & Conditions Library",
+}
+
+
+def _count_clauses(content: str) -> int:
+    import re
+    return len(re.findall(r"^### [A-Z]{2,4}-\d+\.\d+", content, re.MULTILINE))
+
+
+@app.get("/api/policy/docs")
+def list_policy_docs():
+    """List all policy documents (main versioned + docs library), with metadata."""
+    import re
+    result = []
+    # Main versioned files
+    for fname in ["credit_policy.md", "credit_policy_v3.3.md"]:
+        p = POLICY_MAIN_DIR / fname
+        if p.exists():
+            content = p.read_text(encoding="utf-8")
+            result.append({
+                "name": fname,
+                "display_name": _POLICY_DISPLAY_NAMES.get(fname, fname),
+                "folder": "versioned",
+                "editable": True,
+                "clause_count": _count_clauses(content),
+                "size_bytes": p.stat().st_size,
+                "last_modified": int(p.stat().st_mtime * 1000),
+            })
+    # Supplementary docs
+    if POLICY_DOCS_DIR.exists():
+        for p in sorted(POLICY_DOCS_DIR.glob("*.md")):
+            content = p.read_text(encoding="utf-8")
+            result.append({
+                "name": p.name,
+                "display_name": _POLICY_DISPLAY_NAMES.get(p.name, p.stem.replace("_", " ").title()),
+                "folder": "docs",
+                "editable": True,
+                "clause_count": _count_clauses(content),
+                "size_bytes": p.stat().st_size,
+                "last_modified": int(p.stat().st_mtime * 1000),
+            })
+    return result
+
+
+@app.get("/api/policy/docs/{name}")
+def get_policy_doc(name: str):
+    """Return the raw markdown content of a policy document."""
+    # Prevent path traversal
+    if "/" in name or "\\" in name or ".." in name:
+        raise HTTPException(status_code=400, detail="Invalid name")
+    for folder in [POLICY_DOCS_DIR, POLICY_MAIN_DIR]:
+        p = folder / name
+        if p.exists() and p.suffix == ".md":
+            content = p.read_text(encoding="utf-8")
+            return {
+                "name": name,
+                "display_name": _POLICY_DISPLAY_NAMES.get(name, name),
+                "folder": "docs" if folder == POLICY_DOCS_DIR else "versioned",
+                "content": content,
+                "clause_count": _count_clauses(content),
+                "last_modified": int(p.stat().st_mtime * 1000),
+            }
+    raise HTTPException(status_code=404, detail="Document not found")
+
+
+class PolicyDocBody(BaseModel):
+    content: str
+
+
+@app.put("/api/policy/docs/{name}")
+def save_policy_doc(name: str, body: PolicyDocBody):
+    """Save updated markdown content for a policy document."""
+    if "/" in name or "\\" in name or ".." in name:
+        raise HTTPException(status_code=400, detail="Invalid name")
+    for folder in [POLICY_DOCS_DIR, POLICY_MAIN_DIR]:
+        p = folder / name
+        if p.exists() and p.suffix == ".md":
+            p.write_text(body.content, encoding="utf-8")
+            return {
+                "ok": True,
+                "name": name,
+                "clause_count": _count_clauses(body.content),
+                "last_modified": int(p.stat().st_mtime * 1000),
+                "note": "RAG index will be rebuilt automatically on next pipeline run (SHA-256 changed).",
+            }
+    raise HTTPException(status_code=404, detail="Document not found")
 
 
 # ── Background jobs (evals and demos run the project's own scripts) ───────────
@@ -621,11 +873,18 @@ class EvalRequest(BaseModel):
 
 @app.post("/api/evals/run")
 def run_evals(req: EvalRequest = EvalRequest()):
-    if req.llm not in ("mock", "claude"):
-        raise HTTPException(400, "llm must be mock or claude")
+    if req.llm not in ("mock", "claude", "openrouter"):
+        raise HTTPException(400, "llm must be mock, claude, or openrouter")
     if req.llm == "claude" and not os.environ.get("ANTHROPIC_API_KEY"):
-        raise HTTPException(400, "Set ANTHROPIC_API_KEY in the terminal before starting the server to run the eval with Claude")
-    label = "mock" if req.llm == "mock" else "claude-live"
+        raise HTTPException(400, "Set ANTHROPIC_API_KEY to run evals with Claude")
+    if req.llm == "openrouter" and not os.environ.get("OPENROUTER_API_KEY"):
+        raise HTTPException(400, "Set OPENROUTER_API_KEY to run evals with OpenRouter")
+    if req.llm == "mock":
+        label = "mock"
+    elif req.llm == "openrouter":
+        label = os.environ.get("LOAN_AGENT_MODEL", "openrouter").replace("/", "-")
+    else:
+        label = "claude-live"
     cmd = ["python", "evals/run_evals.py", "--llm", req.llm, "--label", label]
     if req.only:
         cmd += ["--only", req.only]
@@ -702,7 +961,10 @@ def overview():
         "eval_runs": len(runs),
         "cat_run": _category_run(runs),
         "headline": {"label": pick["label"], **pick["summary"]} if pick else None,
-        "claude_key_set": bool(os.environ.get("ANTHROPIC_API_KEY")),
+        "claude_key_set": bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENROUTER_API_KEY")),
+        "openrouter_key_set": bool(os.environ.get("OPENROUTER_API_KEY")),
+        "llm_provider": ("openrouter" if os.environ.get("OPENROUTER_API_KEY") else
+                         "anthropic" if os.environ.get("ANTHROPIC_API_KEY") else "mock"),
         "as_of": AS_OF,
     }
 

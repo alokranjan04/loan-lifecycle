@@ -58,6 +58,26 @@
     .md code{background:#f1f5f9;padding:.08rem .22rem;border-radius:.2rem;font-size:.82em;font-family:monospace}
     .md blockquote{border-left:3px solid #e2e8f0;padding-left:.7rem;color:#64748b;margin:.5rem 0}
     .hl{background:#fef3c7;border-radius:2px}
+    /* ── Policy Document Preview ─────────────────────────────────────── */
+    .pol-doc{padding:2.5rem 3rem;max-width:820px;line-height:1.7;color:#1e293b;font-size:.875rem}
+    .pol-doc h1{font-size:1.55rem;font-weight:800;color:#0f172a;margin:0 0 .35rem;letter-spacing:-.02em;line-height:1.25}
+    .pol-doc .pol-doc-subtitle{font-size:.8rem;color:#94a3b8;margin-bottom:2rem;display:flex;align-items:center;gap:.5rem}
+    .pol-doc .pol-doc-subtitle::after{content:'';flex:1;height:1px;background:#e2e8f0}
+    .pol-doc h2{font-size:.92rem;font-weight:700;color:#0f172a;margin:2.25rem 0 .75rem;padding:.35rem .75rem;background:linear-gradient(90deg,#f8fafc 0%,transparent 100%);border-left:3px solid #6366f1;border-radius:0 .25rem .25rem 0;text-transform:uppercase;letter-spacing:.04em}
+    .pol-doc .pol-clause{display:flex;align-items:baseline;gap:.6rem;margin:1.5rem 0 .35rem;padding:.6rem .75rem .6rem .75rem;border-radius:.5rem;background:#fff;border:1px solid #f1f5f9;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+    .pol-doc .pol-clause-id{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:800;border-radius:.35rem;padding:.2rem .55rem;letter-spacing:.04em;flex-shrink:0;white-space:nowrap}
+    .pol-doc .pol-clause-title{font-size:.88rem;font-weight:700;color:#1e293b}
+    .pol-doc .pol-clause + p,.pol-doc .pol-clause ~ p:not(.pol-clause ~ .pol-clause ~ p){margin-top:.3rem;padding-left:.75rem;border-left:2px solid #f1f5f9;color:#374151;line-height:1.75}
+    .pol-doc p{margin:.5rem 0 .875rem;line-height:1.75;color:#374151}
+    .pol-doc ul,.pol-doc ol{padding-left:1.5rem;margin:.5rem 0 .875rem;color:#374151}
+    .pol-doc li{margin:.3rem 0;line-height:1.6}
+    .pol-doc strong{color:#0f172a;font-weight:600}
+    /* Prefix colour palette */
+    .pol-id-POL{color:#5b21b6;background:#f5f3ff} .pol-id-DOA{color:#1e40af;background:#eff6ff}
+    .pol-id-KYC{color:#065f46;background:#ecfdf5} .pol-id-EDD{color:#9a3412;background:#fff7ed}
+    .pol-id-SAN{color:#9f1239;background:#fff1f2} .pol-id-COL{color:#0e7490;background:#ecfeff}
+    .pol-id-RRM{color:#3730a3;background:#eef2ff} .pol-id-RAS{color:#134e4a;background:#f0fdfa}
+    .pol-id-PPG{color:#78350f;background:#fffbeb}
     .gate-glow{box-shadow:0 0 0 3px rgba(217,119,6,.2),0 20px 60px rgba(0,0,0,.3)}
     .na-field{width:100%;border:1.5px solid #e2e8f0;border-radius:.5rem;padding:.6rem .875rem;font-size:.82rem;outline:none;color:#1e293b;font-family:inherit;box-sizing:border-box;transition:border-color .15s,box-shadow .15s;background:#fff}
     .na-field:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
@@ -177,17 +197,31 @@
       <div style="margin-top:1.5rem;border:1.5px dashed #e2e8f0;border-radius:1rem;padding:1rem">
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
           <svg width="14" height="14" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          <span style="font-size:.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em">Demo access</span>
+          <span style="font-size:.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em">Demo access — click to fill</span>
         </div>
-        <button style="width:100%;display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:.75rem;padding:.875rem 1rem;cursor:pointer;text-align:left;font-family:inherit;transition:.15s"
+        <!-- New User card -->
+        <button style="width:100%;display:flex;align-items:center;justify-content:space-between;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:.75rem;padding:.75rem 1rem;cursor:pointer;text-align:left;font-family:inherit;transition:.15s;margin-bottom:.5rem"
+                onmouseover="this.style.borderColor='#4ade80';this.style.background='#dcfce7'"
+                onmouseout="this.style.borderColor='#bbf7d0';this.style.background='#f0fdf4'"
+                @click="loginForm.user='newuser'; loginForm.pass='demo123'">
+          <div>
+            <div style="font-size:.65rem;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem">Applicant</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:#1e293b">newuser / demo123</div>
+            <div style="font-size:.65rem;color:#64748b;margin-top:.15rem">Submit applications, track status</div>
+          </div>
+          <svg width="14" height="14" fill="none" stroke="#4ade80" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M12 4v16m8-8H4"/></svg>
+        </button>
+        <!-- Admin card -->
+        <button style="width:100%;display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e2e8f0;border-radius:.75rem;padding:.75rem 1rem;cursor:pointer;text-align:left;font-family:inherit;transition:.15s"
                 onmouseover="this.style.borderColor='#818cf8';this.style.background='#eef2ff'"
                 onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#fff'"
-                @click="loginForm.user='admin'; loginForm.pass='demo123'">
+                @click="loginForm.user='amara.osei'; loginForm.pass='demo123'">
           <div>
-            <div style="font-size:.72rem;color:#94a3b8;margin-bottom:.2rem">Click to auto-fill credentials</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;color:#1e293b">admin / demo123</div>
+            <div style="font-size:.65rem;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem">Admin (approver)</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:#1e293b">amara.osei / demo123</div>
+            <div style="font-size:.65rem;color:#64748b;margin-top:.15rem">Also: grace.mwangi · kenji.watanabe · sofia.alvarez</div>
           </div>
-          <svg width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          <svg width="14" height="14" fill="none" stroke="#818cf8" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
         </button>
       </div>
       <p style="text-align:center;font-size:.72rem;color:#94a3b8;margin-top:1.5rem">Prototype · Not for production · 2026</p>
@@ -217,7 +251,7 @@
 </div>
 
 <!-- ═══ LAYOUT ════════════════════════════════════════════════════════════ -->
-<div x-show="loggedIn" class="flex h-screen overflow-hidden">
+<div x-show="loggedIn && userRole==='admin'" class="flex h-screen overflow-hidden">
 
 <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
 <aside class="w-56 flex-shrink-0 bg-slate-900 flex flex-col">
@@ -254,17 +288,20 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       Control demos
     </button>
-    <!-- New Application -->
-    <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.07)">
-      <button class="nav-btn" style="background:linear-gradient(135deg,rgba(79,70,229,.35),rgba(124,58,237,.35));border:1px solid rgba(99,102,241,.35);color:#a5b4fc" @click="openNewApp()">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-        New application
-      </button>
-    </div>
+    <!-- Decision Log -->
+    <button class="nav-btn" :class="view==='decisionlog' && 'on'" @click="go('decisionlog')">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      Decision Log
+    </button>
+    <!-- Policy Library -->
+    <button class="nav-btn" :class="view==='policies' && 'on'" @click="go('policies')">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      Policy Library
+    </button>
   </nav>
 
   <!-- Pending approval banner -->
-  <template x-if="sessionStatus==='awaiting_approval'">
+  <template x-if="sessionStatus==='awaiting_approval' && canApproveGate()">
     <button class="mx-3 mb-2 pulse-a rounded-xl p-3 bg-amber-500 text-white text-xs font-semibold text-center hover:bg-amber-400 transition" @click="showApproval=true">
       ⚠ Approval required — click to review
     </button>
@@ -273,10 +310,10 @@
   <!-- Footer: user card + sign out -->
   <div style="padding:.75rem;border-top:1px solid #1e293b;flex-shrink:0">
     <div class="sidebar-user">
-      <div style="width:2rem;height:2rem;border-radius:.625rem;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.75rem;color:#fff;flex-shrink:0">A</div>
+      <div style="width:2rem;height:2rem;border-radius:.625rem;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.75rem;color:#fff;flex-shrink:0" x-text="(currentUser.name||'A')[0].toUpperCase()"></div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.75rem;font-weight:600;color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Admin</div>
-        <div style="font-size:.65rem;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" x-text="ov.as_of ? 'As of '+ov.as_of : 'Demo user'"></div>
+        <div style="font-size:.75rem;font-weight:600;color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" x-text="currentUser.name||'Admin'"></div>
+        <div style="font-size:.65rem;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" x-text="currentUser.approver_role||'Administrator'"></div>
       </div>
       <button style="flex-shrink:0;width:1.75rem;height:1.75rem;border-radius:.5rem;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;transition:.15s"
               onmouseover="this.style.color='#f87171';this.style.background='rgba(185,28,28,.2)'"
@@ -288,6 +325,11 @@
       </button>
     </div>
     <div x-show="!ov.claude_key_set" style="font-size:.65rem;color:#d97706;padding:0 .25rem">No API key — offline mock</div>
+    <div style="font-size:.62rem;padding:0 .25rem;margin-top:.15rem"
+         :style="ragSt.vector_ready ? 'color:#10b981' : 'color:#94a3b8'"
+         :title="ragSt.vector_ready ? 'Hybrid BM25 + Voyage AI vector search active (Qdrant connected)' : (ragSt.error || 'Vector search unavailable — BM25 only')">
+      <span x-text="ragSt.vector_ready ? '⬡ RAG: vector + BM25' : '⬡ RAG: BM25 only'"></span>
+    </div>
   </div>
 </aside>
 
@@ -308,7 +350,8 @@
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
             Live HITL demo
           </button>
-          <button class="btn border border-white/25 hover:bg-white/10" @click="openCase('APP-2026-0142')">Explore case →</button>
+          <button class="btn border border-white/25 hover:bg-white/10" @click="openCase('APP-2026-0201')">Demo approval →</button>
+          <button class="btn border border-white/25 hover:bg-white/10" @click="openCase('APP-2026-0142')">PEP case →</button>
           <button class="btn border border-white/25 hover:bg-white/10" @click="go('cases'); caseFilter='golden'">39 golden cases →</button>
           <button class="btn border border-white/25 hover:bg-white/10" @click="go('evals')">See evals →</button>
           <button class="btn" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff" @click="openNewApp()">
@@ -582,7 +625,7 @@
               </div>
               <div class="text-xs text-slate-400 mono" x-text="a.id"></div>
               <div style="font-size:.8rem;font-weight:600;color:#1e293b;margin-top:.375rem" x-text="usd(a.amount_usd)"></div>
-              <div class="text-xs text-slate-500 leading-relaxed" style="margin-top:.25rem" x-text="a.id==='APP-2026-0142' ? 'PEP match → EDD gate → Board Credit Committee' : 'Clean case → Senior Credit Manager'"></div>
+              <div class="text-xs text-slate-500 leading-relaxed" style="margin-top:.25rem" x-text="a.id==='APP-2026-0142' ? 'PEP match → EDD gate → Board Credit Committee' : a.id==='APP-2026-0201' ? 'DSCR FLAG → Regional Credit Committee → Approved with Conditions' : 'Clean case → Senior Credit Manager'"></div>
             </div>
           </template>
         </div>
@@ -765,9 +808,10 @@
           <label class="text-xs text-slate-500">
             Model
             <select x-model="llmMode" class="block border border-slate-200 rounded-lg px-2 py-1.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-              <option value="auto">Auto</option>
+              <option value="auto">Auto (best available)</option>
               <option value="mock">Offline mock</option>
-              <option value="claude" :disabled="!ov.claude_key_set">Claude (needs key)</option>
+              <option value="openrouter" :disabled="!ov.openrouter_key_set">OpenRouter (Claude / GPT-4o)</option>
+              <option value="claude" :disabled="!ov.claude_key_set">Claude direct</option>
             </select>
           </label>
           <button class="btn btn-p" @click="runPipeline()" :disabled="['running','awaiting_approval'].includes(sessionStatus)">
@@ -849,8 +893,8 @@
           Press <strong>Run the agents</strong>. Choose <em>I decide at each gate</em> to approve yourself — try with the wrong role or the case's own analyst to see controls block it.
         </p>
 
-        <!-- Approval nudge -->
-        <template x-if="sessionStatus==='awaiting_approval'">
+        <!-- Approval nudge — only shown to admin whose role qualifies -->
+        <template x-if="sessionStatus==='awaiting_approval' && canApproveGate()">
           <div class="mt-4 flex items-center justify-between bg-amber-50 border border-amber-300 rounded-xl p-4">
             <div class="flex items-center gap-3">
               <div class="w-8 h-8 rounded-full bg-amber-100 border border-amber-400 flex items-center justify-center text-amber-600 text-lg font-bold">⚠</div>
@@ -922,6 +966,7 @@
           <div>Model <strong class="text-slate-700" x-text="results.controls.model"></strong></div>
           <div>PII masked <strong class="text-slate-700" x-text="results.controls.pii_tokens_masked"></strong></div>
           <div x-show="audit">Audit chain <strong :class="audit&&audit.chain_ok?'text-emerald-600':'text-red-600'" x-text="audit&&audit.chain_ok?'✓ verified':'✕ BROKEN'"></strong></div>
+          <div>Reliability <strong class="text-emerald-600" x-text="reliabilityScore().pct+'%'"></strong> · Confidence <strong class="text-indigo-600" x-text="reliabilityScore().avgConf+'%'"></strong></div>
         </div>
       </div>
 
@@ -940,6 +985,276 @@
         <template x-for="t in tabs()" :key="t[0]">
           <button class="tab" :class="tab===t[0]&&'on'" @click="tab=t[0]" x-text="t[1]"></button>
         </template>
+      </div>
+
+      <!-- Tab: Case Report ─────────────────────────────────────────────── -->
+      <div x-show="tab==='report'" class="mt-4 space-y-5">
+
+        <!-- Reliability bar -->
+        <div class="card p-5">
+          <div class="flex flex-wrap gap-6 items-center">
+            <!-- Reliability donut-style badge -->
+            <div class="flex flex-col items-center justify-center rounded-2xl border-2 px-6 py-4 min-w-[120px]"
+                 :class="reliabilityScore().pct>=90 ? 'border-emerald-300 bg-emerald-50' : (reliabilityScore().pct>=70 ? 'border-amber-300 bg-amber-50' : 'border-red-300 bg-red-50')">
+              <div class="text-4xl font-black leading-none"
+                   :class="reliabilityScore().pct>=90 ? 'text-emerald-600' : (reliabilityScore().pct>=70 ? 'text-amber-600' : 'text-red-600')"
+                   x-text="reliabilityScore().pct+'%'"></div>
+              <div class="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wide">Reliability</div>
+              <div class="text-[10px] text-slate-400 mt-0.5" x-text="reliabilityScore().verified+'/'+reliabilityScore().total+' fields cited'"></div>
+            </div>
+            <!-- Confidence -->
+            <div class="flex flex-col items-center justify-center rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-6 py-4 min-w-[120px]">
+              <div class="text-4xl font-black leading-none text-indigo-600" x-text="reliabilityScore().avgConf+'%'"></div>
+              <div class="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wide">Avg Confidence</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">across all extracted fields</div>
+            </div>
+            <!-- Policy checks mini summary -->
+            <div class="flex gap-3">
+              <div class="text-center">
+                <div class="text-3xl font-black text-emerald-600" x-text="policyCheckCounts().pass"></div>
+                <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mt-0.5">Pass</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-black text-amber-500" x-text="policyCheckCounts().flag"></div>
+                <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mt-0.5">Flag</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-black text-red-500" x-text="policyCheckCounts().fail"></div>
+                <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mt-0.5">Fail</div>
+              </div>
+            </div>
+            <!-- Outcome pill -->
+            <div class="flex-1 min-w-[220px]">
+              <div class="text-xs text-slate-400 uppercase tracking-widest mb-1.5">Decision outcome</div>
+              <div class="flex items-center gap-3">
+                <span class="pill text-base px-4 py-1.5" :class="statusClass(results.final_status)" x-text="results.final_status"></span>
+              </div>
+              <div class="text-sm text-slate-600 mt-2 leading-relaxed max-w-sm" x-text="results.recommendation.reason"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Escalation flow: when threshold not met → human review -->
+        <div class="card p-5">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Decision pipeline — how this case was decided</div>
+          <div class="flex flex-wrap items-start gap-0">
+            <!-- Step 1: Application -->
+            <div class="flex flex-col items-center min-w-[110px]">
+              <div class="w-10 h-10 rounded-full bg-slate-100 border-2 border-slate-300 flex items-center justify-center text-slate-600 font-bold text-sm">1</div>
+              <div class="text-xs font-semibold text-slate-700 mt-2 text-center">Application<br>Submitted</div>
+              <div class="text-[10px] text-slate-400 mt-1 text-center" x-text="(results.application||{}).submitted_on||results.as_of"></div>
+            </div>
+            <div class="mt-5 text-slate-300 font-bold px-1">→</div>
+            <!-- Step 2: Agents -->
+            <div class="flex flex-col items-center min-w-[110px]">
+              <div class="w-10 h-10 rounded-full bg-indigo-100 border-2 border-indigo-300 flex items-center justify-center text-indigo-600 font-bold text-sm">2</div>
+              <div class="text-xs font-semibold text-slate-700 mt-2 text-center">AI Agents<br>Analyse</div>
+              <div class="text-[10px] text-slate-400 mt-1 text-center" x-text="(results.controls.llm_calls||9)+' LLM calls · '+reliabilityScore().total+' fields'"></div>
+            </div>
+            <div class="mt-5 text-slate-300 font-bold px-1">→</div>
+            <!-- Step 3: Policy checks -->
+            <div class="flex flex-col items-center min-w-[110px]">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2"
+                   :class="policyCheckCounts().fail>0?'bg-red-100 border-red-400 text-red-700':policyCheckCounts().flag>0?'bg-amber-100 border-amber-400 text-amber-700':'bg-emerald-100 border-emerald-400 text-emerald-700'">3</div>
+              <div class="text-xs font-semibold text-slate-700 mt-2 text-center">Policy<br>Checks</div>
+              <div class="text-[10px] mt-1 text-center font-semibold"
+                   :class="policyCheckCounts().fail>0?'text-red-500':policyCheckCounts().flag>0?'text-amber-500':'text-emerald-500'"
+                   x-text="policyCheckCounts().fail>0?policyCheckCounts().fail+' FAIL':policyCheckCounts().flag>0?policyCheckCounts().flag+' FLAG':'All PASS'"></div>
+            </div>
+            <div class="mt-5 text-slate-300 font-bold px-1">→</div>
+            <!-- Step 4: Human gate (shown when flag/fail) -->
+            <template x-if="policyCheckCounts().flag>0 || policyCheckCounts().fail>0">
+              <div class="flex items-start gap-0">
+                <div class="flex flex-col items-center min-w-[130px]">
+                  <div class="w-10 h-10 rounded-full bg-amber-100 border-2 border-amber-400 flex items-center justify-center text-amber-700 font-bold text-sm">4</div>
+                  <div class="text-xs font-semibold text-slate-700 mt-2 text-center">Human Review<br>Required</div>
+                  <div class="text-[10px] text-amber-600 mt-1 text-center font-semibold">Threshold not met<br>→ escalated to</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5 text-center font-medium" x-text="(results.gates[0]||{}).role"></div>
+                </div>
+                <div class="mt-5 text-slate-300 font-bold px-1">→</div>
+              </div>
+            </template>
+            <!-- Final step: Decision -->
+            <div class="flex flex-col items-center min-w-[110px]">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2"
+                   :class="results.final_status==='APPROVED'?'bg-emerald-100 border-emerald-400 text-emerald-700':results.final_status.includes('CONDITIONS')?'bg-teal-100 border-teal-400 text-teal-700':'bg-red-100 border-red-400 text-red-700'">✓</div>
+              <div class="text-xs font-semibold text-slate-700 mt-2 text-center">Final<br>Decision</div>
+              <div class="text-[10px] mt-1 text-center font-semibold"
+                   :class="results.final_status.includes('APPROVED')?'text-emerald-600':'text-red-500'"
+                   x-text="results.final_status"></div>
+            </div>
+          </div>
+
+          <!-- Human decision detail (when present) -->
+          <template x-if="(results.human_decisions||[]).length>0">
+            <div class="mt-4 border-t pt-4">
+              <div class="text-xs text-slate-400 uppercase tracking-widest mb-2">Human approver decision</div>
+              <template x-for="hd in (results.human_decisions||[])">
+                <div class="flex items-start gap-3 text-sm">
+                  <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0" x-text="(hd.name||'?')[0]"></div>
+                  <div>
+                    <div class="font-semibold text-slate-800" x-text="hd.name"></div>
+                    <div class="text-xs text-slate-500" x-text="hd.role+' · '+(hd.override?'Override':'Standard approval')"></div>
+                    <div class="text-xs text-slate-600 mt-1 italic" x-text="'\"'+hd.rationale+'\"'"></div>
+                    <div class="mt-1"><span class="pill text-xs" :class="statusClass(hd.decision)" x-text="hd.decision"></span></div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+
+        <!-- Key metrics with grounding -->
+        <div class="card p-5">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Key financial metrics — grounded citations</div>
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+            <!-- DSCR -->
+            <div class="rounded-xl border p-3" :class="(results.metrics.dscr_proj||0)>=1.4?'border-emerald-200 bg-emerald-50/60':(results.metrics.dscr_proj||0)>=1.25?'border-amber-200 bg-amber-50/60':'border-red-200 bg-red-50/60'">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Projected DSCR</div>
+              <div class="text-2xl font-black mt-1" :class="(results.metrics.dscr_proj||0)>=1.4?'text-emerald-600':(results.metrics.dscr_proj||0)>=1.25?'text-amber-600':'text-red-600'" x-text="(results.metrics.dscr_proj||0).toFixed(2)+'x'"></div>
+              <div class="text-[10px] text-slate-500 mt-1">Threshold ≥ 1.25x · source: <span class="text-indigo-600 font-mono" x-text="results.metrics.dscr_proj_source||'computed'"></span></div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Historical DSCR <span class="font-semibold text-slate-600" x-text="(results.metrics.dscr_hist||0).toFixed(2)+'x'"></span></div>
+            </div>
+            <!-- LTV -->
+            <div class="rounded-xl border p-3" :class="(results.metrics.ltv||0)<=0.7?'border-emerald-200 bg-emerald-50/60':'border-red-200 bg-red-50/60'">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Loan to Value</div>
+              <div class="text-2xl font-black mt-1" :class="(results.metrics.ltv||0)<=0.7?'text-emerald-600':'text-red-600'" x-text="Math.round((results.metrics.ltv||0)*100)+'%'"></div>
+              <div class="text-[10px] text-slate-500 mt-1">Threshold ≤ 70% · Facility <span class="font-mono font-semibold" x-text="usd((results.application||{}).facility&&results.application.facility.amount_usd||0)"></span></div>
+            </div>
+            <!-- Leverage -->
+            <div class="rounded-xl border p-3" :class="(results.metrics.debt_ebitda_post||0)<=3.5?'border-emerald-200 bg-emerald-50/60':'border-amber-200 bg-amber-50/60'">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Debt / EBITDA</div>
+              <div class="text-2xl font-black mt-1 text-slate-700" x-text="(results.metrics.debt_ebitda_post||0).toFixed(2)+'x'"></div>
+              <div class="text-[10px] text-slate-500 mt-1">Threshold ≤ 4.0x</div>
+            </div>
+            <!-- Current Ratio -->
+            <div class="rounded-xl border p-3" :class="(results.metrics.current_ratio||0)>=1.1?'border-emerald-200 bg-emerald-50/60':'border-red-200 bg-red-50/60'">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Current Ratio</div>
+              <div class="text-2xl font-black mt-1 text-emerald-600" x-text="(results.metrics.current_ratio||0).toFixed(2)+'x'"></div>
+              <div class="text-[10px] text-slate-500 mt-1">Threshold ≥ 1.10x</div>
+            </div>
+            <!-- Vintage -->
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Business Vintage</div>
+              <div class="text-2xl font-black mt-1 text-emerald-600" x-text="(results.metrics.vintage_years||0).toFixed(1)+' yrs'"></div>
+              <div class="text-[10px] text-slate-500 mt-1">Audited years: <span x-text="results.metrics.years_audited||0"></span></div>
+            </div>
+            <!-- Revenue reconciliation -->
+            <div class="rounded-xl border p-3" :class="(results.metrics.bank_credit_to_revenue||0)>=0.8?'border-emerald-200 bg-emerald-50/60':'border-red-200 bg-red-50/60'">
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Bank Credit / Revenue</div>
+              <div class="text-2xl font-black mt-1" :class="(results.metrics.bank_credit_to_revenue||0)>=0.8?'text-emerald-600':'text-red-600'" x-text="Math.round((results.metrics.bank_credit_to_revenue||0)*100)+'%'"></div>
+              <div class="text-[10px] text-slate-500 mt-1">Threshold ≥ 80%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grounded evidence — top cited fields -->
+        <div class="card p-5">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Grounded evidence — every fact traced to a source document</div>
+          <div class="space-y-2">
+            <template x-for="(fields, doc) in results.extracted_fields" :key="doc">
+              <details class="rounded-xl border border-slate-100" open>
+                <summary class="px-4 py-2.5 cursor-pointer flex items-center gap-3 text-sm font-semibold text-slate-700 capitalize select-none">
+                  <span class="w-5 h-5 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">↳</span>
+                  <span x-text="doc.replace(/_/g,' ')"></span>
+                  <span class="ml-auto text-[10px] text-slate-400 font-normal" x-text="Object.keys(fields).length+' fields'"></span>
+                </summary>
+                <div class="border-t">
+                  <template x-for="(f, fname) in fields" :key="fname">
+                    <div class="flex items-start gap-3 px-4 py-2.5 border-b last:border-0 text-xs hover:bg-slate-50 group">
+                      <!-- Verified badge -->
+                      <div class="mt-0.5 flex-shrink-0">
+                        <template x-if="f.citation_verified">
+                          <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-[9px]">✓</span>
+                        </template>
+                        <template x-if="!f.citation_verified">
+                          <span class="w-4 h-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-[9px]">!</span>
+                        </template>
+                      </div>
+                      <!-- Field name -->
+                      <div class="font-mono text-slate-400 w-36 flex-shrink-0 mt-0.5" x-text="fname"></div>
+                      <!-- Value -->
+                      <div class="font-semibold text-slate-700 w-36 flex-shrink-0 truncate" x-text="fmtVal(f.value)"></div>
+                      <!-- Citation -->
+                      <div class="flex-1 text-slate-500 min-w-0">
+                        <span class="text-indigo-600 font-mono cursor-pointer hover:underline" @click="showDoc(f.evidence.source,f.evidence.line)" x-text="f.evidence.source+':'+f.evidence.line"></span>
+                        <span class="ml-2 text-slate-400 italic truncate" x-text="'\"'+f.evidence.quote.slice(0,80)+(f.evidence.quote.length>80?'…':'')+'\"'"></span>
+                      </div>
+                      <!-- Confidence -->
+                      <div class="flex-shrink-0 text-right">
+                        <span class="text-[10px] font-semibold" :class="(f.confidence||0)>=0.95?'text-emerald-600':'text-amber-600'" x-text="Math.round((f.confidence||0)*100)+'%'"></span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </details>
+            </template>
+          </div>
+        </div>
+
+        <!-- Policy flags and conditions -->
+        <template x-if="policyCheckCounts().flag>0 || policyCheckCounts().fail>0">
+          <div class="card p-5 border-amber-200 bg-amber-50/40">
+            <div class="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-3">Why this case required human review</div>
+            <template x-for="c in results.policy_checks.filter(ch=>ch.status==='FLAG'||ch.status==='FAIL')" :key="c.rule_id">
+              <div class="mb-4">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="pill" :class="checkClass(c.status)" x-text="c.status"></span>
+                  <span class="mono text-xs text-slate-400" x-text="c.rule_id"></span>
+                  <span class="font-semibold text-slate-800" x-text="c.name"></span>
+                </div>
+                <div class="mt-2 text-xs text-slate-600 border-l-4 border-amber-300 pl-3 italic" x-text="c.clause_text"></div>
+                <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+                  <div class="rounded-lg bg-white border px-3 py-2">
+                    <div class="text-[10px] text-slate-400 uppercase">Actual</div>
+                    <div class="font-semibold text-slate-800 mt-0.5" x-text="c.actual"></div>
+                  </div>
+                  <div class="rounded-lg bg-white border px-3 py-2">
+                    <div class="text-[10px] text-slate-400 uppercase">Required</div>
+                    <div class="font-semibold text-slate-800 mt-0.5" x-text="c.threshold"></div>
+                  </div>
+                </div>
+                <div x-show="c.curable" class="mt-2 text-xs text-amber-700 bg-amber-100 rounded px-3 py-1.5">
+                  Curable — converted to condition: <span class="font-semibold" x-text="c.note||'see conditions'"></span>
+                </div>
+                <!-- Evidence citations -->
+                <div class="mt-2 space-y-1">
+                  <template x-for="e in c.evidence">
+                    <div class="text-xs mono bg-white border rounded px-2 py-1 cursor-pointer hover:bg-amber-50" @click="showDoc(e.source,e.line)">
+                      <span class="text-indigo-600 font-semibold" x-text="e.source+(e.line?':'+e.line:'')"></span>
+                      <span class="text-slate-500 ml-2" x-text="e.quote"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <!-- Conditions imposed -->
+            <div class="border-t pt-3 mt-2">
+              <div class="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-2">Conditions imposed on approval</div>
+              <template x-for="c in results.conditions">
+                <div class="flex gap-2 text-sm mb-2">
+                  <span class="mono font-bold text-amber-700 bg-amber-100 rounded px-2 py-0.5 text-xs flex-shrink-0 h-fit" x-text="c.id"></span>
+                  <div>
+                    <div class="text-slate-800" x-text="c.text"></div>
+                    <div class="text-xs text-slate-500 mt-0.5" x-text="c.stage+' · '+c.owner+' · due '+c.due"></div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <!-- Risk mitigants -->
+        <div class="card p-5">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Risk mitigants</div>
+          <div class="flex flex-wrap gap-2">
+            <template x-for="m in (results.risk.mitigants||[])">
+              <span class="rounded-full bg-emerald-100 text-emerald-700 text-xs px-3 py-1 font-medium" x-text="m"></span>
+            </template>
+          </div>
+          <div class="mt-3 text-xs text-slate-500" x-text="'Sector: '+results.metrics.sector_appetite+' · Single obligor post-facility: '+usd(results.metrics.group_exposure_post)"></div>
+        </div>
+
       </div>
 
       <!-- Tab: Policy checks -->
@@ -1098,7 +1413,10 @@
         <svg x-show="evalJob.status==='running'" class="spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
         Run eval (offline mock, ~10 s)
       </button>
-      <button class="btn btn-s" @click="runEval('claude')" :disabled="evalJob.status==='running'||!ov.claude_key_set" :title="ov.claude_key_set?'':'Set ANTHROPIC_API_KEY before starting the server'">Run with Claude (~USD 2)</button>
+      <button class="btn btn-s" @click="runEval('openrouter')" :disabled="evalJob.status==='running'||!ov.openrouter_key_set" :title="ov.openrouter_key_set?'Run 39 cases via OpenRouter (~USD 0.50)':'Set OPENROUTER_API_KEY in .env.local'">
+        Run with OpenRouter (~USD 0.50)
+      </button>
+      <button class="btn btn-s" @click="runEval('claude')" :disabled="evalJob.status==='running'||!ov.claude_key_set" :title="ov.claude_key_set?'Run 39 cases direct via Anthropic (~USD 2)':'Set ANTHROPIC_API_KEY in .env.local'">Run with Claude direct (~USD 2)</button>
     </div>
   </div>
   <div class="px-8 py-5 space-y-5">
@@ -1227,7 +1545,463 @@
   </div>
 </section>
 
+<!-- ═══ DECISION LOG ═════════════════════════════════════════════════════ -->
+<section x-show="view==='decisionlog'" class="fade-in p-8 max-w-5xl mx-auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem">
+    <div>
+      <h1 class="text-xl font-semibold text-slate-900">Decision Log</h1>
+      <p class="text-sm text-slate-500 mt-1">All human approvals and compliance sign-offs, with exact timestamps from the audit trail.</p>
+    </div>
+    <button class="btn btn-g text-sm" @click="loadDecisionLog()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Empty state -->
+  <template x-if="decisionLog.length === 0">
+    <div style="text-align:center;padding:3rem 2rem;background:#fff;border:2px dashed #e2e8f0;border-radius:1rem">
+      <div style="font-size:2rem;margin-bottom:.75rem">📋</div>
+      <div class="font-semibold text-slate-700">No decisions recorded yet</div>
+      <div class="text-sm text-slate-400 mt-1">Run a case with human-in-the-loop mode to see decisions here.</div>
+    </div>
+  </template>
+
+  <!-- Case groups -->
+  <template x-for="c in decisionLog" :key="c.case_id">
+    <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:1rem;margin-bottom:1.25rem;overflow:hidden">
+      <!-- Case header -->
+      <div style="padding:1rem 1.25rem;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:1rem">
+        <div style="display:flex;align-items:center;gap:.875rem;min-width:0">
+          <!-- Status dot -->
+          <div style="width:.625rem;height:.625rem;border-radius:50%;flex-shrink:0"
+               :style="c.final_status && c.final_status.startsWith('APPROVED') ? 'background:#22c55e' :
+                       c.final_status && c.final_status.startsWith('DECLINED') ? 'background:#ef4444' : 'background:#f59e0b'"></div>
+          <div style="min-width:0">
+            <div style="display:flex;align-items:center;gap:.625rem">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;color:#1e293b" x-text="c.case_id"></span>
+              <span style="font-size:.7rem;font-weight:700;border-radius:999px;padding:.15rem .55rem"
+                    :style="c.final_status && c.final_status.startsWith('APPROVED') ? 'background:#dcfce7;color:#15803d' :
+                            c.final_status && c.final_status.startsWith('DECLINED') ? 'background:#fee2e2;color:#b91c1c' : 'background:#fef9c3;color:#92400e'"
+                    x-text="c.final_status || 'Pending'"></span>
+            </div>
+            <div style="font-size:.8rem;color:#64748b;margin-top:.2rem" x-text="c.borrower + ' · ' + c.facility_type + ' · USD ' + (c.amount_usd||0).toLocaleString('en-US')"></div>
+          </div>
+        </div>
+        <div style="font-size:.72rem;color:#94a3b8;flex-shrink:0" x-text="c.as_of"></div>
+      </div>
+
+      <!-- Decision rows -->
+      <div style="padding:.5rem 0">
+        <template x-for="(d, i) in c.decisions" :key="i">
+          <div style="display:grid;grid-template-columns:8rem 1fr 1fr auto;align-items:start;gap:.75rem;padding:.75rem 1.25rem;border-bottom:1px solid #f8fafc"
+               :style="i === c.decisions.length-1 ? 'border-bottom:none' : ''">
+            <!-- Gate badge -->
+            <div>
+              <span style="font-size:.68rem;font-weight:700;border-radius:.375rem;padding:.25rem .6rem;text-transform:uppercase;letter-spacing:.04em"
+                    :style="d.gate==='compliance' ? 'background:#fff7ed;color:#c2410c;border:1px solid #fed7aa' : 'background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe'"
+                    x-text="d.gate==='compliance' ? '🛡 Compliance' : '⚖ Credit'"></span>
+            </div>
+            <!-- Decided by -->
+            <div>
+              <div style="font-size:.82rem;font-weight:600;color:#1e293b" x-text="d.decided_by"></div>
+              <div style="font-size:.72rem;color:#6366f1;margin-top:.1rem" x-text="d.role"></div>
+              <template x-if="d.override">
+                <div style="font-size:.68rem;color:#b45309;font-weight:600;margin-top:.2rem">⚠ Override</div>
+              </template>
+            </div>
+            <!-- Decision + rationale -->
+            <div>
+              <span style="font-size:.75rem;font-weight:700;border-radius:.375rem;padding:.2rem .55rem"
+                    :style="d.decision==='APPROVE'||d.decision==='APPROVE WITH CONDITIONS'||d.decision==='EDD CLEARED' ? 'background:#dcfce7;color:#15803d' :
+                            d.decision==='DECLINE'||d.decision==='EDD NOT CLEARED' ? 'background:#fee2e2;color:#b91c1c' : 'background:#f1f5f9;color:#475569'"
+                    x-text="d.decision"></span>
+              <div x-show="d.rationale" style="font-size:.72rem;color:#64748b;margin-top:.35rem;line-height:1.5" x-text="d.rationale"></div>
+            </div>
+            <!-- Timestamp -->
+            <div style="text-align:right;flex-shrink:0">
+              <template x-if="d.decided_at && d.decided_at.includes('T')">
+                <div>
+                  <div style="font-size:.78rem;font-weight:600;color:#334155" x-text="new Date(d.decided_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})"></div>
+                  <div style="font-size:.72rem;color:#94a3b8;margin-top:.1rem" x-text="new Date(d.decided_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})"></div>
+                </div>
+              </template>
+              <template x-if="!d.decided_at || !d.decided_at.includes('T')">
+                <div style="font-size:.72rem;color:#94a3b8" x-text="d.decided_at||'—'"></div>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
+</section>
+
+<!-- ═══ POLICY LIBRARY ══════════════════════════════════════════════════ -->
+<!-- NOTE: x-show clears inline display, so the inner wrapper carries display:flex + height:100vh -->
+<section x-show="view==='policies'">
+<div style="display:flex;height:100vh;overflow:hidden;background:#f8fafc">
+
+  <!-- ── Left panel ──────────────────────────────────────────────────── -->
+  <div style="width:19rem;flex-shrink:0;display:flex;flex-direction:column;background:#fff;border-right:1.5px solid #e2e8f0;overflow:hidden">
+
+    <!-- Panel header -->
+    <div style="padding:1.1rem 1rem .9rem;border-bottom:1px solid #f1f5f9;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.75rem">
+        <div style="width:1.75rem;height:1.75rem;border-radius:.4rem;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </div>
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:#0f172a">Policy Library</div>
+          <div style="font-size:.67rem;color:#94a3b8" x-text="policyDocs.length + ' documents · ' + policyDocs.reduce((s,d)=>s+d.clause_count,0) + ' clauses total'"></div>
+        </div>
+      </div>
+      <!-- Search -->
+      <div style="position:relative">
+        <svg style="position:absolute;left:.6rem;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input x-model="policySearch" type="text" placeholder="Search documents…"
+               style="width:100%;padding:.42rem .75rem .42rem 2rem;border:1.5px solid #e2e8f0;border-radius:.5rem;font-size:.78rem;outline:none;background:#f8fafc;color:#374151;box-sizing:border-box"
+               onfocus="this.style.borderColor='#6366f1';this.style.background='#fff'"
+               onblur="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'"/>
+      </div>
+    </div>
+
+    <!-- Document list -->
+    <div style="flex:1;overflow-y:auto;padding:.5rem .625rem .75rem">
+
+      <!-- Versioned group -->
+      <div style="display:flex;align-items:center;gap:.4rem;padding:.75rem .375rem .35rem;margin-top:.25rem">
+        <div style="width:.25rem;height:.9rem;border-radius:2px;background:#7c3aed;flex-shrink:0"></div>
+        <span style="font-size:.62rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em">Versioned Credit Policy</span>
+      </div>
+      <template x-for="doc in policyDocs.filter(d=>d.folder==='versioned' && (!policySearch || doc.display_name.toLowerCase().includes(policySearch.toLowerCase())))" :key="doc.name">
+        <button @click="openPolicyDoc(doc.name)"
+                style="display:flex;align-items:flex-start;gap:.625rem;width:100%;text-align:left;padding:.65rem .75rem;border-radius:.625rem;margin-bottom:.25rem;border:1.5px solid transparent;cursor:pointer;transition:all .15s;background:transparent"
+                :style="policyDoc && policyDoc.name===doc.name
+                  ? 'background:#f5f3ff;border-color:#c4b5fd'
+                  : 'background:transparent;border-color:transparent'"
+                @mouseenter="if(!policyDoc || policyDoc.name!==doc.name) $el.style.background='#fafafa'"
+                @mouseleave="if(!policyDoc || policyDoc.name!==doc.name) $el.style.background='transparent'">
+          <!-- Icon -->
+          <div style="width:2rem;height:2rem;border-radius:.4rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.05rem"
+               :style="policyDoc && policyDoc.name===doc.name ? 'background:#ede9fe' : 'background:#f1f5f9'">
+            <svg width="13" height="13" fill="none" stroke="#7c3aed" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <!-- Text -->
+          <div style="min-width:0;flex:1">
+            <div style="font-size:.8rem;font-weight:600;color:#1e293b;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" x-text="doc.display_name"></div>
+            <div style="display:flex;align-items:center;gap:.4rem;margin-top:.25rem;flex-wrap:wrap">
+              <span style="font-size:.67rem;padding:.1rem .45rem;border-radius:999px;background:#ede9fe;color:#5b21b6;font-weight:600" x-text="doc.clause_count + ' clauses'"></span>
+              <span style="font-size:.65rem;color:#94a3b8" x-text="doc.last_modified ? new Date(doc.last_modified).toLocaleDateString('en-GB') : ''"></span>
+            </div>
+          </div>
+        </button>
+      </template>
+
+      <!-- Supplementary group -->
+      <div style="display:flex;align-items:center;gap:.4rem;padding:.9rem .375rem .35rem;margin-top:.375rem">
+        <div style="width:.25rem;height:.9rem;border-radius:2px;background:#059669;flex-shrink:0"></div>
+        <span style="font-size:.62rem;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.08em">Supplementary Policies</span>
+        <span style="font-size:.62rem;color:#94a3b8;margin-left:auto" x-text="policyDocs.filter(d=>d.folder==='docs').length + ' docs'"></span>
+      </div>
+      <template x-for="doc in policyDocs.filter(d=>d.folder==='docs' && (!policySearch || doc.display_name.toLowerCase().includes(policySearch.toLowerCase())))" :key="doc.name">
+        <button @click="openPolicyDoc(doc.name)"
+                style="display:flex;align-items:flex-start;gap:.625rem;width:100%;text-align:left;padding:.65rem .75rem;border-radius:.625rem;margin-bottom:.25rem;border:1.5px solid transparent;cursor:pointer;transition:all .15s;background:transparent"
+                :style="policyDoc && policyDoc.name===doc.name
+                  ? 'background:#f0fdf4;border-color:#6ee7b7'
+                  : 'background:transparent;border-color:transparent'"
+                @mouseenter="if(!policyDoc || policyDoc.name!==doc.name) $el.style.background='#fafafa'"
+                @mouseleave="if(!policyDoc || policyDoc.name!==doc.name) $el.style.background='transparent'">
+          <!-- Icon -->
+          <div style="width:2rem;height:2rem;border-radius:.4rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.05rem"
+               :style="policyDoc && policyDoc.name===doc.name ? 'background:#dcfce7' : 'background:#f1f5f9'">
+            <svg width="13" height="13" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </div>
+          <!-- Text -->
+          <div style="min-width:0;flex:1">
+            <div style="font-size:.8rem;font-weight:600;color:#1e293b;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" x-text="doc.display_name"></div>
+            <div style="display:flex;align-items:center;gap:.4rem;margin-top:.25rem;flex-wrap:wrap">
+              <span style="font-size:.67rem;padding:.1rem .45rem;border-radius:999px;background:#dcfce7;color:#166534;font-weight:600" x-text="doc.clause_count + ' clauses'"></span>
+              <span style="font-size:.65rem;color:#94a3b8" x-text="doc.last_modified ? new Date(doc.last_modified).toLocaleDateString('en-GB') : ''"></span>
+            </div>
+          </div>
+        </button>
+      </template>
+
+      <!-- No results -->
+      <template x-if="policySearch && policyDocs.filter(d=>d.display_name.toLowerCase().includes(policySearch.toLowerCase())).length===0">
+        <div style="text-align:center;padding:2rem 1rem;color:#94a3b8;font-size:.8rem">No documents match "<span x-text="policySearch"></span>"</div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ── Right panel ─────────────────────────────────────────────────── -->
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden">
+
+    <!-- Empty state -->
+    <div :style="!policyDoc ? 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem' : 'display:none'">
+      <div style="width:4rem;height:4rem;border-radius:1rem;background:#f1f5f9;display:flex;align-items:center;justify-content:center">
+        <svg width="28" height="28" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:1rem;font-weight:600;color:#374151">Select a document to edit</div>
+        <div style="font-size:.82rem;color:#94a3b8;margin-top:.4rem;max-width:28rem">Click any policy in the left panel to open it in this editor. Edits are saved to disk and the RAG vector index rebuilds automatically on the next pipeline run.</div>
+      </div>
+      <div style="display:flex;gap:.75rem;margin-top:.5rem">
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.5rem .875rem;background:#fff;border:1.5px solid #e2e8f0;border-radius:.625rem">
+          <div style="width:.5rem;height:.5rem;border-radius:50%;background:#7c3aed"></div>
+          <span style="font-size:.75rem;color:#374151" x-text="policyDocs.filter(d=>d.folder==='versioned').length + ' versioned'"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.5rem .875rem;background:#fff;border:1.5px solid #e2e8f0;border-radius:.625rem">
+          <div style="width:.5rem;height:.5rem;border-radius:50%;background:#059669"></div>
+          <span style="font-size:.75rem;color:#374151" x-text="policyDocs.filter(d=>d.folder==='docs').length + ' supplementary'"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.5rem .875rem;background:#fff;border:1.5px solid #e2e8f0;border-radius:.625rem">
+          <div style="width:.5rem;height:.5rem;border-radius:50%;background:#6366f1"></div>
+          <span style="font-size:.75rem;color:#374151" x-text="policyDocs.reduce((s,d)=>s+d.clause_count,0) + ' clauses'"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <div :style="policyDoc ? 'flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0' : 'display:none'">
+
+      <!-- Toolbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.5rem;background:#fff;border-bottom:1.5px solid #e2e8f0;flex-shrink:0;gap:1.5rem">
+        <div style="min-width:0;flex:1">
+          <div style="display:flex;align-items:center;gap:.625rem;min-width:0">
+            <div style="width:1.5rem;height:1.5rem;border-radius:.35rem;display:flex;align-items:center;justify-content:center;flex-shrink:0"
+                 :style="policyDoc && policyDoc.folder==='versioned' ? 'background:#ede9fe' : 'background:#dcfce7'">
+              <svg width="11" height="11" fill="none" :stroke="policyDoc && policyDoc.folder==='versioned' ? '#7c3aed' : '#059669'" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span style="font-size:.95rem;font-weight:700;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" x-text="policyDoc && policyDoc.display_name"></span>
+            <span x-show="policyDocDirty" style="flex-shrink:0;font-size:.67rem;padding:.15rem .5rem;border-radius:999px;background:#fef9c3;color:#92400e;font-weight:700">unsaved</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-top:.3rem;font-size:.72rem;color:#94a3b8;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;gap:.25rem">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
+              <span x-text="(policyDoc && policyDoc.clause_count) + ' clauses'"></span>
+            </span>
+            <span style="color:#e2e8f0">|</span>
+            <span style="display:inline-flex;align-items:center;gap:.25rem">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span x-text="'Saved ' + (policyDoc && policyDoc.last_modified ? new Date(policyDoc.last_modified).toLocaleString('en-GB') : '—')"></span>
+            </span>
+            <span style="color:#e2e8f0">|</span>
+            <span style="display:inline-flex;align-items:center;gap:.25rem">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+              <span x-text="policyDoc && policyDoc.name"></span>
+            </span>
+          </div>
+        </div>
+        <!-- Actions -->
+        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
+          <!-- View toggle -->
+          <div style="display:flex;border:1.5px solid #e2e8f0;border-radius:.5rem;overflow:hidden;flex-shrink:0">
+            <button @click="policyViewMode='preview'"
+                    style="display:inline-flex;align-items:center;gap:.3rem;padding:.38rem .75rem;border:none;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s"
+                    :style="policyViewMode==='preview' ? 'background:#6366f1;color:#fff' : 'background:#fff;color:#64748b'">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Preview
+            </button>
+            <button @click="policyViewMode='edit'; $nextTick(()=>{ syncGutter(); document.getElementById('pol-editor')&&document.getElementById('pol-editor').focus(); })"
+                    style="display:inline-flex;align-items:center;gap:.3rem;padding:.38rem .75rem;border:none;border-left:1.5px solid #e2e8f0;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s"
+                    :style="policyViewMode==='edit' ? 'background:#6366f1;color:#fff' : 'background:#fff;color:#64748b'">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+          </div>
+          <!-- Save / Revert -->
+          <button @click="revertPolicyDoc()" :disabled="!policyDocDirty"
+                  style="display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .875rem;border-radius:.5rem;border:1.5px solid #e2e8f0;background:#fff;font-size:.78rem;font-weight:600;color:#475569;cursor:pointer;transition:all .15s"
+                  :style="!policyDocDirty ? 'opacity:.4;cursor:not-allowed' : ''">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            Revert
+          </button>
+          <button @click="savePolicyDoc()" :disabled="policyDocSaving || !policyDocDirty"
+                  style="display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1rem;border-radius:.5rem;border:none;background:#6366f1;font-size:.78rem;font-weight:600;color:#fff;cursor:pointer;transition:all .15s"
+                  :style="(policyDocSaving || !policyDocDirty) ? 'opacity:.55;cursor:not-allowed' : ''">
+            <template x-if="policyDocSaving">
+              <svg class="spin" width="12" height="12" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="4" style="opacity:.3"/><path fill="white" d="M4 12a8 8 0 018-8v8z" style="opacity:.8"/></svg>
+            </template>
+            <template x-if="!policyDocSaving">
+              <svg width="12" height="12" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            </template>
+            <span x-text="policyDocSaving ? 'Saving…' : 'Save'"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Preview mode ──────────────────────────────────────────────── -->
+      <div :style="policyViewMode==='preview' ? 'flex:1;overflow-y:auto;background:#fff' : 'display:none'">
+        <div class="pol-doc" x-html="renderPolicyDoc(policyDocContent)"></div>
+      </div>
+
+      <!-- ── Edit mode ─────────────────────────────────────────────────── -->
+      <div :style="policyViewMode==='edit' ? 'flex:1;display:flex;overflow:hidden;min-height:0' : 'display:none'">
+        <!-- Line gutter -->
+        <div style="width:3rem;background:#f8fafc;border-right:1px solid #e2e8f0;padding:.875rem 0;overflow:hidden;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.72rem;line-height:1.7;color:#cbd5e1;text-align:right;user-select:none"
+             id="pol-gutter" aria-hidden="true">
+          <template x-for="n in Math.max(1, (policyDocContent||'').split('\n').length)" :key="n">
+            <div style="padding-right:.5rem" x-text="n"></div>
+          </template>
+        </div>
+        <!-- Textarea -->
+        <textarea id="pol-editor"
+          style="flex:1;width:100%;resize:none;border:none;outline:none;background:#fff;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.7;padding:.875rem 1.25rem;color:#1e293b;overflow-y:auto;tab-size:2"
+          x-model="policyDocContent"
+          @input="policyDocDirty = true; syncGutter()"
+          @scroll="syncGutterScroll()"
+          spellcheck="false"
+          placeholder="# Document title&#10;&#10;## Section&#10;&#10;### CLAUSE-1.1 Title&#10;Clause text..."></textarea>
+      </div>
+
+      <!-- Status bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.35rem 1.25rem;background:#f8fafc;border-top:1px solid #e2e8f0;flex-shrink:0;font-size:.7rem;color:#94a3b8">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <template x-if="policyDocMsg && policyDocMsg.ok">
+            <span style="color:#059669;font-weight:600;display:flex;align-items:center;gap:.3rem">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+              <span x-text="policyDocMsg.text"></span>
+            </span>
+          </template>
+          <template x-if="policyDocMsg && !policyDocMsg.ok">
+            <span style="color:#dc2626;font-weight:600" x-text="policyDocMsg.text"></span>
+          </template>
+          <template x-if="!policyDocMsg && policyViewMode==='preview'">
+            <span style="display:flex;align-items:center;gap:.35rem">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              Click <strong style="color:#6366f1;margin:0 .15rem">Edit</strong> in the toolbar to modify this document
+            </span>
+          </template>
+          <template x-if="!policyDocMsg && policyViewMode==='edit'">
+            <span>Editing — RAG index rebuilds automatically on next pipeline run</span>
+          </template>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem">
+          <span x-text="(policyDocContent||'').split('\n').length + ' lines'"></span>
+          <span x-text="(policyDocContent||'').length.toLocaleString() + ' chars'"></span>
+          <span x-text="policyViewMode === 'preview' ? 'Preview' : 'Markdown'"></span>
+        </div>
+      </div>
+
+    </div><!-- /editor -->
+  </div><!-- /right panel -->
+
+</div>
+</section>
+
 </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     APPLICANT PORTAL
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div x-show="loggedIn && userRole==='applicant'" class="fixed inset-0 flex flex-col bg-slate-50" style="display:none">
+  <!-- Top bar -->
+  <div style="background:#fff;border-bottom:1px solid #e2e8f0;padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <div style="width:2.25rem;height:2.25rem;border-radius:.625rem;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:#fff">LC</div>
+      <div>
+        <div style="font-size:.9rem;font-weight:700;color:#0f172a">Loan Application Portal</div>
+        <div style="font-size:.7rem;color:#94a3b8">Submit and track your credit applications</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <div style="width:1.75rem;height:1.75rem;border-radius:.5rem;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.7rem;color:#fff" x-text="(currentUser.name||'U')[0].toUpperCase()"></div>
+        <span style="font-size:.82rem;font-weight:600;color:#334155" x-text="currentUser.name||'New User'"></span>
+      </div>
+      <button style="display:flex;align-items:center;gap:.375rem;font-size:.78rem;color:#64748b;background:none;border:1px solid #e2e8f0;border-radius:.5rem;padding:.375rem .75rem;cursor:pointer;font-family:inherit"
+              onmouseover="this.style.color='#b91c1c';this.style.borderColor='#fca5a5'" onmouseout="this.style.color='#64748b';this.style.borderColor='#e2e8f0'"
+              @click="logout()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Sign out
+      </button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div style="flex:1;overflow-y:auto;padding:2rem 1.5rem;max-width:760px;margin:0 auto;width:100%">
+    <!-- Header row -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div>
+        <h1 style="font-size:1.25rem;font-weight:800;color:#0f172a;margin:0">My Applications</h1>
+        <p style="font-size:.8rem;color:#94a3b8;margin:.25rem 0 0">Submit a new loan application or track the status of an existing one.</p>
+      </div>
+      <button style="display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:.75rem;padding:.65rem 1.25rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(99,102,241,.35)"
+              onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'"
+              @click="openNewApp()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+        New Application
+      </button>
+    </div>
+
+    <!-- Empty state -->
+    <template x-if="myApplications.length === 0">
+      <div style="text-align:center;padding:4rem 2rem;background:#fff;border:2px dashed #e2e8f0;border-radius:1.25rem">
+        <div style="width:3.5rem;height:3.5rem;background:#f1f5f9;border-radius:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+          <svg width="24" height="24" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+        <div style="font-size:1rem;font-weight:700;color:#334155;margin-bottom:.4rem">No applications yet</div>
+        <div style="font-size:.82rem;color:#94a3b8;margin-bottom:1.5rem">Click "New Application" to submit your first loan request.</div>
+        <button style="display:inline-flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:.75rem;padding:.65rem 1.5rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit"
+                @click="openNewApp()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+          Submit your first application
+        </button>
+      </div>
+    </template>
+
+    <!-- Application cards -->
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <template x-for="app in myApplications" :key="app.app_id">
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:1rem;padding:1.25rem 1.5rem;transition:.2s"
+             :style="app.status==='complete' && app.decision && app.decision.startsWith('APPROVED') ? 'border-color:#86efac' :
+                     app.status==='complete' && app.decision && app.decision.startsWith('DECLINED') ? 'border-color:#fca5a5' :
+                     app.status==='awaiting_approval' ? 'border-color:#fde68a' : 'border-color:#e2e8f0'">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:.625rem;margin-bottom:.4rem">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:#1e293b" x-text="app.app_id"></span>
+                <!-- Status badge -->
+                <span style="font-size:.68rem;font-weight:700;border-radius:999px;padding:.2rem .6rem"
+                      :style="app.status==='complete' && app.decision && app.decision.startsWith('APPROVED') ? 'background:#dcfce7;color:#15803d' :
+                              app.status==='complete' && app.decision && app.decision.startsWith('DECLINED') ? 'background:#fee2e2;color:#b91c1c' :
+                              app.status==='awaiting_approval' ? 'background:#fef9c3;color:#92400e' :
+                              app.status==='running' ? 'background:#ede9fe;color:#5b21b6' : 'background:#f1f5f9;color:#64748b'"
+                      x-text="app.status==='running' ? '⚙ Processing…' :
+                               app.status==='awaiting_approval' ? '⏳ Under Review' :
+                               app.status==='complete' ? (app.decision||'Complete') :
+                               app.status==='error' ? '✕ Error' : 'Idle'">
+                </span>
+              </div>
+              <div style="font-size:.82rem;color:#475569" x-text="app.borrower_name + ' · ' + app.facility"></div>
+              <div style="font-size:.72rem;color:#94a3b8;margin-top:.25rem" x-text="'Submitted ' + app.submitted_at"></div>
+            </div>
+            <!-- Spinner for running -->
+            <template x-if="app.status==='running'">
+              <svg class="spin" width="18" height="18" fill="none" viewBox="0 0 24 24" style="flex-shrink:0;color:#6366f1"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+            </template>
+          </div>
+          <!-- Decision detail -->
+          <template x-if="app.status==='complete' && app.decision">
+            <div style="margin-top:.875rem;padding:.75rem 1rem;border-radius:.625rem;font-size:.8rem"
+                 :style="app.decision.startsWith('APPROVED') ? 'background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d' : 'background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c'">
+              <span style="font-weight:700" x-text="app.decision"></span>
+              <span x-show="app.conditions > 0" x-text="' · ' + app.conditions + ' condition(s) to fulfil before disbursement'" style="font-weight:400"></span>
+            </div>
+          </template>
+          <!-- Under review message -->
+          <template x-if="app.status==='awaiting_approval'">
+            <div style="margin-top:.875rem;padding:.75rem 1rem;border-radius:.625rem;background:#fffbeb;border:1px solid #fde68a;font-size:.8rem;color:#92400e">
+              Your application is currently being reviewed by our credit team. You will be notified once a decision is made.
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
@@ -1453,7 +2227,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════════
      APPROVAL FULL-SCREEN OVERLAY
      ═══════════════════════════════════════════════════════════════════════ -->
-<div x-show="loggedIn && showApproval && gate" class="fixed inset-0 z-[200] flex" style="display:none">
+<div x-show="loggedIn && userRole==='admin' && showApproval && gate" class="fixed inset-0 z-[200] flex" style="display:none">
   <!-- Backdrop -->
   <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" @click="showApproval=false"></div>
 
@@ -1542,21 +2316,19 @@
           <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-5">Your decision</div>
 
           <div class="space-y-4 flex-1">
-            <!-- Name -->
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1.5">Your full name *</label>
-              <input x-model="approval.name" type="text" placeholder="e.g. Amara Osei"
-                     class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent" />
-            </div>
-
-            <!-- Role -->
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1.5">Your role *</label>
-              <select x-model="approval.role"
-                      class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent bg-white">
-                <template x-for="r in roleOptions()"><option :value="r" x-text="r"></option></template>
-              </select>
-              <div class="text-xs text-slate-400 mt-1">Required: <span class="font-medium text-slate-600" x-text="gate&&gate.required_role"></span></div>
+            <!-- Identity — taken from logged-in user, not editable -->
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:.875rem;padding:1rem 1.25rem">
+              <div style="font-size:.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.625rem">Deciding as</div>
+              <div style="display:flex;align-items:center;gap:.75rem">
+                <div style="width:2.25rem;height:2.25rem;border-radius:.625rem;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:#fff;flex-shrink:0" x-text="(approval.name||'?')[0].toUpperCase()"></div>
+                <div>
+                  <div style="font-size:.9rem;font-weight:700;color:#0f172a" x-text="approval.name"></div>
+                  <div style="font-size:.78rem;font-weight:600;color:#6366f1;margin-top:.1rem" x-text="approval.role"></div>
+                </div>
+              </div>
+              <div style="font-size:.7rem;color:#94a3b8;margin-top:.75rem;padding-top:.625rem;border-top:1px solid #e2e8f0">
+                Gate requires: <span style="color:#334155;font-weight:600" x-text="gate&&gate.required_role"></span>
+              </div>
             </div>
 
             <!-- Decision -->
@@ -1591,11 +2363,7 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex items-center justify-between pt-5 mt-4 border-t gap-3">
-            <button class="btn btn-g text-sm" @click="fillSuggested()">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-              Fill a valid approver
-            </button>
+          <div class="flex items-center justify-end pt-5 mt-4 border-t gap-3">
             <div class="flex gap-3">
               <button class="btn btn-s" @click="showApproval=false">Cancel</button>
               <button class="btn btn-p px-6" @click="submitApprovalNew()" :disabled="submitting||!approval.name||!approval.decision">
@@ -1641,9 +2409,14 @@ const STEPS = [
 function loanApp() {
   return {
     loggedIn: false,
+    userRole: '',        // 'admin' | 'applicant'
+    currentUser: {},     // {name, username, role, approver_role?}
+    myApplications: [],  // applicant's submitted apps [{app_id, status, decision, submitted_at}]
+    decisionLog: [],     // admin decision history
+    policyDocs: [], policyDoc: null, policyDocContent: '', policyDocDirty: false, policyDocSaving: false, policyDocMsg: null, policySearch: '', policyViewMode: 'preview',
     loginForm: {user:'', pass:'', error:'', showPass:false},
     view: 'home',
-    ov: {}, cases: [], caseFilter: 'all', caseSearch: '',
+    ov: {}, ragSt: {}, cases: [], caseFilter: 'all', caseSearch: '',
     caseId: null, detail: null, results: null, audit: null,
     tab: 'checks', docName: null, docLine: null, docModal: false,
     llmMode: 'auto', approverMode: 'web',
@@ -1652,6 +2425,7 @@ function loanApp() {
     showApproval: false, gate: null,
     approval: {name:'',role:'',decision:'',rationale:''},
     approvalErrors: [], submitting: false,
+    approvers: [],
     evals: [], evalReport: '', evalJob: {status:'idle',log:''},
     demoJobs: {},
     demoMode: false,
@@ -1705,30 +2479,45 @@ function loanApp() {
     dismissToast(id) { this.toasts = this.toasts.filter(t => t.id !== id); },
 
     // ── Auth ──────────────────────────────────────────────────────────
-    login() {
-      if (this.loginForm.user === 'admin' && this.loginForm.pass === 'demo123') {
+    async login() {
+      this.loginForm.error = '';
+      try {
+        const r = await fetch('/api/auth/login', {method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({username: this.loginForm.user.trim(), password: this.loginForm.pass})});
+        if (!r.ok) { const e = await r.json().catch(()=>({})); this.loginForm.error = e.detail || 'Invalid credentials'; return; }
+        const d = await r.json();
         sessionStorage.setItem('lc_auth', '1');
+        sessionStorage.setItem('lc_user', JSON.stringify(d));
+        this.currentUser = d;
+        this.userRole = d.role;
         this.loggedIn = true;
-        this.loginForm.error = '';
-        this.loadApp();
-      } else {
-        this.loginForm.error = 'Invalid credentials. Use admin / demo123.';
-      }
+        if (d.role === 'admin') await this.loadApp();
+        else await this.loadApprovers();
+      } catch(e) { this.loginForm.error = 'Network error — is the server running?'; }
     },
     logout() {
       sessionStorage.removeItem('lc_auth');
+      sessionStorage.removeItem('lc_user');
       this.loggedIn = false;
+      this.userRole = '';
+      this.currentUser = {};
+      this.myApplications = [];
       this.loginForm = {user:'', pass:'', error:'', showPass:false};
     },
 
     // ── Init ──────────────────────────────────────────────────────────
     async init() {
       this.loggedIn = !!sessionStorage.getItem('lc_auth');
-      if (this.loggedIn) await this.loadApp();
+      if (this.loggedIn) {
+        const saved = sessionStorage.getItem('lc_user');
+        if (saved) { this.currentUser = JSON.parse(saved); this.userRole = this.currentUser.role; }
+        if (this.userRole === 'admin') await this.loadApp();
+        else await this.loadApprovers();
+      }
     },
     async loadApp() {
       this.steps = STEPS.map(([id,label,desc]) => ({id,label,desc,status:'pending'}));
-      await Promise.all([this.loadOverview(), this.loadCases()]);
+      await Promise.all([this.loadOverview(), this.loadCases(), this.loadApprovers(), this.loadDecisionLog(), this.loadRagStatus()]);
       const h = location.hash.slice(1);
       if (h.startsWith('case/')) this.openCase(h.slice(5));
       else if (h && ['home','cases','evals','demos'].includes(h)) this.go(h);
@@ -1737,12 +2526,17 @@ function loanApp() {
       this.ov = await (await fetch('/api/overview')).json();
       if (!this.ov.claude_key_set) this.llmMode = 'mock';
     },
+    async loadRagStatus() {
+      try { this.ragSt = await (await fetch('/api/rag/status')).json(); } catch(e) { this.ragSt = {}; }
+    },
     async loadCases() { this.cases = await (await fetch('/api/applications')).json(); },
     go(v) {
       this.demoMode = false;
       this.view = v; location.hash = v;
       if (v === 'evals') this.loadEvals();
       if (v === 'cases') this.loadCases();
+      if (v === 'policies') this.loadPolicyDocs();
+      if (v === 'decisionlog') this.loadDecisionLog();
     },
     samples() { return this.cases.filter(c => c.kind === 'sample'); },
     filteredCases() {
@@ -1770,7 +2564,7 @@ function loanApp() {
     async openCase(id) {
       this.demoMode = false;
       this.view = 'case'; location.hash = 'case/'+id;
-      this.caseId = id; this.detail = null; this.results = null; this.audit = null; this.tab = 'checks';
+      this.caseId = id; this.detail = null; this.results = null; this.audit = null; this.tab = 'report';
       this.resetRun();
       this.detail = await (await fetch('/api/applications/'+id)).json();
       this.docName = Object.keys(this.detail.documents)[0];
@@ -1834,15 +2628,61 @@ function loanApp() {
         if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.detail || 'Failed to create application'); }
         const d = await r.json();
         this.showNewApp = false;
-        await this.loadCases();
-        this.llmMode = 'mock'; this.approverMode = 'web';
-        await this.openCase(d.app_id);
-        this.addToast('ok', '✓ Application created', d.app_id + ' — pipeline starting now.', 5000);
-        this.runPipeline();
+
+        if (this.userRole === 'applicant') {
+          // Applicant view: track app and run pipeline with scripted approver (immediate result)
+          const entry = {
+            app_id: d.app_id, status: 'running', decision: null, conditions: 0,
+            borrower_name: this.newApp.borrower_name,
+            facility: this.newApp.facility_type + ' · USD ' + Number(this.newApp.amount_usd).toLocaleString('en-US'),
+            submitted_at: new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})
+          };
+          this.myApplications.unshift(entry);
+          // Run pipeline with scripted approvals so applicant gets an immediate decision
+          const runResp = await fetch('/api/run/' + d.app_id, {method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({approver: 'scripted', llm_mode: 'mock'})});
+          const run = await runResp.json();
+          if (run.session_id) this.pollApplicantApp(d.app_id, run.session_id, entry);
+        } else {
+          // Admin view: existing behaviour
+          await this.loadCases();
+          this.llmMode = 'mock'; this.approverMode = 'web';
+          await this.openCase(d.app_id);
+          this.addToast('ok', '✓ Application created', d.app_id + ' — pipeline starting now.', 5000);
+          this.runPipeline();
+        }
       } catch(e) {
         this.newAppError = e.message;
         this.newAppBusy = false;
       }
+    },
+    pollApplicantApp(app_id, session_id, entry) {
+      const es = new EventSource('/api/stream/' + session_id);
+      es.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'status') {
+          entry.status = msg.data.status;
+          if (msg.data.status === 'awaiting_approval') {
+            this.addToast('warn', '⏳ Under Review', app_id + ' is waiting for credit team approval.', 8000);
+          }
+        }
+        if (msg.type === 'complete' || msg.type === 'error') {
+          es.close();
+          // Fetch final result
+          fetch('/api/results/' + app_id).then(r => r.json()).then(res => {
+            if (res && res.final_status) {
+              entry.status = 'complete';
+              entry.decision = res.final_status;
+              entry.conditions = (res.conditions||[]).filter(c => c.stage !== 'post-disbursement covenant').length;
+              const approved = res.final_status.startsWith('APPROVED');
+              this.addToast(approved ? 'ok' : 'err',
+                approved ? '✓ Application ' + res.final_status : '✕ Application ' + res.final_status,
+                app_id, 8000);
+            }
+          }).catch(() => { entry.status = 'complete'; });
+        }
+      };
+      es.onerror = () => { es.close(); entry.status = 'error'; };
     },
 
     async startHitlDemo() {
@@ -1909,9 +2749,11 @@ function loanApp() {
       }
       if (ev.type === 'gate') {
         this.gate = ev.data; this.sessionStatus = 'awaiting_approval';
-        this.openGate();
         const label = ev.data.gate_type === 'compliance' ? 'EDD compliance sign-off' : 'Credit approval: '+ev.data.required_role;
-        this.addToast('warn', '⚠ Human approval required', label, 0); // 0 = no auto-dismiss
+        if (this.canApproveGate()) {
+          this.openGate();
+          this.addToast('warn', '⚠ Human approval required', label, 0); // 0 = no auto-dismiss
+        }
         return;
       }
       if (ev.type === 'complete') {
@@ -1919,7 +2761,7 @@ function loanApp() {
         this.steps.forEach(s => s.status = 'done');
         this.showApproval = false; this.gate = null;
         this.addToast('ok', '✓ Decision complete', 'Pipeline finished for '+this.caseId, 6000);
-        setTimeout(() => this.loadResults(true), 400);
+        setTimeout(() => { this.loadResults(true); this.loadDecisionLog(); }, 400);
         return;
       }
       if (ev.type === 'progress') {
@@ -1945,6 +2787,7 @@ function loanApp() {
     },
     tabs() {
       return [
+        ['report', '📋 Case Report'],
         ['checks', 'Policy checks ('+this.results.policy_checks.length+')'],
         ['fields', 'Extracted fields'],
         ['findings', 'Findings & conditions'],
@@ -1953,6 +2796,29 @@ function loanApp() {
         ['audit', 'Audit trail'],
         ['memo', 'Credit memo'],
       ];
+    },
+    reliabilityScore() {
+      if (!this.results || !this.results.extracted_fields) return {verified:0, total:0, pct:0, avgConf:0};
+      let verified = 0, total = 0, confSum = 0;
+      for (const grp of Object.values(this.results.extracted_fields)) {
+        for (const f of Object.values(grp)) {
+          total++;
+          if (f.citation_verified) verified++;
+          confSum += (f.confidence || 0);
+        }
+      }
+      return { verified, total, pct: total ? Math.round(verified/total*100) : 0, avgConf: total ? Math.round(confSum/total*100) : 0 };
+    },
+    policyCheckCounts() {
+      if (!this.results) return {pass:0, flag:0, fail:0, ne:0};
+      const c = {pass:0, flag:0, fail:0, ne:0};
+      for (const ch of (this.results.policy_checks||[])) {
+        if (ch.status==='PASS') c.pass++;
+        else if (ch.status==='FLAG') c.flag++;
+        else if (ch.status==='FAIL') c.fail++;
+        else c.ne++;
+      }
+      return c;
     },
     decidedBy(g) {
       const h = (this.results.human_decisions||[]).find(x => x.gate === g.gate);
@@ -1963,27 +2829,45 @@ function loanApp() {
     showDoc(src, line) { if (!this.detail.documents[src]) return; this.docName = src; this.docLine = line; this.docModal = true; },
 
     // ── Approval ──────────────────────────────────────────────────────
+    async loadApprovers() {
+      this.approvers = await (await fetch('/api/approvers')).json();
+    },
+    async loadDecisionLog() {
+      try {
+        const data = await (await fetch('/api/decision-log')).json();
+        this.decisionLog = Array.isArray(data) ? data : [];
+      } catch(e) { this.decisionLog = []; }
+    },
+    canApproveGate() {
+      if (!this.gate) return false;
+      const myRole = this.currentUser.approver_role || '';
+      if (this.gate.gate_type === 'compliance') return myRole === 'Compliance Officer';
+      const RANK = {'Senior Credit Manager':1,'Regional Credit Committee':2,'Board Credit Committee':3};
+      return (RANK[myRole] || 0) >= (RANK[this.gate.required_role] || 0);
+    },
     openGate() {
-      this.approval = {name:'', role:this.roleOptions()[0], decision:this.decisionOptions()[0], rationale:''};
+      // Identity always comes from the logged-in admin — cannot be changed in the form
+      this.approval = {
+        name: this.currentUser.name || '',
+        role: this.currentUser.approver_role || '',
+        decision: this.decisionOptions()[0],
+        rationale: ''
+      };
       this.approvalErrors = [];
       this.showApproval = true;
       this.steps.forEach(s => { if (s.status==='running') s.status='waiting'; });
-      if (this.demoMode) this.fillSuggested(); // pre-fill for demo presentation
-    },
-    roleOptions() {
-      if (!this.gate) return [];
-      if (this.gate.gate_type === 'compliance') return ['Compliance Officer','Credit Analyst'];
-      return ['Credit Analyst','Senior Credit Manager','Regional Credit Committee','Board Credit Committee'];
+      if (this.demoMode) this.fillSuggested();
     },
     decisionOptions() {
       if (!this.gate) return [];
       return this.gate.gate_type === 'compliance' ? ['EDD CLEARED','EDD NOT CLEARED'] : ['APPROVE WITH CONDITIONS','APPROVE','DECLINE','RETURN TO RM'];
     },
     fillSuggested() {
+      // Only pre-fill the decision & rationale — identity already set from currentUser in openGate()
       const c = this.gate.gate_type === 'compliance';
-      this.approval = c
-        ? {name:'Grace Mwangi', role:'Compliance Officer', decision:'EDD CLEARED', rationale:'EDD complete: source of wealth verified, no adverse findings on the individual.'}
-        : {name:'Amara Osei', role:this.gate.required_role, decision:this.gate.recommendation, rationale:'Approved as recommended after reviewing the cited evidence and risk grade.'};
+      this.approval.decision  = c ? 'EDD CLEARED' : this.gate.recommendation;
+      this.approval.rationale = c ? 'EDD complete: source of wealth verified, no adverse findings on the individual.'
+                                  : 'Approved as recommended after reviewing the cited evidence and risk grade.';
     },
     async submitApprovalNew() {
       this.submitting = true; this.approvalErrors = [];
@@ -2053,6 +2937,68 @@ function loanApp() {
         {label:'Cost per case',                 value:'USD '+h.avg_cost_usd_per_case},
       ];
     },
+    // ── Policy Library ───────────────────────────────────────────────
+    renderPolicyDoc(content) {
+      if (!content) return '';
+      // Parse markdown normally (works with any marked version)
+      let html = marked.parse(content);
+      // Post-process: inject clause-ID badges on h3 headings like <h3>SAN-1.1 Title</h3>
+      html = html.replace(/<h3[^>]*>([A-Z]{2,4}-\d+\.\d+)\s+([^<]+)<\/h3>/g, (_, id, title) => {
+        const prefix = id.split('-')[0];
+        return `<div class="pol-clause"><span class="pol-clause-id pol-id-${prefix}">${id}</span><span class="pol-clause-title">${title.trim()}</span></div>`;
+      });
+      // Add subtitle line after h1
+      const fname = this.policyDoc ? this.policyDoc.name : '';
+      html = html.replace(/(<h1[^>]*>.*?<\/h1>)/, `$1<div class="pol-doc-subtitle">${fname}</div>`);
+      return html;
+    },
+    syncGutter() {
+      const g = document.getElementById('pol-gutter');
+      const e = document.getElementById('pol-editor');
+      if (g && e) g.scrollTop = e.scrollTop;
+    },
+    syncGutterScroll() { this.syncGutter(); },
+    async loadPolicyDocs() {
+      try { this.policyDocs = await (await fetch('/api/policy/docs')).json(); } catch(e) { this.policyDocs = []; }
+    },
+    async openPolicyDoc(name) {
+      this.policyDoc = null; this.policyDocContent = ''; this.policyDocDirty = false; this.policyDocMsg = null; this.policyViewMode = 'preview';
+      const r = await (await fetch(`/api/policy/docs/${encodeURIComponent(name)}`)).json();
+      this.policyDoc = r;
+      this.policyDocContent = r.content;
+      await this.$nextTick(); this.syncGutter();
+    },
+    revertPolicyDoc() {
+      if (this.policyDoc) { this.policyDocContent = this.policyDoc.content; this.policyDocDirty = false; this.policyDocMsg = null; }
+    },
+    async savePolicyDoc() {
+      if (!this.policyDoc) return;
+      this.policyDocSaving = true; this.policyDocMsg = null;
+      try {
+        const r = await (await fetch(`/api/policy/docs/${encodeURIComponent(this.policyDoc.name)}`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({content: this.policyDocContent}),
+        })).json();
+        if (r.ok) {
+          this.policyDoc.content = this.policyDocContent;
+          this.policyDoc.clause_count = r.clause_count;
+          this.policyDoc.last_modified = r.last_modified;
+          this.policyDocDirty = false;
+          // update sidebar clause count
+          const idx = this.policyDocs.findIndex(d => d.name === this.policyDoc.name);
+          if (idx >= 0) { this.policyDocs[idx].clause_count = r.clause_count; this.policyDocs[idx].last_modified = r.last_modified; }
+          this.policyDocMsg = {ok: true, text: `Saved — ${r.clause_count} clauses indexed. RAG re-index will run on the next pipeline execution.`};
+        } else {
+          this.policyDocMsg = {ok: false, text: r.detail || 'Save failed'};
+        }
+      } catch(e) {
+        this.policyDocMsg = {ok: false, text: String(e)};
+      } finally {
+        this.policyDocSaving = false;
+      }
+    },
+
     md(s) { return s ? marked.parse(s) : ''; },
     usd(n) { return n ? new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n) : '—'; },
     pct(x, d) { return x==null ? '—' : (x*100).toFixed(d)+'%'; },

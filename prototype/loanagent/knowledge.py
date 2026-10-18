@@ -33,28 +33,46 @@ def _tokens(text: str) -> list[str]:
     return re.findall(r"[a-z0-9]+", text.lower())
 
 
+_CLAUSE_RE = re.compile(r"^### ([A-Z]{2,4}-\d+\.\d+) (.+)$")
+
+
+def _load_clauses(path: Path, into: dict) -> None:
+    """Parse clause IDs matching XXX-N.N from a markdown file and merge into `into`."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    current = None
+    for i, line in enumerate(lines):
+        m = _CLAUSE_RE.match(line)
+        if m:
+            current = Clause(m.group(1), m.group(2).strip(), "", path.name, i + 1)
+            into[current.id] = current
+        elif current and line.strip() and not line.startswith("#"):
+            current.text = (current.text + " " + line.strip()).strip()
+
+
 class PolicyKnowledgeBase:
-    def __init__(self, path: Path, version: str = "v3.2", params: dict | None = None, effective_from: str = ""):
+    def __init__(self, path: Path, version: str = "v3.2", params: dict | None = None, effective_from: str = "",
+                 extra_paths: list | None = None):
         self.path = path
         self.clauses: dict[str, Clause] = {}
-        lines = path.read_text().splitlines()
-        current = None
-        for i, line in enumerate(lines):
-            m = re.match(r"^### (POL-\d+\.\d+) (.+)$", line)
-            if m:
-                current = Clause(m.group(1), m.group(2).strip(), "", path.name, i + 1)
-                self.clauses[current.id] = current
-            elif current and line.strip() and not line.startswith("#"):
-                current.text = (current.text + " " + line.strip()).strip()
+        _load_clauses(path, self.clauses)
+        self.extra_paths: list[Path] = list(extra_paths or [])
+        for ep in self.extra_paths:
+            _load_clauses(ep, self.clauses)
+        self._build_index()
+        self.version = version
+        self.effective_from = effective_from
+        self.params = params or {}
+        all_text = path.read_text(encoding="utf-8") + "".join(
+            p.read_text(encoding="utf-8") for p in self.extra_paths
+        )
+        self.sha256 = hashlib.sha256((all_text + json.dumps(self.params, sort_keys=True)).encode()).hexdigest()
+
+    def _build_index(self) -> None:
         self._docs = {cid: _tokens(c.title + " " + c.text) for cid, c in self.clauses.items()}
         self._avg = sum(len(t) for t in self._docs.values()) / max(len(self._docs), 1)
         df = Counter(tok for toks in self._docs.values() for tok in set(toks))
         n = len(self._docs)
         self._idf = {t: math.log(1 + (n - d + 0.5) / (d + 0.5)) for t, d in df.items()}
-        self.version = version
-        self.effective_from = effective_from
-        self.params = params or {}
-        self.sha256 = hashlib.sha256((path.read_text() + json.dumps(self.params, sort_keys=True)).encode()).hexdigest()
 
     @classmethod
     def for_date(cls, policy_dir: Path, as_of: str, version: str | None = None) -> "PolicyKnowledgeBase":
@@ -65,7 +83,8 @@ class PolicyKnowledgeBase:
         else:
             live = [x for x in reg if date.fromisoformat(x["effective_from"]) <= date.fromisoformat(as_of)]
             v = max(live, key=lambda x: x["effective_from"])
-        return cls(policy_dir / v["file"], v["version"], v["params"], v["effective_from"])
+        extra = sorted((policy_dir / "docs").glob("*.md")) if (policy_dir / "docs").is_dir() else []
+        return cls(policy_dir / v["file"], v["version"], v["params"], v["effective_from"], extra_paths=extra)
 
     def p(self, key: str):
         return self.params[key]

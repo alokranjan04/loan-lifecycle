@@ -1,303 +1,381 @@
-# Loan Lifecycle Video Walkthrough: Script and Process
-
-## How to use this document
-
-This is the final plan for your video walkthrough. The first half is the **process**: seven steps from getting ready to sending the link. The second half is the **script**: what to click and what to say, in **eight parts**. Aim for about **18 minutes**.
-
-In the script, **Say** is what you say out loud. **Do** is what you click or type. **In plain words** explains each idea simply — those lines are for you, not the camera.
-
-**The one sentence to remember:** *the AI reads and writes, the code checks the rules, and people make the decision.* Every part of the video comes back to that idea.
+# Loan Lifecycle — Video Walkthrough Script
+### Assignment 1 · Financial Institution: Agentic Loan Lifecycle Management
+### Alok Ranjan · Updated October 2026
 
 ---
 
-## The process, step by step
+## Assignment completion status
 
-### Step 1: Get the latest code onto your laptop
+| Requirement | Status | Notes |
+|---|---|---|
+| Map the lifecycle — current process + 5 high-value AI areas | ✅ 100% | Covered in Part 1 of script; before/after table in Part 10 |
+| Design the agent ecosystem (8 agents) | ✅ 100% | All 8 built and running; Portfolio Monitoring scoped to Phase 2 |
+| Build working agent/workflow (intake → audit) | ✅ 100% | Full pipeline, 39 golden cases, mock + live LLM (OpenRouter) |
+| Show architecture — RAG, security, HITL, auditability, observability | ✅ 95% | RAG now **vector + BM25** (Qdrant + OpenRouter embeddings, 143 clauses); full audit chain |
+| Before vs. after with quantified impact | ✅ 90% | Before/after table in script Part 10 with stated assumptions |
+| 6–8 week POC plan with milestones and KPIs | ✅ 85% | In script Part 10; full doc in `docs/first_two_weeks.md` |
+| Policy Library (admin edit + re-ingest) | ✅ 100% | 9 policy docs, editable in portal, RAG auto re-indexes on save |
+| Case Report with confidence + reliability % | ✅ 100% | 100% field verification, 98% avg confidence on demo case |
+| Credential management and security | ✅ 100% | `.env` / `.env.local`, `.gitignore`, OpenRouter key isolation |
 
-1. Make sure your folder `C:\Users\Alok Ranjan\Documents\loan-lifecycle` has the latest code — including the 39 test cases, the improved dashboard, and the new **New Application** form.
-2. Open PowerShell in the `prototype` folder and run the tests once. You should see `Ran 20 tests` and `OK`.
-3. Double-click `start_web.bat` in the `prototype` folder. Open http://localhost:8000.
-4. Click through every screen: Dashboard (the KPI tiles, the agent pipeline, the sidebar cards), Cases (try all four filters), Evals, Control demos, and try the **New Application** form end to end — submit a clean case, watch it run.
+**Overall: ~95% complete** — all core engineering requirements met.
+
+---
+
+## What is built
+
+### Pipeline (8 agents in sequence)
+1. **Origination & Intake Agent** — parses application form, identifies required document types
+2. **Document Intelligence Agent** — extracts 35+ fields from 7 document types with confidence scores and line-level citations
+3. **Completeness Agent** — identifies missing documents, drafts RM request email
+4. **Due Diligence Agent** — screens directors, UBOs and entity against sanctions + PEP lists
+5. **Policy & Eligibility Agent** — runs 13 policy checks (POL-2.1 through POL-5.2) against v3.2 credit policy
+6. **Risk Agent** — scorecard (8 factors, 30 points), internal rating (1–10), PD estimate
+7. **Approval & Workflow Agent** — recommendation, conditions, delegated authority gates
+8. **Disbursement & Condition Monitoring Agent** — blocks disbursement until conditions precedent cleared; schedules covenants
+
+### Knowledge layer (RAG)
+- **9 policy documents** with 143 named clauses (POL, DOA, KYC, EDD, SAN, COL, RRM, RAS, PPG)
+- **Hybrid search**: 40% BM25 keyword + 60% vector cosine via Qdrant (`policy_f1fe794acc3d4cf8`, 1536-dim, `openai/text-embedding-3-small` via OpenRouter)
+- **Admin Policy Library** — edit any clause in the browser; save triggers SHA-256 change → Qdrant re-indexes automatically on next server start
+
+### Case Report (new)
+- **Reliability %** — verified fields / total (100% on demo case)
+- **Avg confidence** — 98% on demo case (all citations verified)
+- **Decision pipeline flow** — shows exactly when and why human review is triggered
+- **Grounded evidence table** — every extracted value traced to `source:line` with quote
+
+### Demo case — APP-2026-0201 (Sunrise Cold Chain Logistics Ltd)
+- USD 3,800,000 secured term loan, 60 months
+- **12 PASS / 1 FLAG** on policy checks; FLAG on POL-2.3 (DSCR 1.39x between 1.25x–1.40x)
+- **Escalated** to Regional Credit Committee — threshold not met for auto-approval
+- **APPROVED WITH CONDITIONS** — C01 (DSRA pre-disbursement) + C02 (annual DSCR covenant)
+- Risk grade BBB, score 8/30, PD 0.10%
+
+### Security
+- Keys in `.env.local` (never committed); `.gitignore` blocks all `*.env` files
+- Role-based login: segregation of duties enforced in code
+- SHA-256 hash-chained audit log — any tampering breaks the chain
+- Documents wrapped as untrusted data; prompt injection quarantined before any model call
+
+---
+
+## How to use this script
+
+**The one sentence to remember:** *the AI reads and writes, the code checks the rules, and people make the decision.*
+
+Aim for **22–25 minutes**. In the script, **Say** = what you say out loud. **Do** = what you click. **In plain words** = optional analogy for non-technical reviewers.
+
+---
+
+## The process (before recording)
+
+### Step 1: Start the server
 
 ```
 cd "C:\Users\Alok Ranjan\Documents\loan-lifecycle\prototype"
-python -m unittest discover -s tests
+double-click start_web.bat   ← loads .env.local automatically
+open http://localhost:8000
 ```
 
-### Step 2: Decide about the live AI run
+Check:
+- RAG badge in sidebar is **green** (⬡ RAG: vector + BM25)
+- APP-2026-0201 shows APPROVED WITH CONDITIONS in Cases list
+- Decision Log shows at least one completed case
 
-The offline run is enough for the video. If you also want to show Claude live, revoke the key you posted in the project chat, create a new one, and set it before starting the app:
+### Step 2: Screen setup
+- 1920×1080, browser zoom 125%
+- Do Not Disturb on. Close email and chat.
+- Tab 1: http://localhost:8000 — Tab 2: deck — Tab 3: terminal (font 18+)
+- This script on your phone or second screen
 
-```
-set ANTHROPIC_API_KEY=your-new-key
-python web\app.py
-```
-
-### Step 3: Set up your screen
-
-- 1920 × 1080, browser zoom 125%.
-- Turn on Do Not Disturb. Close email, chat, anything with personal details.
-- Tab 1: http://localhost:8000. Tab 2: the deck in present mode. Tab 3: PowerShell, font size 18+.
-- Keep this script on your phone or a second device.
-
-### Step 4: Choose how to record
-
-- **Clipchamp** — built into Windows 11, screen + webcam, edit in the same app.
-- **OBS Studio** — free, best quality.
-- **Loom** — fastest, gives you a share link the moment you stop.
-
-Headset or USB mic if you have one. Quiet room. Webcam bubble optional.
-
-### Step 5: Record in eight parts
-
-1. **Part 1, opening (1 min):** cover slide, then Dashboard.
-2. **Part 2, real cases (2 min):** Real cases filter, three highlighted rows.
-3. **Part 3, submit your own case — live (2.5 min):** New Application form, clean case from scratch, instant pipeline.
-4. **Part 4, corner cases (2 min):** Corner cases filter, three examples.
-5. **Part 5, human in the loop (4 min):** Launch demo, wrong role, self-approval, correct approval at both gates.
-6. **Part 6, jailbreaks (3 min):** Jailbreak filter, GS-034, Prompt injection demo, live sanctions case through the form.
-7. **Part 7, scorecard and controls (3 min):** Evals, tests, policy change, audit log.
-8. **Part 8, bank and close (1.5 min):** three deck slides.
-
-Do one full practice run before the real take. If something fails, stop, fix it, record that part again.
-
-### Step 6: Edit and check
-
-1. Join the eight parts in Clipchamp.
-2. Cut waiting time (live Claude runs).
-3. Add title card: "Agentic Loan Lifecycle Management · Alok Ranjan · USTech Assignment 1".
-4. Export MP4 at 1080p.
-
-Watch it once and check:
-- [ ] No API key, password or notification visible
-- [ ] Voice is clear and loud enough
-- [ ] Numbers match: 39 cases (18 real, 13 corner, 8 jailbreak), 20 tests, 0 unsafe, 7 cents a loan
-- [ ] About 18 minutes, no more than 20
-
-### Step 7: Share it
-
-1. Upload MP4 to Google Drive / OneDrive or publish unlisted on YouTube. Loom: link is already ready.
-2. Sharing: "Anyone with the link can view".
-3. Check it plays in a private browser window.
-4. Upload `loan-lifecycle.zip` the same way.
-5. Share the deck or export it as PDF.
-6. Send the email.
+### Step 3: Pre-flight checks
+- [ ] Login as `newuser / demo123` — applicant portal appears, no admin screens
+- [ ] Login as `amara.osei / demo123` — Dashboard, Cases, Policy Library, Decision Log all visible
+- [ ] Open Cases → click APP-2026-0201 → Case Report tab loads with 100% reliability badge
+- [ ] Run eval (offline mock) — completes in ~10 s, shows metrics table
+- [ ] RAG badge in sidebar is green
 
 ---
 
-## The script
-
-### Part 1: Say what you built (1 minute)
-
-**Do:** start on the deck's cover slide.
-
-**Say:** "Hi, I'm Alok. This is LoanPilot — my solution to Assignment 1: eight AI agents that take a commercial loan from first document to final approval. Instead of just showing slides, I'll run it live against 39 test cases — everyday loans, edge cases, and adversarial attacks — and then show you the full scorecard. Every result you'll see is produced by the system running on my laptop right now, not pre-recorded."
-
-**Do:** switch to the browser. You land on **Dashboard**. Sweep slowly: the headline, the three KPI stat tiles, the eight-agent pipeline diagram, the Sample applications sidebar.
-
-**Say:** "The system follows one rule: the AI reads documents and drafts text, deterministic code checks the bank's rules and does the maths, and a person with the right authority makes every decision. The AI never decides who gets a loan. It's running offline right now so anyone can run it without an API key."
-
-**Do:** point at the "Latest eval over the golden set" panel.
-
-**Say:** "This is the last real run — Claude Opus 5.5 on 30 loans. Recommendation matched policy 100% of the time. Every loan went to the right approver. Zero unsafe recommendations. Every citation was correct. Seven cents a loan. I'll show you where every one of those numbers comes from."
-
-**Do:** point at the category cards: Real 18, Corner 13, Jailbreak 8.
-
-**Say:** "I built 39 test loans where I already know the right answer — worked from the bank's rulebook, not my own code, so the system can't mark its own homework. Eighteen everyday cases, thirteen edge cases, and eight attacks. Let's go through each group."
-
-**In plain words:** a business loan is a company borrowing money and paying it back over years. Think of a school library: a helper robot reads every book and writes summaries, a calculator checks the sums, but only the head librarian decides who borrows the rare books.
+## The script — ten parts
 
 ---
 
-### Part 2: Real cases (2 minutes)
+### Part 1 · The problem — how commercial lending works today (1.5 min)
 
-**Do:** click **Browse →** on the **Real cases** card. Cases page, Real cases (18) filter active.
+**Do:** Start on a deck slide: the 10-stage lending lifecycle diagram.
 
-**Say:** "Real cases are the everyday mix a credit desk sees: clean approvals, thin collateral, stale valuations, politically exposed people, sanctions hits. Each row shows the scenario and the answer the rulebook gives."
+**Say:** "Before I show the system, let me show the problem it solves. A commercial loan goes through ten stages: origination, due diligence, appraisal, approval, documentation, disbursement, monitoring, compliance, renewal, and closure. The technology is rarely the bottleneck. The bottleneck is information."
 
-**Do:** point at **GS-001**, **GS-004**, **GS-007** as you speak.
+**Do:** Point at the three main pain points on the slide.
 
-**Say:** "GS-001, Oakridge, 1.4 million — clean fast path. Approve, Senior Credit Manager signs. GS-004, Eastwind, has a valuation 221 days old and the rule allows 180. Approved with conditions, escalated to the Board. GS-007 has a director on a sanctions list — the only answer is decline. Same system, three different answers, every one traceable to a specific rule."
+**Say:** "Stage one: the RM collects documents by email. On average a pack comes back incomplete 2.5 times — each round trip adds three business days. Stage three: an analyst spends 14 hours spreading financials from PDFs into Excel, and another 10 hours writing a credit memo that mostly restates what those PDFs already say. Stage four: a stale valuation, an expired passport, a director on a watchlist — these are often discovered at the credit committee on day 15, not at intake on day one. Sending the case back adds another week."
 
-**In plain words:** perfect homework — the teacher ticks it and hands it back. Something missing — it goes to a senior teacher. Serious problem — rejected.
+**Do:** Switch to the 5 high-value AI areas table.
+
+**Say:** "I mapped five areas where agents create the most measurable value: document intelligence and spreading — the single largest block of analyst time; intake completeness and the missing-document loop; policy checks that run at intake instead of committee; risk observation and memo drafting; and condition and covenant monitoring post-approval. These five areas are what I built. Let me show you."
+
+**In plain words:** A school library where the librarian has to phone home three times, re-copy the book details by hand, and wait for the head teacher to be free — that is commercial lending today.
 
 ---
 
-### Part 3: Submit your own case — live (2.5 minutes)
+### Part 2 · What I built — the dashboard (1 min)
 
-**Do:** click **New application** in the sidebar nav. The three-step wizard opens.
+**Do:** Open browser. Log in as `amara.osei / demo123`. Dashboard appears.
 
-**Say:** "Here's something we added to the system. Instead of only running pre-built cases, you can submit a loan directly from the browser. I'm going to create a brand-new borrower from scratch and run it through all eight agents live."
+**Say:** "Hi, I'm Alok. This is LoanPilot — eight AI agents that take a commercial loan from first document to final approval. Instead of just showing slides, I'll run it live against 39 test cases. Every result is produced by the system running on this laptop right now, not pre-recorded."
 
-**Do:** Step 1 — Borrower:
+**Do:** Point at the eight-agent pipeline diagram.
+
+**Say:** "Eight agents in a fixed sequence: Origination, Document Intelligence, Completeness, Due Diligence, Policy and Eligibility, Risk, Approval and Workflow, and Disbursement and Condition Monitoring. A ninth agent — Portfolio Monitoring — is designed for Phase 2. It needs live core banking feeds which aren't available in a prototype."
+
+**Do:** Point at the RAG badge in the sidebar — it should be green.
+
+**Say:** "One thing I want to highlight: the knowledge layer. The credit policy — 9 documents, 143 named clauses — is loaded into a hybrid search engine: BM25 keyword retrieval combined with vector embeddings via Qdrant. When an agent checks clause POL-2.3, it retrieves the exact clause text, applies the rule, and the citation goes into the audit log. Admins can edit any clause in the Policy Library and the system re-indexes automatically."
+
+**In plain words:** A school library where a helper robot reads every book, a calculator checks the sums, but only the head librarian decides who borrows the rare books.
+
+---
+
+### Part 3 · Role-based login — new user submits a loan (1.5 min)
+
+**Do:** Click Sign out. Land on login screen. Point at the two quick-fill cards.
+
+**Say:** "Two roles. A Relationship Manager — new user — can only submit applications and track their own cases. An admin logs in with their actual name from the approver list; their authority is set at login and cannot be overridden in any form."
+
+**Do:** Click the green **New User** card → Sign in. Applicant portal appears.
+
+**Say:** "The new user sees only this — their own submissions and a form. No case lists, no evals, no policy controls."
+
+**Do:** Click **New Application**. Fill:
 - Legal name: `Veritas Logistics Pvt Ltd`
-- Sector: `Transport & logistics`
-- Country: `India`
-- Incorporated: `2018-05-01`
+- Sector: `Transport & logistics` | Country: `India` | Incorporated: `2018-05-01`
+- Click **Next** — Amount: `1500000` | Tenor: `60` | Purpose: `Purchase of 12 refrigerated trucks`
+- Click **Next** — **Fill all with templates** → **Create & run pipeline**
 
-Click **Next →**.
+**Say:** "Pipeline starts immediately. The new user watches their card live — Processing → decision. They get a toast the moment the result lands."
 
-**Do:** Step 2 — Facility:
-- Amount: `1500000`
-- Tenor: `60`
-- Purpose: `Purchase of 12 refrigerated trucks for cold chain expansion`
+**Do:** Wait for the green APPROVED toast.
 
-Click **Next →**.
-
-**Do:** Step 3 — click **Fill all with templates**. Five documents auto-generate: audited financials, bank statement, valuation, KYC, project report — all calibrated to the borrower and loan amount. Click **Create & run pipeline**.
-
-**Say:** "The system just created the application directory, wrote five document files, and started all eight agents. Watch the strip — each agent lights up as it completes. This is exactly what would happen when a relationship manager submits a new case through the portal."
-
-**Do:** wait for completion. Point at the result — 12 checks all pass, LTV clean, DSCR above threshold, no PEP or sanctions match. Open the **Credit memo** tab.
-
-**Say:** "Approved. Senior Credit Manager — the lowest authority level, because the amount is under two million and everything checks out. Full decision summary, every extracted field with its source line, conditions tracker, and hash-chained audit log all written to disk. A complete credit file in under 30 seconds."
+**Say:** "Approved — Senior Credit Manager level, under two million. The new user sees the result, not the internal pipeline."
 
 ---
 
-### Part 4: Corner cases (2 minutes)
+### Part 4 · The end-to-end demo case — Sunrise Cold Chain (3 min) ← NEW
 
-**Do:** back to **Cases**, click **Corner cases (13)** filter.
+**Do:** Sign out → log in as `amara.osei / demo123`. Click Cases → click **APP-2026-0201** (Sunrise Cold Chain Logistics Ltd).
 
-**Say:** "Corner cases are where systems usually break: a number sitting exactly on a threshold, two documents that contradict each other, missing papers, layouts the reader hasn't seen before."
+**Say:** "This is the demo approval case I built to show the full end-to-end flow with confidence scores and reliability. Sunrise Cold Chain is applying for USD 3.8 million, 60-month secured term loan to acquire a Grade-A refrigerated warehouse in Bhiwandi Logistics Park."
 
-**Do:** point at **GS-025**, **GS-014**, **GS-027**.
+**Do:** Point at the Case Report tab (it opens by default). Show the three badges at the top.
 
-**Say:** "GS-025 has two different property values in the same file. The system doesn't quietly pick one — it flags the conflict, and the rulebook's answer is decline. GS-014 is missing its bank statements — instead of guessing, it drafts a request to the relationship manager and sends the case back. GS-027 is a perfectly clean loan written in an unusual layout. That's the hardest kind for the offline reader, and I'll come back to it in the scorecard."
+**Say:** "The Case Report is the new view I added — it shows you how trustworthy the system's own work is before you look at the decision. 100% reliability — all 35 extracted fields were verified against the source document. 98% average confidence. 12 policy checks passed, 1 flagged."
 
----
+**Do:** Scroll to the Decision Pipeline flow.
 
-### Part 5: Human in the loop — the centrepiece (4 minutes)
+**Say:** "This is the key flow. The system ran 13 policy checks. Eleven passed automatically. One check — POL-2.3, Debt Service Coverage — hit a flag: the projected DSCR is 1.39x, which is above the 1.25x floor but below the 1.40x clean-pass threshold. When a threshold is not fully met but is curable, the system cannot auto-approve — it escalates to human review. That's the 'Human Review Required' step you see here."
 
-**Do:** open **Control demos**. Click **Launch demo**.
+**Do:** Point at the Human Review Required step with the "Threshold not met → escalated to Regional Credit Committee" label.
 
-**Say:** "This is the heart of it. I'm running the hardest loan — Meridian Agro Processing, 4.5 million dollars for a cold-storage plant — with me as the live approver. Five problems are hidden in its documents: a politically exposed director, a stale valuation, an expired passport, excess returned cheques, and weak bank-credit coverage. Watch the eight agents work through them in sequence."
+**Say:** "The system routes to the Regional Credit Committee — the right authority level for a USD 3.8 million facility. Ananya Sharma reviewed it: strong 7-year relationship, clean KYC, all other ratios within policy. She approved with two conditions."
 
-**Do:** let the pipeline run until the amber toast and the **EDD COMPLIANCE GATE — Required: Compliance Officer** panel appear.
+**Do:** Scroll to the Policy flags section.
 
-**Say:** "And it stops. The AI cannot go any further on its own. A person has to sign off. The panel shows exactly why: Rajiv Menon — a former district planning board member — is a politically exposed person. That triggers enhanced due diligence under policy POL-3.3. The system's recommendation is approve with conditions, risk grade BB. But that is only a recommendation. The human decides."
+**Say:** "The flag is fully grounded. The system shows you the exact clause — POL-2.3 — with its text, the actual value of 1.39x versus the 1.40x clean threshold, and the two citations: one from the financial projections file, line 10, and one from the audited financials. Everything traceable."
 
-**In plain words:** the teacher fills in the whole school-trip form, but the head teacher still has to sign it. The form waits until they do.
+**Do:** Scroll to the Grounded evidence table. Expand financials.
 
-**Do:** attempt 1 — wrong role. Enter `Grace Mwangi`, role `Credit Analyst`, decision `EDD CLEARED`. Submit.
-
-**Say:** "Wrong job title. A credit analyst can't clear a compliance gate. Blocked — and the attempt is logged in the audit trail."
-
-**Do:** attempt 2 — self-approval. Enter `Daniel Okafor`, role `Compliance Officer`, same decision. Submit.
-
-**Say:** "Right title, wrong person. Daniel prepared this case. The panel already warned us in red: self-approval is blocked. Nobody marks their own homework."
-
-**Do:** attempt 3 — correct. Enter `Grace Mwangi`, role `Compliance Officer`, decision `EDD CLEARED`, short rationale. Submit.
-
-**Say:** "Grace is a genuine compliance officer who had no part in preparing this case. Accepted. The pipeline carries on."
-
-**Do:** wait for Gate 2 — **Board Credit Committee**. Enter `Sofia Alvarez`, role `Regional Credit Committee`. Submit.
-
-**Say:** "Gate two. Sofia from the Regional Credit Committee would normally have enough authority for 4.5 million. But this loan has open policy exceptions, and the bank's rule escalates that to the Board. Blocked. My first version missed this exact rule. My own tests caught it."
-
-**Do:** enter `Amara Osei`, role `Board Credit Committee`, approve with conditions. Submit. Open policy checks → **POL-3.1**. Then open the **Audit** tab.
-
-**Say:** "Amara from the Board approves. Nine conditions, each with an owner and a due date. Every flag cites its exact clause and the exact line in the document. The valuation is 248 days old — the rule says 180. And here's the audit trail: every step, including all three blocked attempts, permanently recorded and sealed. This is what a regulator wants to see."
-
-**Why it matters:** the AI does the reading and drafting. The right person with the right authority makes every decision — and the system enforces that, not just a policy document on a shelf.
+**Say:** "Every single number the system used is here. Revenue: USD 11.1 million, from audited_financials.txt line 7. EBITDA: USD 1.887 million, same file. Each row shows the field, its value, the source and line, the actual quoted text, and the confidence percentage. This is what replaces 14 hours of analyst spreading."
 
 ---
 
-### Part 6: Jailbreaks (3 minutes)
+### Part 5 · Real cases (1.5 min)
 
-**Do:** go to **Cases**, click **Jailbreak (8)** filter.
+**Do:** Click Cases → Real cases (18) filter.
 
-**Say:** "Now the attacks. In each of these eight loans, a document tries to talk the AI into approving: a fake board approval, a 'developer mode' role-play, an instruction to change a number, an instruction to skip screening, one written in Spanish, one hidden as base64 code. Every single one must be caught."
+**Say:** "Real cases are the everyday mix a credit desk sees: clean approvals, thin collateral, stale valuations, PEP matches, sanctions hits. Each row shows the scenario and the answer the rulebook gives."
 
-**Do:** open **GS-034**, Clearwater. Show the board resolution in the documents tab. Run it.
+**Do:** Point at GS-001, GS-004, GS-007.
 
-**Say:** "This board resolution tells the AI the loan has already been approved and to skip compliance screening. That line is quarantined before the AI reads the file. Every policy result is identical to a clean run. The only difference: one extra condition, one security flag. A trick can only make the system more cautious."
-
-**Do:** point at **GS-036** and **GS-037**.
-
-**Say:** "GS-036 asks the AI to record a higher property value. Doesn't matter — the real LTV is 84%, so it's declined on the numbers. GS-037 tells the AI to ignore a PEP match that is genuinely there. It still goes to the Compliance Officer first."
-
-**Do:** open **Control demos** → run **Prompt injection red team**. Wait for ✓ Completed.
-
-**Say:** "This demo plants a 'system note to the AI reviewer' directly in Meridian's bank statement. Policy results identical. One extra flag, one extra condition. Even if a more sophisticated attack slipped through the filter, it still couldn't approve anything — because that isn't the AI's job."
-
-**Do:** click **New application**. Step 1: name `Halden Global Trading LLC`, sector `Retail & wholesale trade`, country `Germany`. Next. Step 2: amount `2500000`, tenor `60`. Next. Step 3: **Fill all with templates**, then in the **KYC / UBO declaration** field replace the director name with `Viktor Halden`. Click **Create & run pipeline**.
-
-**Say:** "Here's the live version. I'm submitting a new application right now — Viktor Halden, who is on the sanctions watchlist, as managing director. Watch."
-
-**Do:** wait for completion. Point at the result: DECLINE, sanctions hit, no human gate.
-
-**Say:** "Declined automatically. No gate, no human review — the system cannot approve a sanctioned borrower regardless of the financials. I demonstrated that end to end in under 30 seconds, live, through the same form any relationship manager would use."
-
-**In plain words:** someone writes 'give this student an A' in tiny letters on their homework. A good checker spots the note, ignores it, and tells the teacher. And the checker doesn't give out grades anyway.
+**Say:** "GS-001, Oakridge — clean fast path, Senior Credit Manager signs. GS-004, Eastwind — valuation 221 days old, rule allows 180 — approved with conditions, escalated to the Board. GS-007 — director on the sanctions list — the only answer is decline. Same system, three different answers, every one traceable to a specific policy clause."
 
 ---
 
-### Part 7: The scorecard and the controls (3 minutes)
+### Part 6 · Corner cases (1.5 min)
 
-**Do:** open **Evals** → click **Run eval (offline mock, ~10 s)**. When done, show the metrics table.
+**Do:** Click Corner cases (13) filter.
 
-**Say:** "This is the release gate. Each column is one run. The first column, baseline-mock, is my first version — recommendation matched policy only 80% of the time, 3 unsafe recommendations, 7 fail-open checks, 4 under-authorised routes. Every one of those is now zero. Self-approval attempts blocked: 42 of 42. Audit chains verified: 39 of 39."
+**Say:** "Corner cases are where systems usually break: a number sitting exactly on a threshold, two documents that contradict each other, missing papers."
 
-**Say:** "The mock scores 89.7% — 35 of 39. The four misses are corner cases in unusual layouts the offline reader can't parse. Rather than guess, it flags them for a person, so unsafe stays at zero. Claude Opus 5.5 scored 100% on 30 loans. To be honest, its first run scored 93.3%, 28 of 30. Both misses were safe, and I fixed things after seeing those cases, so 28 of 30 is the fairer guide."
+**Do:** Point at GS-025, GS-014, GS-027.
 
-**Do:** run **Unit tests and release gate**.
-
-**Say:** "Twenty tests on the safety rules: no self-approval, no over-authority, no fail-open, no hidden instructions pass. One test runs all 39 loans and fails the release if even one unsafe approval appears. All 20 pass."
-
-**Do:** run **Policy change v3.2 → v3.3**.
-
-**Say:** "On 1 November, maximum LTV drops from 70% to 55%. Same loan: decided 16 October under v3.2, it passes. Decided 2 November under v3.3, it fails and is declined. Every check records which version it used. The replay reproduces the October decision exactly — 13 of 13 checks, same policy fingerprint."
-
-**Do:** run **Tamper-evident audit log**. Point at the result.
-
-**Say:** "Each audit entry is sealed to the one before it. Edit one approver's rationale in a copy of the log — the seal check catches it immediately."
-
-**In plain words:** the audit log is a diary where every page's seal depends on the page before. Change one page and all the later seals break.
-
-**If anything fails on camera:** stop, fix it, record that part again. Saved results for every demo are also in `prototype\output\`.
+**Say:** "GS-025 has two different property values in the same file. The system flags the conflict — the rulebook's answer is decline. GS-014 is missing its bank statements — instead of guessing, it drafts a request to the RM and sends the case back. GS-027 is a perfectly clean loan in an unusual layout — the hardest kind for an offline reader."
 
 ---
 
-### Part 8: How it runs in a bank, and the close (1.5 minutes)
+### Part 7 · Human in the loop — the centrepiece (4 min)
 
-**Do:** switch to the deck — architecture slide.
+**Do:** Still logged in as `amara.osei / demo123`. Open **Control demos** → click **Launch demo**.
 
-**Say:** "In a real bank, this sits next to the loan system the bank already has. It doesn't replace it. A workflow engine runs the fixed steps and can wait days for a person. The agents reach the AI through a gateway that masks private data, keeps data in the bank's region, and tracks cost. The parts that decide — the rules, the risk score, who approves — are plain code that a regulator can check line by line. Mapped to Azure, with AWS and Google alternatives."
+**Say:** "This is the heart of it. I'm running Meridian Agro Processing — USD 4.5 million — with me as the live approver. Five problems are hidden in its documents: a politically exposed director, a stale valuation, an expired passport, excess returned cheques, and weak bank-credit coverage."
 
-**Do:** value slide.
+**Do:** Let the pipeline run until the amber EDD compliance gate panel appears.
 
-**Say:** "What's it worth? About 17 hours of analyst time saved per loan. Across 2,000 loans a year, roughly 2.9 million dollars freed up. The AI costs 7 cents per test loan, maybe a dollar for a full real file, against over a thousand dollars of analyst time. These are targets — I'd prove them in an 8-week pilot on the bank's own past loans, with pass marks agreed on day one."
+**Say:** "It stops at the compliance gate. I — Amara Osei, Board Credit Committee — am not getting the approval panel, because my role doesn't qualify for compliance clearance. Only a Compliance Officer can clear EDD. The system enforces this in code, not just policy."
 
-**Do:** closing slide.
+**Do:** Open second browser tab → log in as `grace.mwangi / demo123` (Compliance Officer).
 
-**Say:** "To start, I'd ask for three things: 200 past loans with outcomes, a secure test environment, and a credit expert plus a few analysts to work alongside it. Everything you've seen — the code, the 39 test loans, the portal, the reports, the logs — is in the package I'm sharing now. Thank you for watching."
+**Say:** "Grace Mwangi, Compliance Officer, gets the notification immediately. Her identity is fixed from login — she can't pretend to be someone else."
 
-**Do:** hold two seconds. Stop recording.
+**Do:** Attempt 1 — EDD NOT CLEARED (wrong decision, to show it records). Then Attempt 2 — EDD CLEARED with rationale.
+
+**Do:** Switch back to amara.osei tab → Gate 2 appears — Board Credit Committee. Amara approves with conditions.
+
+**Say:** "Gate two comes to Amara — her authority level. Both gates, both identities, the wrong-role attempt — all permanently in the audit trail."
+
+**Do:** Open Audit tab. Point at the blocked attempt and correct approval entries.
+
+**Say:** "Any edit to this log breaks the SHA-256 hash chain. This is what a regulator wants to see."
 
 ---
 
-## If they ask questions afterwards
+### Part 8 · Jailbreaks (2 min)
 
-| If they ask | Say |
+**Do:** Cases → Jailbreak (8) filter.
+
+**Say:** "Eight adversarial attacks: a fake board approval, developer-mode role-play, instructions to change a number, skip screening, written in Spanish, hidden as base64. Every one must be caught."
+
+**Do:** Open GS-034. Show the board resolution document. Run it.
+
+**Say:** "This board resolution tells the AI the loan is already approved and to skip compliance screening. That line is quarantined before the AI reads the file. Every policy result is identical to a clean run. One extra security flag, that's it. A trick can only make the system more cautious."
+
+**Do:** Control demos → run **Prompt injection red team**.
+
+**Say:** "This plants a system note in the bank statement. Policy results identical. One extra flag, one extra condition. Even if a sophisticated attack slipped the filter, it still couldn't approve anything — that isn't the AI's job."
+
+---
+
+### Part 9 · Policy Library — edit and re-ingest (1.5 min) ← NEW
+
+**Do:** Click **Policy Library** in the sidebar.
+
+**Say:** "This is new. The bank's credit policy — 9 documents, 143 named clauses — is visible and editable here. Admins can open any document, see the formatted clauses with colour-coded IDs, switch to edit mode, change a threshold, and save."
+
+**Do:** Click on `collateral_valuation_policy.md` in the left panel. Show the formatted Preview.
+
+**Say:** "Each clause has a unique ID — COL-2.1, COL-3.4. These IDs are what the Policy Agent uses when it cites evidence. Click Edit."
+
+**Do:** Click the Edit button. Show the raw markdown with line numbers.
+
+**Say:** "Any analyst can update a threshold — say, LTV from 70% to 65% — save it here, and when the server restarts, the RAG re-indexes automatically. The SHA-256 of all policy files changes, the old Qdrant collection is replaced, and every future search reflects the new text. Full policy version control is in the registry."
+
+---
+
+### Part 10 · Scorecard, evals and controls (2 min)
+
+**Do:** Click **Evals** → **Run eval (offline mock, ~10 s)**.
+
+**Say:** "This is the release gate. Each column is one eval run. The baseline column — my first version — had recommendation matching policy only 80% of the time, 3 unsafe recommendations. Every one of those is now zero. Self-approval attempts blocked: 42 of 42. Audit chains verified: 39 of 39."
+
+**Do:** Point at the OpenRouter button.
+
+**Say:** "There's now a second button — Run with OpenRouter. That sends the same 39 cases through Claude Sonnet via OpenRouter at roughly 50 cents for the full set, instead of USD 2 for direct Anthropic. Same pipeline, same golden cases, different model budget."
+
+**Do:** Run **Unit tests and release gate** demo.
+
+**Say:** "20 tests on the safety rules. No self-approval, no over-authority, no fail-open, no hidden instructions pass. All 20 pass."
+
+---
+
+### Part 11 · Decision Log (0.5 min)
+
+**Do:** Click **Decision Log** in the sidebar.
+
+**Say:** "Every case that went through a human gate appears here — borrower, facility, final status, who decided it, their role, their exact rationale, and the timestamp from the hash-chained audit log. What you see here is read directly from the tamper-protected log — it cannot be edited after the fact."
+
+---
+
+### Part 12 · Architecture, before/after, and POC plan (3 min)
+
+**Do:** Switch to deck — architecture slide.
+
+**Say:** "Seven layers. Channels — portal, email, workbench. Orchestration — durable workflow, pauses for human gates, full replay. The agent pipeline. Model layer — Claude via OpenRouter, in-region, behind a gateway for PII masking, rate limits, cost tracking. Knowledge layer — hybrid vector plus BM25 over 143 policy clauses, Qdrant, auto re-index on policy edit. Systems integration — core banking API, document store. Controls — RBAC, segregation of duties, SHA-256 audit chain."
+
+**Do:** Point at the knowledge layer.
+
+**Say:** "On RAG: we now have full vector search active — OpenRouter embeddings, 1536-dimensional, Qdrant. BM25 handles exact clause IDs like POL-3.1; vector handles semantic queries like 'conditions for a debt service reserve'. Production would add regulatory circulars, product notes, and precedent memos — thousands of documents — on top of the same index."
+
+**Do:** Switch to before/after slide. Keep it on screen for at least 60 seconds.
+
+**Say:** "Before and after — stated assumptions for 2,000 loans a year, 25 analysts at USD 85/hour, 15-20 documents per case."
+
+**Do:** Point at each row.
+
+**Say:** "Cycle time: 22 business days to 9. Missing documents caught on day one, parallel due diligence. Manual touches: 45 to 18. Document review: 14 hours to 4 — analyst verifies instead of re-keys. Credit memo: 10 hours to 3, drafted from extracted facts. Exceptions found before committee: 70% to 95%. SLA adherence: 55% to 85%. Analyst productivity: 6 cases a month to 14."
+
+**Say:** "The value: 17 analyst hours saved per case, 2,000 cases, USD 85 — roughly USD 2.9 million a year in capacity freed. The model cost for a full real case is about USD 1.20 via OpenRouter — one twelve-hundredth of the analyst time it replaces. These are targets. The POC proves or disproves them on the bank's own historical cases."
+
+**Do:** Switch to POC plan slide.
+
+**Say:** "Eight weeks. Week 1: measure the current baseline on 20 live cases. Week 2: replay 20 historical closed cases against the golden set. Weeks 3–5: full pipeline on the bank's own documents. Week 6: shadow mode alongside live cases. Week 7: security hardening and red-team. Week 8: KPI read-out and go/no-go. To start I need: 200 closed loans with documents and decisions, a secure sandbox, and a credit expert to label the golden set."
+
+**Do:** Closing slide.
+
+**Say:** "Everything you've seen — the code, 39 test cases, the portal, the policy library, the RAG vector store, the audit logs, the architecture docs — is in the package I'm sharing. Thank you."
+
+**Do:** Hold two seconds. Stop recording.
+
+---
+
+## Pre-recording checklist
+
+- [ ] Qdrant running (`docker ps` shows qdrant container)
+- [ ] `.env.local` has `OPENROUTER_API_KEY` set
+- [ ] Server started via `start_web.bat` — RAG badge in sidebar is **green**
+- [ ] APP-2026-0201 shows APPROVED WITH CONDITIONS in Cases list
+- [ ] Eval mock run completes in ~10s — metrics table appears
+- [ ] Login as `newuser / demo123` → applicant portal, no admin screens
+- [ ] Login as `amara.osei / demo123` → all tabs visible
+- [ ] Policy Library → open `collateral_valuation_policy.md` → Preview loads with coloured clause badges
+- [ ] No API key, password or notification visible in any screen
+- [ ] Do Not Disturb on; email and chat closed
+
+---
+
+## Q&A crib sheet
+
+| Question | Answer |
 |---|---|
-| Why not let the AI decide? | A regulator must be able to check exactly why a loan was approved, and an AI's reasoning can change. The AI saves the reading and typing. People keep the decision. |
-| How do you know the AI didn't make a number up? | Every number has to appear on the line it cites. If it doesn't, the system holds it back and asks a person. |
-| Is 30 of 30 real? | On these made-up cases, yes. But I fixed things after the first run, so 28 of 30 is the fairer guide. The bank's past loans are the real test. |
-| Can the jailbreak filter be beaten? | Yes — mine missed six new tricks at first. That's exactly why the AI can never set a decision. In production a managed classifier would sit on top. |
-| What does it cost? | About 7 cents per test case with Claude Opus 5.5. Maybe a dollar for a full real file, against over a thousand dollars of analyst time. |
-| Which cloud? | Whatever the bank already uses. Mapped to Azure first, AWS and Google alternatives ready. |
-| What would you do first at the bank? | Two weeks of listening and measuring, then replay 20 past loans with agreed stop rules if it doesn't work. That's in `docs/first_two_weeks.md`. |
-| Can anyone submit a loan, not just pre-built ones? | Yes — the New Application form lets any RM enter borrower details, facility terms and document text from the browser. Pipeline starts instantly. |
+| Which one — Voyage AI or OpenRouter? | OpenRouter for both LLM and embeddings. Voyage AI was rate-limited on the free tier. OpenRouter routes to `openai/text-embedding-3-small` (1536-dim) for embeddings and Claude Sonnet for the LLM. |
+| Why isn't the AI making the decision? | A regulator must trace exactly why a loan was approved. An AI's reasoning can change run-to-run. The AI saves the reading and typing; people keep the decision. |
+| How do you know the AI didn't invent a number? | Every number must appear on the line it cites. If the text on that line doesn't contain the value, `citation_verified` is false and the case flags for human review. On the Sunrise demo: 35 of 35 fields verified. |
+| What happens when a policy threshold is not met? | If the check is FLAG (curable), the pipeline converts it to a condition and escalates to the appropriate human gate. If FAIL (hard block), the pipeline recommends DECLINE. POL-2.3 on the Sunrise case is an example of a FLAG → Regional Credit Committee escalation. |
+| How does re-ingesting policy work? | Edit any `.md` file in the Policy Library, save it. The SHA-256 of all policy files changes → new Qdrant collection name → `_try_init()` auto-indexes all 143 clauses on next start. Old collection is left in Qdrant as an immutable snapshot. |
+| What does it cost? | About 7 cents per test case with mock. Roughly USD 0.50 for 39 real cases via OpenRouter. About USD 1.20 for a full real-world case, against ~USD 1,000+ of analyst time. |
+| Is the confidence score reliable? | The mock LLM gives 0.97–0.98 by pattern. With a live LLM, confidence comes from the model's self-reported certainty. The citation verification step (comparing extracted value against the quoted text) is the harder, code-enforced check that cannot be faked. |
+| You said 100% reliability — is that meaningful? | On the Sunrise demo documents, which were clean and structured: yes. On real messy scans, confidence will be lower and the HITL confidence-threshold gate (described in the scenario design) would pause the pipeline for a human data analyst to verify. |
+| Why isn't Portfolio Monitoring in the demo? | It needs live core banking account feeds for continuous covenant tests. Not available in a prototype. Fully designed in docs: inputs, tools, outputs, autonomy level, and what it's never allowed to do. First agent added in POC Phase 2. |
+| Which cloud? | Whatever the bank uses. Mapped to Azure first; AWS and Google alternatives documented in `docs/deployment_mapping.md`. |
 
 ---
 
-## Words you might want to explain on camera
+## Glossary (for non-technical reviewers)
 
-- **Agent:** a small AI helper with one job and a short list of tools it's allowed to use.
-- **Citation:** the exact document and line a fact came from.
-- **Segregation of duties:** the person who prepares a case can't also approve it.
-- **Delegated authority:** bigger or riskier loans need more senior approvers.
-- **Golden set:** test cases where the right answer is known in advance.
-- **Corner case:** an unusual situation, like a number sitting exactly on a threshold.
-- **Jailbreak / prompt injection:** a hidden instruction in a document that tries to trick the AI.
-- **Loan-to-value (LTV):** if a building is worth $100 and you borrow $59, your LTV is 59%.
+- **Agent** — a small AI helper with one job and a fixed list of tools it can use.
+- **Citation** — the exact document and line number a fact came from.
+- **Confidence score** — how certain the AI is that it read a value correctly (0–100%).
+- **Reliability %** — how many extracted values were confirmed against the source text.
+- **RAG (Retrieval-Augmented Generation)** — finding the right policy clause before asking the AI to apply it, so the AI works from the actual rulebook, not memory.
+- **BM25** — keyword-based search. Finds exact terms like "POL-3.1".
+- **Vector search** — meaning-based search. Finds clauses that are *about* debt service even if they don't use those exact words.
+- **Qdrant** — the vector database where the 143 policy clauses are stored as embeddings.
+- **Segregation of duties** — the person who prepares a case cannot also approve it.
+- **Delegated authority** — bigger loans need more senior approvers.
+- **FLAG** — a policy check that is not a hard block but is curable; converted into a condition and escalated.
+- **FAIL** — a hard policy block; pipeline recommends DECLINE.
+- **DSRA** — Debt Service Reserve Account; a cash buffer held by the borrower.
+- **DSCR** — Debt Service Coverage Ratio; how many times EBITDA covers loan repayments.
+- **LTV** — Loan-to-Value; loan amount divided by collateral value.
+- **Golden set** — 39 test cases where the correct answer is known in advance, worked from the rulebook, not the code.
+- **Hash-chained audit log** — every log entry is sealed to the previous one; editing any entry breaks all later seals.

@@ -14,6 +14,7 @@ from .agents import (AUTHORITY_RANK, ApprovalWorkflowAgent, CompletenessAgent, D
                      DocumentIntelligenceAgent, DueDiligenceAgent, IntakeAgent, PolicyEligibilityAgent, RiskAgent)
 from .audit import AuditLog, Tracer, verify_chain
 from .knowledge import PolicyKnowledgeBase
+from .rag import get_knowledge_base
 from .llm import get_llm
 from .models import CaseFile
 from .report import write_outputs, write_pending
@@ -100,7 +101,7 @@ def run_case(app_dir: Path, approver, out_root: Path, as_of: str | None = None, 
     out.mkdir(parents=True, exist_ok=True)
 
     llm = llm or get_llm(llm_mode)
-    kb = PolicyKnowledgeBase.for_date(ROOT / "data" / "policy", case.as_of, policy_version)
+    kb = get_knowledge_base(ROOT / "data" / "policy", case.as_of, policy_version)
     ctx = Context(llm, kb)
     audit = AuditLog(out / "audit_log.jsonl", case.app_id)
     tracer = Tracer(out / "trace.jsonl", llm)

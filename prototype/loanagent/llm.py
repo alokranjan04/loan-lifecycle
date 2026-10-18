@@ -270,7 +270,137 @@ def _decision_rationale(c: dict) -> str:
 TEMPLATES = {"rm_request": _rm_request, "risk_narrative": _risk_narrative, "decision_rationale": _decision_rationale}
 
 
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_PRICES_PER_MTOK = {
+    "anthropic/claude-opus-4": (15.00, 75.00),
+    "anthropic/claude-sonnet-4-5": (3.00, 15.00),
+    "anthropic/claude-haiku-4-5": (0.80, 4.00),
+    "openai/gpt-4o": (2.50, 10.00),
+    "openai/gpt-4o-mini": (0.15, 0.60),
+}
+
+
+class OpenRouterLLM:
+    """OpenAI-compatible LLM via OpenRouter (supports Claude, GPT-4o, Gemini, etc.)."""
+
+    PROMPT_VERSION = "openrouter-v1"
+
+    def __init__(self, model: str | None = None, api_key: str | None = None):
+        self.api_key = api_key or os.environ["OPENROUTER_API_KEY"]
+        self.model = model or os.environ.get("LOAN_AGENT_MODEL", "anthropic/claude-sonnet-4-5")
+        self.name = f"openrouter:{self.model}"
+        self.stats = LLMStats()
+
+    def cost_usd(self) -> float:
+        pin, pout = OPENROUTER_PRICES_PER_MTOK.get(self.model, (0.0, 0.0))
+        return (self.stats.input_tokens * pin + self.stats.output_tokens * pout) / 1e6
+
+    def _call(self, system: str, prompt: str, max_tokens: int = 16000, schema: dict | None = None) -> str:
+        payload = {
+            "model": self.model,
+            "max_tokens": max_tokens,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+        }
+        if schema is not None:
+            payload["response_format"] = {"type": "json_schema", "json_schema": {"name": "extraction", "schema": schema, "strict": True}}
+        req = urllib.request.Request(
+            OPENROUTER_API_URL,
+            data=json.dumps(payload).encode(),
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://loan-lifecycle-demo",
+                "X-Title": "Loan Lifecycle Agent",
+            },
+        )
+        t0 = time.perf_counter()
+        try:
+            with urllib.request.urlopen(req, timeout=300) as resp:
+                data = json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            if e.code == 400 and schema is not None:
+                # Retry without structured output (model may not support it)
+                payload.pop("response_format", None)
+                req2 = urllib.request.Request(
+                    OPENROUTER_API_URL,
+                    data=json.dumps(payload).encode(),
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://loan-lifecycle-demo",
+                        "X-Title": "Loan Lifecycle Agent",
+                    },
+                )
+                with urllib.request.urlopen(req2, timeout=300) as resp2:
+                    data = json.loads(resp2.read())
+            else:
+                raise
+        self.stats.latency_ms += (time.perf_counter() - t0) * 1000
+        self.stats.calls += 1
+        usage = data.get("usage", {})
+        self.stats.input_tokens += usage.get("prompt_tokens", 0)
+        self.stats.output_tokens += usage.get("completion_tokens", 0)
+        return data["choices"][0]["message"]["content"] or ""
+
+    def extract(self, doc_name: str, doc_type: str, lines: list[str], schema: list[dict]) -> dict:
+        # Delegate to ClaudeLLM's extract logic by temporarily binding methods
+        fields = "\n".join(
+            f'- {s["name"]} ({s["type"]}{", list of objects with keys " + ", ".join(s["columns"]) + " and the line of each row" if s.get("multi") else ""}): {s["description"]}'
+            for s in schema)
+        prompt = (f"Document type: {doc_type}\nDocument name: {doc_name}\n\nFields to extract:\n{fields}\n\n"
+                  f"<document name=\"{doc_name}\">\n{numbered(lines)}\n</document>\n\n"
+                  'Reply with JSON only: {"<field>": {"value": <value>, "line": <int>, "confidence": <0-1>} or null}. '
+                  "Money and numbers as plain numbers without commas. Dates as YYYY-MM-DD.")
+        json_schema = {"type": "object", "properties": {s["name"]: _field_schema(s) for s in schema},
+                       "required": [s["name"] for s in schema], "additionalProperties": False}
+        data = None
+        for _ in range(2):
+            raw = self._call(EXTRACT_SYSTEM, prompt, schema=json_schema)
+            try:
+                data = json.loads(raw[raw.find("{"): raw.rfind("}") + 1])
+                break
+            except ValueError:
+                continue
+        if not isinstance(data, dict):
+            return {}
+        from loanagent.citations import ExtractedField, Evidence
+        out = {}
+        known = {s["name"]: s for s in schema}
+        for name, item in data.items():
+            if name not in known or not isinstance(item, dict) or item.get("value") is None:
+                continue
+            spec = known[name]
+            value = item["value"]
+            try:
+                if spec.get("multi"):
+                    value = [{c: str(r.get(c, "")).strip() for c in spec["columns"]} for r in value]
+                elif spec["type"] in ("money", "float"):
+                    value = float(str(value).replace(",", ""))
+                elif spec["type"] == "int":
+                    value = int(float(str(value).replace(",", "")))
+            except (TypeError, ValueError, AttributeError):
+                continue
+            line = item.get("line") if isinstance(item.get("line"), int) else None
+            quote = lines[line - 1].strip() if line and 0 < line <= len(lines) else ""
+            out[name] = ExtractedField(name, value, Evidence(doc_name, line, quote),
+                                       float(item.get("confidence", 0.9)))
+        return out
+
+    def write(self, task: str, context: dict) -> str:
+        system = ("You are a credit analyst's drafting assistant at a commercial bank. Write in plain, precise English. "
+                  "Use only the facts provided. Keep every citation in square brackets exactly as given. "
+                  "Do not recommend a decision unless asked; never change numbers or invent facts.")
+        prompt = (f"Task: {TASK_PROMPTS[task]}\n\nFacts (JSON):\n{json.dumps(context, indent=2, default=str)}\n\n"
+                  "Write the text now. No preamble.")
+        return self._call(system, prompt, max_tokens=8000).strip()
+
+
 def get_llm(mode: str = "auto"):
+    if mode == "openrouter" or (mode == "auto" and os.environ.get("OPENROUTER_API_KEY")):
+        return OpenRouterLLM()
     if mode == "claude" or (mode == "auto" and os.environ.get("ANTHROPIC_API_KEY")):
         return ClaudeLLM()
     return MockLLM()

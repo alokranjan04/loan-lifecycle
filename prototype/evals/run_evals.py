@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Run the agents over the golden set and score them against ground truth.
 
-  python evals/run_evals.py --llm mock --label mock          # offline, deterministic
+  python evals/run_evals.py --llm mock --label mock                    # offline, deterministic
+  python evals/run_evals.py --llm openrouter --label sonnet-4-5        # via OpenRouter (reads .env.local)
   ANTHROPIC_API_KEY=... python evals/run_evals.py --llm claude --label claude-opus-5-5
   python evals/run_evals.py --report                          # rebuild evals/results/REPORT.md from every run
 
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -24,6 +26,24 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
+
+
+def _load_env(*paths):
+    """Load KEY=VALUE lines from env files. Shell env takes precedence."""
+    for p in paths:
+        if not Path(p).exists():
+            continue
+        for line in Path(p).read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            k, v = k.strip(), v.strip().strip('"').strip("'")
+            if k and k not in os.environ:
+                os.environ[k] = v
+
+
+_load_env(ROOT / ".env.local", ROOT / ".env")
 
 from loanagent.agents import DOC_LABELS, SCHEMAS            # noqa: E402
 from loanagent.audit import verify_chain                    # noqa: E402
@@ -382,7 +402,7 @@ def write_report():
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--llm", choices=["mock", "claude"], default="mock")
+    ap.add_argument("--llm", choices=["mock", "claude", "openrouter"], default="mock")
     ap.add_argument("--label", help="results folder name (default: the --llm value)")
     ap.add_argument("--only", help="regex on case ids, e.g. GS-02")
     ap.add_argument("--report", action="store_true", help="rebuild REPORT.md from all saved runs")
