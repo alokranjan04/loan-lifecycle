@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Agentic Loan Lifecycle Management",
+    "subtitle": "Web UI · 8-agent pipeline · Hybrid RAG · HITL gate · audit trail",
+    "output": ".archify/architecture-loan-lifecycle-20261018-120000/loan-lifecycle.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "applicant",        "type": "external",   "label": "Applicant / RM",        "sublabel": "Submits application",               "pos": [30,  80],  "size": [130, 60] },
+    { "id": "orchestrator",     "type": "backend",    "label": "Orchestrator",           "sublabel": "Case state machine (SoD)",           "pos": [30,  380], "size": [130, 60] },
+
+    { "id": "webui",            "type": "frontend",   "label": "Web UI",                 "sublabel": "FastAPI · Alpine.js · port 8000",    "pos": [210, 80],  "size": [145, 60] },
+    { "id": "cli",              "type": "frontend",   "label": "CLI Entry Point",        "sublabel": "run_demo.py",                        "pos": [210, 165], "size": [145, 60] },
+    { "id": "appdata",          "type": "database",   "label": "Application Files",      "sublabel": "JSON + supporting docs",             "pos": [210, 260], "size": [145, 60] },
+
+    { "id": "human_credit",     "type": "external",   "label": "Credit Authority",       "sublabel": "SCM · Committee · Board",            "pos": [210, 465], "size": [145, 60] },
+    { "id": "human_compliance", "type": "external",   "label": "Compliance Officer",     "sublabel": "PEP / sanctions gate",               "pos": [210, 555], "size": [145, 60] },
+    { "id": "hitl",             "type": "external",   "label": "HITL Validator",         "sublabel": "Confidence < 75% gate",              "pos": [210, 645], "size": [145, 60] },
+
+    { "id": "intake",           "type": "backend",    "label": "Intake Agent",           "sublabel": "Form completeness · doc list",       "pos": [425, 80],  "size": [155, 60] },
+    { "id": "docint",           "type": "backend",    "label": "Document Intelligence",  "sublabel": "35+ fields · confidence scores",     "pos": [425, 170], "size": [155, 60] },
+    { "id": "completeness",     "type": "backend",    "label": "Completeness Agent",     "sublabel": "Missing docs → RM email",            "pos": [425, 260], "size": [155, 60] },
+    { "id": "duediligence",     "type": "backend",    "label": "Due Diligence Agent",    "sublabel": "KYC · Sanctions · Conduct",          "pos": [425, 350], "size": [155, 60] },
+    { "id": "policy",           "type": "backend",    "label": "Policy Eligibility",     "sublabel": "13 clauses · DSCR · LTV",            "pos": [425, 440], "size": [155, 60] },
+    { "id": "risk",             "type": "backend",    "label": "Risk Agent",             "sublabel": "8-factor scorecard 1–10",            "pos": [425, 530], "size": [155, 60] },
+    { "id": "approval_wf",      "type": "backend",    "label": "Approval Workflow",      "sublabel": "Route · draft conditions",           "pos": [425, 620], "size": [155, 60] },
+    { "id": "disbursement",     "type": "backend",    "label": "Disbursement Agent",     "sublabel": "Condition tracker",                  "pos": [425, 710], "size": [155, 60] },
+
+    { "id": "security",         "type": "security",   "label": "PII Vault",              "sublabel": "Mask → model → unmask",              "pos": [635, 170], "size": [145, 60] },
+    { "id": "screening",        "type": "database",   "label": "Screening Watchlist",    "sublabel": "Sanctions / PEP / Adverse",          "pos": [635, 350], "size": [145, 60] },
+    { "id": "llm",              "type": "backend",    "label": "LLM Layer",              "sublabel": "MockLLM · OpenRouterLLM",            "pos": [635, 470], "size": [145, 60] },
+    { "id": "knowledge",        "type": "database",   "label": "Policy KB",              "sublabel": "Hybrid: BM25 40% + Vector 60%",      "pos": [635, 560], "size": [145, 60] },
+    { "id": "qdrant",           "type": "database",   "label": "Qdrant Vector DB",       "sublabel": "143 clauses · 1536-dim",             "pos": [635, 650], "size": [145, 60] },
+    { "id": "audit",            "type": "database",   "label": "Audit Log",              "sublabel": "SHA-256 hash chain",                 "pos": [635, 740], "size": [145, 60] },
+    { "id": "output",           "type": "database",   "label": "Output + Case Report",   "sublabel": "Summary · Record · Tracker · UI",   "pos": [635, 830], "size": [145, 60] },
+
+    { "id": "openrouter",       "type": "external",   "label": "OpenRouter API",         "sublabel": "LLM completions + embeddings",       "pos": [852, 510], "size": [155, 65] }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Human Gates (SoD enforced)",
+      "wraps": ["human_credit", "human_compliance", "hitl"]
+    },
+    {
+      "kind": "region",
+      "label": "Agent Pipeline (sequential)",
+      "wraps": ["intake", "docint", "completeness", "duediligence", "policy", "risk", "approval_wf", "disbursement"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Bank Boundary — PII stays here",
+      "wraps": ["security", "llm", "knowledge", "qdrant", "audit", "screening", "output"]
+    },
+    {
+      "kind": "region",
+      "label": "External: OpenRouter",
+      "wraps": ["openrouter"]
+    }
+  ],
+  "connections": [
+    { "id": "applicant-webui",    "from": "applicant",       "to": "webui",            "label": "submit",            "variant": "emphasis" },
+    { "id": "webui-orch",         "from": "webui",           "to": "orchestrator",     "label": "run_case()",        "variant": "emphasis" },
+    { "id": "cli-orch",           "from": "cli",             "to": "orchestrator",     "label": "run_case()",        "variant": "emphasis" },
+    { "id": "cli-appdata",        "from": "cli",             "to": "appdata",          "label": "load app",          "variant": "dashed" },
+
+    { "id": "orch-intake",        "from": "orchestrator",    "to": "intake",           "label": "start pipeline",    "variant": "emphasis" },
+    { "id": "orch-compliance",    "from": "orchestrator",    "to": "human_compliance", "label": "PEP gate",          "variant": "security" },
+    { "id": "orch-credit",        "from": "orchestrator",    "to": "human_credit",     "label": "credit decision",   "variant": "emphasis" },
+    { "id": "orch-hitl",          "from": "orchestrator",    "to": "hitl",             "label": "confidence < 75%",  "variant": "security" },
+    { "id": "orch-audit",         "from": "orchestrator",    "to": "audit",            "label": "log events",        "variant": "dashed" },
+
+    { "id": "seq-1-2",            "from": "intake",          "to": "docint",           "fromSide": "bottom", "toSide": "top" },
+    { "id": "seq-2-3",            "from": "docint",          "to": "completeness",     "fromSide": "bottom", "toSide": "top" },
+    { "id": "seq-3-4",            "from": "completeness",    "to": "duediligence",     "fromSide": "bottom", "toSide": "top" },
+    { "id": "seq-4-5",            "from": "duediligence",    "to": "policy",           "fromSide": "bottom", "toSide": "top" },
+    { "id": "seq-5-6",            "from": "policy",          "to": "risk",             "fromSide": "bottom", "toSide": "top" },
+    { "id": "seq-6-7",            "from": "risk",            "to": "approval_wf",      "fromSide": "bottom", "toSide": "top" },
+    { "id": "seq-7-8",            "from": "approval_wf",     "to": "disbursement",     "fromSide": "bottom", "toSide": "top" },
+
+    { "id": "docint-pii",         "from": "docint",          "to": "security",         "label": "mask PII",          "variant": "security" },
+    { "id": "docint-llm",         "from": "docint",          "to": "llm",              "label": "extract fields" },
+    { "id": "duediligence-screen","from": "duediligence",    "to": "screening",        "label": "screen" },
+    { "id": "policy-kb",          "from": "policy",          "to": "knowledge" },
+    { "id": "kb-qdrant",          "from": "knowledge",       "to": "qdrant",           "fromSide": "bottom", "toSide": "top", "labelDy": 5 },
+    { "id": "risk-llm",           "from": "risk",            "to": "llm" },
+    { "id": "approval-llm",       "from": "approval_wf",     "to": "llm" },
+    { "id": "disbursement-output","from": "disbursement",    "to": "output",           "label": "write outputs" },
+
+    { "id": "llm-openrouter",     "from": "llm",             "to": "openrouter",       "label": "LLM completions" },
+    { "id": "qdrant-openrouter",  "from": "qdrant",          "to": "openrouter",       "label": "embed query" }
+  ],
+  "cards": [
+    { "dot": "cyan",    "title": "Inputs",          "items": ["Browser (Web UI) or CLI submits application", "application.json: borrower, facility, RM details", "7 document types: financials, KYC, valuation, bank statement", "Scripted (demo) or interactive human approvers"] },
+    { "dot": "emerald", "title": "Agent Pipeline",  "items": ["8 agents run sequentially through the orchestrator", "Document Intelligence extracts 35+ fields with confidence scores", "PolicyEligibilityAgent runs 13 credit policy clauses", "Hybrid RAG: 40% BM25 keyword + 60% Qdrant vector cosine", "HITL gate triggered when avg field confidence < 75%"] },
+    { "dot": "violet",  "title": "Controls",        "items": ["PII Vault masks identifiers before any model call", "SHA-256 hash-chained audit log detects tampering", "3 human gates: Credit Authority, Compliance Officer, HITL Validator", "OpenRouter provides LLM completions and embeddings via one key"] },
+    { "dot": "rose",    "title": "Outputs",         "items": ["Case Report: reliability %, avg confidence, grounded evidence", "decision_summary.md — human-readable markdown", "decision_record.json — machine-readable downstream record", "conditions_tracker.json — disbursement readiness", "extracted_fields.json — cited evidence per field"] }
+  ]
+}
