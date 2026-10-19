@@ -5152,7 +5152,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <div class="pulse-dot"></div>
         <h1>Agentic Loan Lifecycle Management</h1>
       </div>
-      <p class="subtitle">Web UI · 8-agent pipeline · Hybrid RAG · HITL gate · audit trail</p>
+      <p class="subtitle">3-gate HITL · 8-agent pipeline · Hybrid RAG · SHA-256 audit trail</p>
     </div>
 
 
@@ -5160,9 +5160,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / PLATE 04">
-      <svg viewBox="0 0 1077 978" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase" data-node-ui="" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
+      <svg viewBox="0 0 1085 978" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase" data-node-ui="" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
         <title id="archify-diagram-title">Agentic Loan Lifecycle Management</title>
-        <desc id="archify-diagram-description">Web UI · 8-agent pipeline · Hybrid RAG · HITL gate · audit trail</desc>
+        <desc id="archify-diagram-description">3-gate HITL · 8-agent pipeline · Hybrid RAG · SHA-256 audit trail</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -5207,439 +5207,440 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Human Gates (SoD enforced)" x="180" y="435" width="205" height="290" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Human Gates — SoD enforced" x="190" y="380" width="205" height="290" rx="12" class="c-region" stroke-width="1"/>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Agent Pipeline (sequential)" x="395" y="50" width="215" height="740" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Agent Pipeline — sequential" x="400" y="50" width="215" height="740" rx="12" class="c-region" stroke-width="1"/>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="2" data-composition-frame-label="Bank Boundary — PII stays here" x="605" y="140" width="205" height="770" rx="8" class="c-security-group" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="2" data-composition-frame-label="Bank Boundary — PII stays here" x="615" y="140" width="205" height="770" rx="8" class="c-security-group" stroke-width="1"/>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="3" data-composition-frame-label="External: OpenRouter" x="822" y="480" width="215" height="115" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="3" data-composition-frame-label="External: OpenRouter" x="830" y="480" width="215" height="115" rx="12" class="c-region" stroke-width="1"/>
 
         <!-- Connection paths (before components for correct z-order) -->
         <g data-graph-role="automatic-crossover" style="--step:0">
-          <path data-graph-role="automatic-crossover-underlay" d="M 160 110 L 210 110" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="applicant" data-edge-to="webui" data-edge-label="submit" data-edge-key="0" data-edge-id="applicant-webui" data-composition-points="160,110;210,110" data-composition-crossover="halo" data-composition-independent="true" d="M 160 110 L 210 110" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 170 110 L 220 110" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="applicant" data-edge-to="webui" data-edge-label="submit" data-edge-key="0" data-edge-id="applicant-webui" data-composition-points="170,110;220,110" data-composition-crossover="halo" data-composition-independent="true" d="M 170 110 L 220 110" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:1">
-          <path data-graph-role="automatic-crossover-underlay" d="M 282.5 80 L 282.5 64 Q 282.5 56 274.5 56 L 14 56 Q 6 56 6 64 L 6 402 Q 6 410 14 410 L 30 410" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="webui" data-edge-to="orchestrator" data-edge-label="run_case()" data-edge-key="1" data-edge-id="webui-orch" data-composition-points="282.5,80;282.5,56;6,56;6,410;30,410" data-composition-crossover="halo" data-composition-independent="true" d="M 282.5 80 L 282.5 64 Q 282.5 56 274.5 56 L 14 56 Q 6 56 6 64 L 6 402 Q 6 410 14 410 L 30 410" class="a-emphasis" data-animate="edge" style="--step:1" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 365 110 L 381 110 Q 389 110 389 118 L 389 368 Q 389 376 381 376 L 143.1 376 Q 135.1 376 135.1 384 L 135.1 400" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="webui" data-edge-to="orchestrator" data-edge-label="run_case()" data-edge-key="1" data-edge-id="webui-orch" data-composition-points="365,110;389,110;389,376;135.1,376;135.1,400" data-composition-crossover="halo" data-composition-independent="true" d="M 365 110 L 381 110 Q 389 110 389 118 L 389 368 Q 389 376 381 376 L 143.1 376 Q 135.1 376 135.1 384 L 135.1 400" class="a-emphasis" data-animate="edge" style="--step:1" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:2">
-          <path data-graph-role="automatic-crossover-underlay" d="M 210 195 L 86.9 195 Q 78.9 195 78.9 203 L 78.9 380" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="cli" data-edge-to="orchestrator" data-edge-label="run_case()" data-edge-key="2" data-edge-id="cli-orch" data-composition-points="210,195;78.9,195;78.9,380" data-composition-crossover="halo" data-composition-independent="true" d="M 210 195 L 86.9 195 Q 78.9 195 78.9 203 L 78.9 380" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 220 195 L 96.9 195 Q 88.9 195 88.9 203 L 88.9 400" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="cli" data-edge-to="orchestrator" data-edge-label="run_case()" data-edge-key="2" data-edge-id="cli-orch" data-composition-points="220,195;88.9,195;88.9,400" data-composition-crossover="halo" data-composition-independent="true" d="M 220 195 L 96.9 195 Q 88.9 195 88.9 203 L 88.9 400" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:3">
-          <path data-graph-role="automatic-crossover-underlay" d="M 290.55 225 L 290.55 260" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="cli" data-edge-to="appdata" data-edge-label="load app" data-edge-key="3" data-edge-id="cli-appdata" data-composition-points="290.55,225;290.55,260" data-composition-crossover="halo" data-composition-independent="true" d="M 290.55 225 L 290.55 260" class="a-dashed" data-animate="edge" style="--step:3" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 300.55 225 L 300.55 260" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="cli" data-edge-to="appdata" data-edge-label="load app" data-edge-key="3" data-edge-id="cli-appdata" data-composition-points="300.55,225;300.55,260" data-composition-crossover="halo" data-composition-independent="true" d="M 300.55 225 L 300.55 260" class="a-dashed" data-animate="edge" style="--step:3" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:4">
-          <path data-graph-role="automatic-crossover-underlay" d="M 160 408.95 L 393 408.95 Q 401 408.95 401 400.95 L 401 118 Q 401 110 409 110 L 425 110" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="orchestrator" data-edge-to="intake" data-edge-label="start pipeline" data-edge-key="4" data-edge-id="orch-intake" data-composition-points="160,408.95;401,408.95;401,110;425,110" data-composition-crossover="halo" data-composition-independent="true" d="M 160 408.95 L 393 408.95 Q 401 408.95 401 400.95 L 401 118 Q 401 110 409 110 L 425 110" class="a-emphasis" data-animate="edge" style="--step:4" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 135.1 460 L 135.1 476 Q 135.1 484 143.1 484 L 398 484 Q 406 484 406 476 L 406 118 Q 406 110 414 110 L 430 110" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="orchestrator" data-edge-to="intake" data-edge-label="start pipeline" data-edge-key="4" data-edge-id="orch-intake" data-composition-points="135.1,460;135.1,484;406,484;406,110;430,110" data-composition-crossover="halo" data-composition-independent="true" d="M 135.1 460 L 135.1 476 Q 135.1 484 143.1 484 L 398 484 Q 406 484 406 476 L 406 118 Q 406 110 414 110 L 430 110" class="a-emphasis" data-animate="edge" style="--step:4" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:5">
-          <path data-graph-role="automatic-crossover-underlay" d="M 81 440 L 81 577 Q 81 585 89 585 L 210 585" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="orchestrator" data-edge-to="human_compliance" data-edge-label="PEP gate" data-edge-key="5" data-edge-id="orch-compliance" data-composition-points="81,440;81,585;210,585" data-composition-crossover="halo" data-composition-independent="true" d="M 81 440 L 81 577 Q 81 585 89 585 L 210 585" class="a-security" data-animate="edge" style="--step:5" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 170 416 L 186 416 Q 194 416 194 408 L 194 394 Q 194 386 202 386 L 284.5 386 Q 292.5 386 292.5 394 L 292.5 410" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="orchestrator" data-edge-to="hitl" data-edge-label="avg conf &lt; 75%" data-edge-key="5" data-edge-id="orch-hitl" data-composition-points="170,416;194,416;194,386;292.5,386;292.5,410" data-composition-crossover="halo" data-composition-independent="true" d="M 170 416 L 186 416 Q 194 416 194 408 L 194 394 Q 194 386 202 386 L 284.5 386 Q 292.5 386 292.5 394 L 292.5 410" class="a-security" data-animate="edge" style="--step:5" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:6">
-          <path data-graph-role="automatic-crossover-underlay" d="M 110.05 440 L 110.05 487 Q 110.05 495 118.05 495 L 210 495" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="orchestrator" data-edge-to="human_credit" data-edge-label="credit decision" data-edge-key="6" data-edge-id="orch-credit" data-composition-points="110.05,440;110.05,495;210,495" data-composition-crossover="halo" data-composition-independent="true" d="M 110.05 440 L 110.05 487 Q 110.05 495 118.05 495 L 210 495" class="a-emphasis" data-animate="edge" style="--step:6" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 120.05 460 L 120.05 522 Q 120.05 530 128.05 530 L 220 530" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="orchestrator" data-edge-to="human_compliance" data-edge-label="PEP gate" data-edge-key="6" data-edge-id="orch-compliance" data-composition-points="120.05,460;120.05,530;220,530" data-composition-crossover="halo" data-composition-independent="true" d="M 120.05 460 L 120.05 522 Q 120.05 530 128.05 530 L 220 530" class="a-security" data-animate="edge" style="--step:6" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:7">
-          <path data-graph-role="automatic-crossover-underlay" d="M 46 440 L 46 653 Q 46 661 54 661 L 210 661" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="orchestrator" data-edge-to="hitl" data-edge-label="confidence &lt; 75%" data-edge-key="7" data-edge-id="orch-hitl" data-composition-points="46,440;46,661;210,661" data-composition-crossover="halo" data-composition-independent="true" d="M 46 440 L 46 653 Q 46 661 54 661 L 210 661" class="a-security" data-animate="edge" style="--step:7" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 105 460 L 105 612 Q 105 620 113 620 L 220 620" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="orchestrator" data-edge-to="human_credit" data-edge-label="credit decision" data-edge-key="7" data-edge-id="orch-credit" data-composition-points="105,460;105,620;220,620" data-composition-crossover="halo" data-composition-independent="true" d="M 105 460 L 105 612 Q 105 620 113 620 L 220 620" class="a-emphasis" data-animate="edge" style="--step:7" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:8">
-          <path data-graph-role="automatic-crossover-underlay" d="M 160 424 L 575 424 Q 583 424 583 432 L 583 708 Q 583 716 591 716 L 699.5 716 Q 707.5 716 707.5 724 L 707.5 740" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="orchestrator" data-edge-to="audit" data-edge-label="log events" data-edge-key="8" data-edge-id="orch-audit" data-composition-points="160,424;583,424;583,716;707.5,716;707.5,740" data-composition-crossover="halo" data-composition-independent="true" d="M 160 424 L 575 424 Q 583 424 583 432 L 583 708 Q 583 716 591 716 L 699.5 716 Q 707.5 716 707.5 724 L 707.5 740" class="a-dashed" data-animate="edge" style="--step:8" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 89.95 460 L 89.95 776 Q 89.95 784 97.95 784 L 645 784" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="orchestrator" data-edge-to="audit" data-edge-label="log events" data-edge-key="8" data-edge-id="orch-audit" data-composition-points="89.95,460;89.95,784;645,784" data-composition-crossover="halo" data-composition-independent="true" d="M 89.95 460 L 89.95 776 Q 89.95 784 97.95 784 L 645 784" class="a-dashed" data-animate="edge" style="--step:8" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:9">
-          <path data-graph-role="automatic-crossover-underlay" d="M 510.55 140 L 510.55 170" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="intake" data-edge-to="docint" data-edge-key="9" data-edge-id="seq-1-2" data-composition-points="510.55,140;510.55,170" data-composition-crossover="halo" data-composition-independent="true" d="M 510.55 140 L 510.55 170" class="a-default" data-animate="edge" style="--step:9" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 515.55 140 L 515.55 170" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="intake" data-edge-to="docint" data-edge-key="9" data-edge-id="seq-1-2" data-composition-points="515.55,140;515.55,170" data-composition-crossover="halo" data-composition-independent="true" d="M 515.55 140 L 515.55 170" class="a-default" data-animate="edge" style="--step:9" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:10">
-          <path data-graph-role="automatic-crossover-underlay" d="M 495.5 230 L 495.5 260" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="docint" data-edge-to="completeness" data-edge-key="10" data-edge-id="seq-2-3" data-composition-points="495.5,230;495.5,260" data-composition-crossover="halo" data-composition-independent="true" d="M 495.5 230 L 495.5 260" class="a-default" data-animate="edge" style="--step:10" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 500.5 230 L 500.5 260" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="docint" data-edge-to="completeness" data-edge-key="10" data-edge-id="seq-2-3" data-composition-points="500.5,230;500.5,260" data-composition-crossover="halo" data-composition-independent="true" d="M 500.5 230 L 500.5 260" class="a-default" data-animate="edge" style="--step:10" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:11">
-          <path data-graph-role="automatic-crossover-underlay" d="M 502.5 320 L 502.5 350" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="completeness" data-edge-to="duediligence" data-edge-key="11" data-edge-id="seq-3-4" data-composition-points="502.5,320;502.5,350" data-composition-crossover="halo" data-composition-independent="true" d="M 502.5 320 L 502.5 350" class="a-default" data-animate="edge" style="--step:11" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 507.5 320 L 507.5 350" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="completeness" data-edge-to="duediligence" data-edge-key="11" data-edge-id="seq-3-4" data-composition-points="507.5,320;507.5,350" data-composition-crossover="halo" data-composition-independent="true" d="M 507.5 320 L 507.5 350" class="a-default" data-animate="edge" style="--step:11" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:12">
-          <path data-graph-role="automatic-crossover-underlay" d="M 502.5 410 L 502.5 440" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="duediligence" data-edge-to="policy" data-edge-key="12" data-edge-id="seq-4-5" data-composition-points="502.5,410;502.5,440" data-composition-crossover="halo" data-composition-independent="true" d="M 502.5 410 L 502.5 440" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 507.5 410 L 507.5 440" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="duediligence" data-edge-to="policy" data-edge-key="12" data-edge-id="seq-4-5" data-composition-points="507.5,410;507.5,440" data-composition-crossover="halo" data-composition-independent="true" d="M 507.5 410 L 507.5 440" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:13">
-          <path data-graph-role="automatic-crossover-underlay" d="M 502.5 500 L 502.5 530" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="policy" data-edge-to="risk" data-edge-key="13" data-edge-id="seq-5-6" data-composition-points="502.5,500;502.5,530" data-composition-crossover="halo" data-composition-independent="true" d="M 502.5 500 L 502.5 530" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 507.5 500 L 507.5 530" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="policy" data-edge-to="risk" data-edge-key="13" data-edge-id="seq-5-6" data-composition-points="507.5,500;507.5,530" data-composition-crossover="halo" data-composition-independent="true" d="M 507.5 500 L 507.5 530" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:14">
-          <path data-graph-role="automatic-crossover-underlay" d="M 502.5 590 L 502.5 620" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="risk" data-edge-to="approval_wf" data-edge-key="14" data-edge-id="seq-6-7" data-composition-points="502.5,590;502.5,620" data-composition-crossover="halo" data-composition-independent="true" d="M 502.5 590 L 502.5 620" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 507.5 590 L 507.5 620" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="risk" data-edge-to="approval_wf" data-edge-key="14" data-edge-id="seq-6-7" data-composition-points="507.5,590;507.5,620" data-composition-crossover="halo" data-composition-independent="true" d="M 507.5 590 L 507.5 620" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:15">
-          <path data-graph-role="automatic-crossover-underlay" d="M 502.5 680 L 502.5 710" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="approval_wf" data-edge-to="disbursement" data-edge-key="15" data-edge-id="seq-7-8" data-composition-points="502.5,680;502.5,710" data-composition-crossover="halo" data-composition-independent="true" d="M 502.5 680 L 502.5 710" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 507.5 680 L 507.5 710" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="approval_wf" data-edge-to="disbursement" data-edge-key="15" data-edge-id="seq-7-8" data-composition-points="507.5,680;507.5,710" data-composition-crossover="halo" data-composition-independent="true" d="M 507.5 680 L 507.5 710" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:16">
-          <path data-graph-role="automatic-crossover-underlay" d="M 580 200 L 635 200" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="docint" data-edge-to="security" data-edge-label="mask PII" data-edge-key="16" data-edge-id="docint-pii" data-composition-points="580,200;635,200" data-composition-crossover="halo" data-composition-independent="true" d="M 580 200 L 635 200" class="a-security" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 585 200 L 645 200" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="docint" data-edge-to="security" data-edge-label="mask PII" data-edge-key="16" data-edge-id="docint-pii" data-composition-points="585,200;645,200" data-composition-crossover="halo" data-composition-independent="true" d="M 585 200 L 645 200" class="a-security" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:17">
-          <path data-graph-role="automatic-crossover-underlay" d="M 509.5 230 L 509.5 246 Q 509.5 254 517.5 254 L 796 254 Q 804 254 804 262 L 804 478 Q 804 486 796 486 L 780 486" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="docint" data-edge-to="llm" data-edge-label="extract fields" data-edge-key="17" data-edge-id="docint-llm" data-composition-points="509.5,230;509.5,254;804,254;804,486;780,486" data-composition-crossover="halo" data-composition-independent="true" d="M 509.5 230 L 509.5 246 Q 509.5 254 517.5 254 L 796 254 Q 804 254 804 262 L 804 478 Q 804 486 796 486 L 780 486" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 514.5 230 L 514.5 246 Q 514.5 254 522.5 254 L 806 254 Q 814 254 814 262 L 814 478 Q 814 486 806 486 L 790 486" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="docint" data-edge-to="llm" data-edge-label="extract fields" data-edge-key="17" data-edge-id="docint-llm" data-composition-points="514.5,230;514.5,254;814,254;814,486;790,486" data-composition-crossover="halo" data-composition-independent="true" d="M 514.5 230 L 514.5 246 Q 514.5 254 522.5 254 L 806 254 Q 814 254 814 262 L 814 478 Q 814 486 806 486 L 790 486" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:18">
-          <path data-graph-role="automatic-crossover-underlay" d="M 580 380 L 635 380" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="duediligence" data-edge-to="screening" data-edge-label="screen" data-edge-key="18" data-edge-id="duediligence-screen" data-composition-points="580,380;635,380" data-composition-crossover="halo" data-composition-independent="true" d="M 580 380 L 635 380" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 521.5 410 L 521.5 426 Q 521.5 434 529.5 434 L 709.5 434 Q 717.5 434 717.5 426 L 717.5 410" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="duediligence" data-edge-to="screening" data-edge-label="screen entity" data-edge-key="18" data-edge-id="duediligence-screen" data-composition-points="521.5,410;521.5,434;717.5,434;717.5,410" data-composition-crossover="halo" data-composition-independent="true" d="M 521.5 410 L 521.5 426 Q 521.5 434 529.5 434 L 709.5 434 Q 717.5 434 717.5 426 L 717.5 410" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:19">
-          <path data-graph-role="automatic-crossover-underlay" d="M 580 470 L 603 470 Q 611 470 611 478 L 611 582 Q 611 590 619 590 L 635 590" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="policy" data-edge-to="knowledge" data-edge-key="19" data-edge-id="policy-kb" data-composition-points="580,470;611,470;611,590;635,590" data-composition-crossover="halo" data-composition-independent="true" d="M 580 470 L 603 470 Q 611 470 611 478 L 611 582 Q 611 590 619 590 L 635 590" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 585 470 L 634 470 Q 642 470 642 478 L 642 528 Q 642 536 650 536 L 709.5 536 Q 717.5 536 717.5 544 L 717.5 560" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="policy" data-edge-to="knowledge" data-edge-key="19" data-edge-id="policy-kb" data-composition-points="585,470;642,470;642,536;717.5,536;717.5,560" data-composition-crossover="halo" data-composition-independent="true" d="M 585 470 L 634 470 Q 642 470 642 478 L 642 528 Q 642 536 650 536 L 709.5 536 Q 717.5 536 717.5 544 L 717.5 560" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:20">
-          <path data-graph-role="automatic-crossover-underlay" d="M 707.5 620 L 707.5 650" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="knowledge" data-edge-to="qdrant" data-edge-key="20" data-edge-id="kb-qdrant" data-composition-points="707.5,620;707.5,650" data-composition-crossover="halo" data-composition-independent="true" d="M 707.5 620 L 707.5 650" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 717.5 620 L 717.5 650" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="knowledge" data-edge-to="qdrant" data-edge-key="20" data-edge-id="kb-qdrant" data-composition-points="717.5,620;717.5,650" data-composition-crossover="halo" data-composition-independent="true" d="M 717.5 620 L 717.5 650" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:21">
-          <path data-graph-role="automatic-crossover-underlay" d="M 580 546 L 643 546 Q 651 546 651 538 L 651 530" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="risk" data-edge-to="llm" data-edge-key="21" data-edge-id="risk-llm" data-composition-points="580,546;651,546;651,530" data-composition-crossover="halo" data-composition-independent="true" d="M 580 546 L 643 546 Q 651 546 651 538 L 651 530" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 585 546 L 653 546 Q 661 546 661 538 L 661 530" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="risk" data-edge-to="llm" data-edge-key="21" data-edge-id="risk-llm" data-composition-points="585,546;661,546;661,530" data-composition-crossover="halo" data-composition-independent="true" d="M 585 546 L 653 546 Q 661 546 661 538 L 661 530" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:22">
-          <path data-graph-role="automatic-crossover-underlay" d="M 580 650 L 596 650 Q 604 650 604 642 L 604 562 Q 604 554 612 554 L 699.5 554 Q 707.5 554 707.5 546 L 707.5 530" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="approval_wf" data-edge-to="llm" data-edge-key="22" data-edge-id="approval-llm" data-composition-points="580,650;604,650;604,554;707.5,554;707.5,530" data-composition-crossover="halo" data-composition-independent="true" d="M 580 650 L 596 650 Q 604 650 604 642 L 604 562 Q 604 554 612 554 L 699.5 554 Q 707.5 554 707.5 546 L 707.5 530" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 585 650 L 601 650 Q 609 650 609 642 L 609 515 Q 609 507 617 507 L 645 507" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="approval_wf" data-edge-to="llm" data-edge-key="22" data-edge-id="approval-llm" data-composition-points="585,650;609,650;609,507;645,507" data-composition-crossover="halo" data-composition-independent="true" d="M 585 650 L 601 650 Q 609 650 609 642 L 609 515 Q 609 507 617 507 L 645 507" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:23">
-          <path data-graph-role="automatic-crossover-underlay" d="M 564 770 L 564 838 Q 564 846 572 846 L 635 846" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="disbursement" data-edge-to="output" data-edge-label="write outputs" data-edge-key="23" data-edge-id="disbursement-output" data-composition-points="564,770;564,846;635,846" data-composition-crossover="halo" data-composition-independent="true" d="M 564 770 L 564 838 Q 564 846 572 846 L 635 846" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 569 770 L 569 838 Q 569 846 577 846 L 645 846" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="disbursement" data-edge-to="output" data-edge-label="write outputs" data-edge-key="23" data-edge-id="disbursement-output" data-composition-points="569,770;569,846;645,846" data-composition-crossover="halo" data-composition-independent="true" d="M 569 770 L 569 838 Q 569 846 577 846 L 645 846" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:24">
-          <path data-graph-role="automatic-crossover-underlay" d="M 780 500 L 863 500 Q 868 500 868 505 L 868 510" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="llm" data-edge-to="openrouter" data-edge-label="LLM completions" data-edge-key="24" data-edge-id="llm-openrouter" data-composition-points="780,500;868,500;868,510" data-composition-crossover="halo" data-composition-independent="true" d="M 780 500 L 863 500 Q 868 500 868 505 L 868 510" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 790 500 L 871 500 Q 876 500 876 505 L 876 510" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="llm" data-edge-to="openrouter" data-edge-label="LLM completions" data-edge-key="24" data-edge-id="llm-openrouter" data-composition-points="790,500;876,500;876,510" data-composition-crossover="halo" data-composition-independent="true" d="M 790 500 L 871 500 Q 876 500 876 505 L 876 510" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:25">
-          <path data-graph-role="automatic-crossover-underlay" d="M 780 666 L 860 666 Q 868 666 868 658 L 868 575" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="qdrant" data-edge-to="openrouter" data-edge-label="embed query" data-edge-key="25" data-edge-id="qdrant-openrouter" data-composition-points="780,666;868,666;868,575" data-composition-crossover="halo" data-composition-independent="true" d="M 780 666 L 860 666 Q 868 666 868 658 L 868 575" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 790 666 L 868 666 Q 876 666 876 658 L 876 575" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="qdrant" data-edge-to="openrouter" data-edge-label="embed query" data-edge-key="25" data-edge-id="qdrant-openrouter" data-composition-points="790,666;876,666;876,575" data-composition-crossover="halo" data-composition-independent="true" d="M 790 666 L 868 666 Q 876 666 876 658 L 876 575" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
 
         <!-- Components -->
         <g id="node-applicant" data-node-id="applicant" data-node-label="Applicant / RM" tabindex="0" role="button" aria-label="Focus Applicant / RM, Submits application, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="Submits application" data-node-context="Architecture component">
           <title>Applicant / RM · Submits application · Architecture component</title>
-          <rect x="30" y="80" width="130" height="60" rx="8" class="c-mask"/>
-          <rect x="30" y="80" width="130" height="60" rx="8" class="c-external" data-animate="node" style="--step:0" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(36 86) scale(0.6875)">
+          <rect x="40" y="80" width="130" height="60" rx="8" class="c-mask"/>
+          <rect x="40" y="80" width="130" height="60" rx="8" class="c-external" data-animate="node" style="--step:0" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 86) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="95" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Applicant / RM</text>
-        <text data-detail="context" x="95" y="124" class="t-muted" font-size="9" text-anchor="middle">Submits application</text>
+          <text data-node-label="" data-detail-anchor="" x="105" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Applicant / RM</text>
+        <text data-detail="context" x="105" y="124" class="t-muted" font-size="9" text-anchor="middle">Submits application</text>
         </g>
 
-        <g id="node-orchestrator" data-node-id="orchestrator" data-node-label="Orchestrator" tabindex="0" role="button" aria-label="Focus Orchestrator, Case state machine (SoD), Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Case state machine (SoD)" data-node-context="Architecture component">
-          <title>Orchestrator · Case state machine (SoD) · Architecture component</title>
-          <rect x="30" y="380" width="130" height="60" rx="8" class="c-mask"/>
-          <rect x="30" y="380" width="130" height="60" rx="8" class="c-backend" data-animate="node" style="--step:2" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(36 386) scale(0.6875)">
+        <g id="node-orchestrator" data-node-id="orchestrator" data-node-label="Orchestrator" tabindex="0" role="button" aria-label="Focus Orchestrator, Case state machine · SoD, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Case state machine · SoD" data-node-context="Architecture component">
+          <title>Orchestrator · Case state machine · SoD · Architecture component</title>
+          <rect x="40" y="400" width="130" height="60" rx="8" class="c-mask"/>
+          <rect x="40" y="400" width="130" height="60" rx="8" class="c-backend" data-animate="node" style="--step:2" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(46 406) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="95" y="408" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Orchestrator</text>
-        <text data-detail="context" x="95" y="424" class="t-muted" font-size="8.4" text-anchor="middle">Case state machine (SoD)</text>
+          <text data-node-label="" data-detail-anchor="" x="105" y="428" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Orchestrator</text>
+        <text data-detail="context" x="105" y="444" class="t-muted" font-size="8.4" text-anchor="middle">Case state machine · SoD</text>
         </g>
 
         <g id="node-webui" data-node-id="webui" data-node-label="Web UI" tabindex="0" role="button" aria-label="Focus Web UI, FastAPI · Alpine.js · port 8000, Architecture component" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="FastAPI · Alpine.js · port 8000" data-node-context="Architecture component">
           <title>Web UI · FastAPI · Alpine.js · port 8000 · Architecture component</title>
-          <rect x="210" y="80" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="210" y="80" width="145" height="60" rx="8" class="c-frontend" data-animate="node" style="--step:1" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(216 86) scale(0.6875)">
+          <rect x="220" y="80" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="220" y="80" width="145" height="60" rx="8" class="c-frontend" data-animate="node" style="--step:1" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(226 86) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="282.5" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Web UI</text>
-        <text data-detail="context" x="282.5" y="124" class="t-muted" font-size="7.3" text-anchor="middle">FastAPI · Alpine.js · port 8000</text>
+          <text data-node-label="" data-detail-anchor="" x="292.5" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Web UI</text>
+        <text data-detail="context" x="292.5" y="124" class="t-muted" font-size="7.3" text-anchor="middle">FastAPI · Alpine.js · port 8000</text>
         </g>
 
         <g id="node-cli" data-node-id="cli" data-node-label="CLI Entry Point" tabindex="0" role="button" aria-label="Focus CLI Entry Point, run_demo.py, Architecture component" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="run_demo.py" data-node-context="Architecture component">
           <title>CLI Entry Point · run_demo.py · Architecture component</title>
-          <rect x="210" y="165" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="210" y="165" width="145" height="60" rx="8" class="c-frontend" data-animate="node" style="--step:2" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(216 171) scale(0.6875)">
+          <rect x="220" y="165" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="220" y="165" width="145" height="60" rx="8" class="c-frontend" data-animate="node" style="--step:2" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(226 171) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="282.5" y="193" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CLI Entry Point</text>
-        <text data-detail="context" x="282.5" y="209" class="t-muted" font-size="9" text-anchor="middle">run_demo.py</text>
+          <text data-node-label="" data-detail-anchor="" x="292.5" y="193" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CLI Entry Point</text>
+        <text data-detail="context" x="292.5" y="209" class="t-muted" font-size="9" text-anchor="middle">run_demo.py</text>
         </g>
 
         <g id="node-appdata" data-node-id="appdata" data-node-label="Application Files" tabindex="0" role="button" aria-label="Focus Application Files, JSON + supporting docs, Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="JSON + supporting docs" data-node-context="Architecture component">
           <title>Application Files · JSON + supporting docs · Architecture component</title>
-          <rect x="210" y="260" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="210" y="260" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:4" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(216 266) scale(0.6875)">
+          <rect x="220" y="260" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="220" y="260" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:4" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(226 266) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="282.5" y="288" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Application Files</text>
-        <text data-detail="context" x="282.5" y="304" class="t-muted" font-size="9" text-anchor="middle">JSON + supporting docs</text>
+          <text data-node-label="" data-detail-anchor="" x="292.5" y="288" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Application Files</text>
+        <text data-detail="context" x="292.5" y="304" class="t-muted" font-size="9" text-anchor="middle">JSON + supporting docs</text>
         </g>
 
-        <g id="node-human_credit" data-node-id="human_credit" data-node-label="Credit Authority" tabindex="0" role="button" aria-label="Focus Credit Authority, SCM · Committee · Board, Human Gates (SoD enforced)" aria-pressed="false" data-node-kind="external" data-node-sublabel="SCM · Committee · Board" data-node-context="Human Gates (SoD enforced)">
-          <title>Credit Authority · SCM · Committee · Board · Human Gates (SoD enforced)</title>
-          <rect x="210" y="465" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="210" y="465" width="145" height="60" rx="8" class="c-external" data-animate="node" style="--step:7" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(216 471) scale(0.6875)">
+        <g id="node-hitl" data-node-id="hitl" data-node-label="Senior Analyst" tabindex="0" role="button" aria-label="Focus Senior Analyst, Data validation · avg conf &lt; 75%, Human Gates — SoD enforced" aria-pressed="false" data-node-kind="external" data-node-sublabel="Data validation · avg conf &lt; 75%" data-node-context="Human Gates — SoD enforced">
+          <title>Senior Analyst · Data validation · avg conf &lt; 75% · Human Gates — SoD enforced</title>
+          <rect x="220" y="410" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="220" y="410" width="145" height="60" rx="8" class="c-external" data-animate="node" style="--step:6" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(226 416) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="282.5" y="493" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Credit Authority</text>
-        <text data-detail="context" x="282.5" y="509" class="t-muted" font-size="9" text-anchor="middle">SCM · Committee · Board</text>
+          <text data-node-label="" data-detail-anchor="" x="292.5" y="438" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Senior Analyst</text>
+        <text data-detail="context" x="292.5" y="454" class="t-muted" font-size="7.1" text-anchor="middle">Data validation · avg conf &lt; 75%</text>
         </g>
 
-        <g id="node-human_compliance" data-node-id="human_compliance" data-node-label="Compliance Officer" tabindex="0" role="button" aria-label="Focus Compliance Officer, PEP / sanctions gate, Human Gates (SoD enforced)" aria-pressed="false" data-node-kind="external" data-node-sublabel="PEP / sanctions gate" data-node-context="Human Gates (SoD enforced)">
-          <title>Compliance Officer · PEP / sanctions gate · Human Gates (SoD enforced)</title>
-          <rect x="210" y="555" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="210" y="555" width="145" height="60" rx="8" class="c-external" data-animate="node" style="--step:6" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(216 561) scale(0.6875)">
+        <g id="node-human_compliance" data-node-id="human_compliance" data-node-label="Compliance Officer" tabindex="0" role="button" aria-label="Focus Compliance Officer, PEP / sanctions EDD gate, Human Gates — SoD enforced" aria-pressed="false" data-node-kind="external" data-node-sublabel="PEP / sanctions EDD gate" data-node-context="Human Gates — SoD enforced">
+          <title>Compliance Officer · PEP / sanctions EDD gate · Human Gates — SoD enforced</title>
+          <rect x="220" y="500" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="220" y="500" width="145" height="60" rx="8" class="c-external" data-animate="node" style="--step:7" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(226 506) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="282.5" y="583" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Compliance Officer</text>
-        <text data-detail="context" x="282.5" y="599" class="t-muted" font-size="9" text-anchor="middle">PEP / sanctions gate</text>
+          <text data-node-label="" data-detail-anchor="" x="292.5" y="528" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Compliance Officer</text>
+        <text data-detail="context" x="292.5" y="544" class="t-muted" font-size="9" text-anchor="middle">PEP / sanctions EDD gate</text>
         </g>
 
-        <g id="node-hitl" data-node-id="hitl" data-node-label="HITL Validator" tabindex="0" role="button" aria-label="Focus HITL Validator, Confidence &lt; 75% gate, Human Gates (SoD enforced)" aria-pressed="false" data-node-kind="external" data-node-sublabel="Confidence &lt; 75% gate" data-node-context="Human Gates (SoD enforced)">
-          <title>HITL Validator · Confidence &lt; 75% gate · Human Gates (SoD enforced)</title>
-          <rect x="210" y="645" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="210" y="645" width="145" height="60" rx="8" class="c-external" data-animate="node" style="--step:8" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(216 651) scale(0.6875)">
+        <g id="node-human_credit" data-node-id="human_credit" data-node-label="Credit Authority" tabindex="0" role="button" aria-label="Focus Credit Authority, SCM · Committee · Board, Human Gates — SoD enforced" aria-pressed="false" data-node-kind="external" data-node-sublabel="SCM · Committee · Board" data-node-context="Human Gates — SoD enforced">
+          <title>Credit Authority · SCM · Committee · Board · Human Gates — SoD enforced</title>
+          <rect x="220" y="590" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="220" y="590" width="145" height="60" rx="8" class="c-external" data-animate="node" style="--step:8" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(226 596) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="282.5" y="673" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">HITL Validator</text>
-        <text data-detail="context" x="282.5" y="689" class="t-muted" font-size="9" text-anchor="middle">Confidence &lt; 75% gate</text>
+          <text data-node-label="" data-detail-anchor="" x="292.5" y="618" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Credit Authority</text>
+        <text data-detail="context" x="292.5" y="634" class="t-muted" font-size="9" text-anchor="middle">SCM · Committee · Board</text>
         </g>
 
-        <g id="node-intake" data-node-id="intake" data-node-label="Intake Agent" tabindex="0" role="button" aria-label="Focus Intake Agent, Form completeness · doc list, Agent Pipeline (sequential)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Form completeness · doc list" data-node-context="Agent Pipeline (sequential)">
-          <title>Intake Agent · Form completeness · doc list · Agent Pipeline (sequential)</title>
-          <rect x="425" y="80" width="155" height="60" rx="8" class="c-mask"/>
-          <rect x="425" y="80" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:5" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(431 86) scale(0.6875)">
+        <g id="node-intake" data-node-id="intake" data-node-label="Intake Agent" tabindex="0" role="button" aria-label="Focus Intake Agent, Form completeness · doc list, Agent Pipeline — sequential" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Form completeness · doc list" data-node-context="Agent Pipeline — sequential">
+          <title>Intake Agent · Form completeness · doc list · Agent Pipeline — sequential</title>
+          <rect x="430" y="80" width="155" height="60" rx="8" class="c-mask"/>
+          <rect x="430" y="80" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:5" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(436 86) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="502.5" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Intake Agent</text>
-        <text data-detail="context" x="502.5" y="124" class="t-muted" font-size="8.7" text-anchor="middle">Form completeness · doc list</text>
+          <text data-node-label="" data-detail-anchor="" x="507.5" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Intake Agent</text>
+        <text data-detail="context" x="507.5" y="124" class="t-muted" font-size="8.7" text-anchor="middle">Form completeness · doc list</text>
         </g>
 
-        <g id="node-docint" data-node-id="docint" data-node-label="Document Intelligence" tabindex="0" role="button" aria-label="Focus Document Intelligence, 35+ fields · confidence scores, Agent Pipeline (sequential)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="35+ fields · confidence scores" data-node-context="Agent Pipeline (sequential)">
-          <title>Document Intelligence · 35+ fields · confidence scores · Agent Pipeline (sequential)</title>
-          <rect x="425" y="170" width="155" height="60" rx="8" class="c-mask"/>
-          <rect x="425" y="170" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:10" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(431 176) scale(0.6875)">
+        <g id="node-docint" data-node-id="docint" data-node-label="Document Intelligence" tabindex="0" role="button" aria-label="Focus Document Intelligence, 35+ fields · confidence scores, Agent Pipeline — sequential" aria-pressed="false" data-node-kind="backend" data-node-sublabel="35+ fields · confidence scores" data-node-context="Agent Pipeline — sequential">
+          <title>Document Intelligence · 35+ fields · confidence scores · Agent Pipeline — sequential</title>
+          <rect x="430" y="170" width="155" height="60" rx="8" class="c-mask"/>
+          <rect x="430" y="170" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:10" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(436 176) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="502.5" y="198" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Document Intelligence</text>
-        <text data-detail="context" x="502.5" y="214" class="t-muted" font-size="8.1" text-anchor="middle">35+ fields · confidence scores</text>
+          <text data-node-label="" data-detail-anchor="" x="507.5" y="198" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Document Intelligence</text>
+        <text data-detail="context" x="507.5" y="214" class="t-muted" font-size="8.1" text-anchor="middle">35+ fields · confidence scores</text>
         </g>
 
-        <g id="node-completeness" data-node-id="completeness" data-node-label="Completeness Agent" tabindex="0" role="button" aria-label="Focus Completeness Agent, Missing docs → RM email, Agent Pipeline (sequential)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Missing docs → RM email" data-node-context="Agent Pipeline (sequential)">
-          <title>Completeness Agent · Missing docs → RM email · Agent Pipeline (sequential)</title>
-          <rect x="425" y="260" width="155" height="60" rx="8" class="c-mask"/>
-          <rect x="425" y="260" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:11" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(431 266) scale(0.6875)">
+        <g id="node-completeness" data-node-id="completeness" data-node-label="Completeness Agent" tabindex="0" role="button" aria-label="Focus Completeness Agent, Missing docs → RM email, Agent Pipeline — sequential" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Missing docs → RM email" data-node-context="Agent Pipeline — sequential">
+          <title>Completeness Agent · Missing docs → RM email · Agent Pipeline — sequential</title>
+          <rect x="430" y="260" width="155" height="60" rx="8" class="c-mask"/>
+          <rect x="430" y="260" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:11" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(436 266) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="502.5" y="288" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Completeness Agent</text>
-        <text data-detail="context" x="502.5" y="304" class="t-muted" font-size="9" text-anchor="middle">Missing docs → RM email</text>
+          <text data-node-label="" data-detail-anchor="" x="507.5" y="288" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Completeness Agent</text>
+        <text data-detail="context" x="507.5" y="304" class="t-muted" font-size="9" text-anchor="middle">Missing docs → RM email</text>
         </g>
 
-        <g id="node-duediligence" data-node-id="duediligence" data-node-label="Due Diligence Agent" tabindex="0" role="button" aria-label="Focus Due Diligence Agent, KYC · Sanctions · Conduct, Agent Pipeline (sequential)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="KYC · Sanctions · Conduct" data-node-context="Agent Pipeline (sequential)">
-          <title>Due Diligence Agent · KYC · Sanctions · Conduct · Agent Pipeline (sequential)</title>
-          <rect x="425" y="350" width="155" height="60" rx="8" class="c-mask"/>
-          <rect x="425" y="350" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(431 356) scale(0.6875)">
+        <g id="node-duediligence" data-node-id="duediligence" data-node-label="Due Diligence Agent" tabindex="0" role="button" aria-label="Focus Due Diligence Agent, KYC · Sanctions · Conduct, Agent Pipeline — sequential" aria-pressed="false" data-node-kind="backend" data-node-sublabel="KYC · Sanctions · Conduct" data-node-context="Agent Pipeline — sequential">
+          <title>Due Diligence Agent · KYC · Sanctions · Conduct · Agent Pipeline — sequential</title>
+          <rect x="430" y="350" width="155" height="60" rx="8" class="c-mask"/>
+          <rect x="430" y="350" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(436 356) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="502.5" y="378" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Due Diligence Agent</text>
-        <text data-detail="context" x="502.5" y="394" class="t-muted" font-size="9" text-anchor="middle">KYC · Sanctions · Conduct</text>
+          <text data-node-label="" data-detail-anchor="" x="507.5" y="378" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Due Diligence Agent</text>
+        <text data-detail="context" x="507.5" y="394" class="t-muted" font-size="9" text-anchor="middle">KYC · Sanctions · Conduct</text>
         </g>
 
-        <g id="node-policy" data-node-id="policy" data-node-label="Policy Eligibility" tabindex="0" role="button" aria-label="Focus Policy Eligibility, 13 clauses · DSCR · LTV, Agent Pipeline (sequential)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="13 clauses · DSCR · LTV" data-node-context="Agent Pipeline (sequential)">
-          <title>Policy Eligibility · 13 clauses · DSCR · LTV · Agent Pipeline (sequential)</title>
-          <rect x="425" y="440" width="155" height="60" rx="8" class="c-mask"/>
-          <rect x="425" y="440" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(431 446) scale(0.6875)">
+        <g id="node-policy" data-node-id="policy" data-node-label="Policy Eligibility" tabindex="0" role="button" aria-label="Focus Policy Eligibility, 13 clauses · DSCR · LTV, Agent Pipeline — sequential" aria-pressed="false" data-node-kind="backend" data-node-sublabel="13 clauses · DSCR · LTV" data-node-context="Agent Pipeline — sequential">
+          <title>Policy Eligibility · 13 clauses · DSCR · LTV · Agent Pipeline — sequential</title>
+          <rect x="430" y="440" width="155" height="60" rx="8" class="c-mask"/>
+          <rect x="430" y="440" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(436 446) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="502.5" y="468" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Policy Eligibility</text>
-        <text data-detail="context" x="502.5" y="484" class="t-muted" font-size="9" text-anchor="middle">13 clauses · DSCR · LTV</text>
+          <text data-node-label="" data-detail-anchor="" x="507.5" y="468" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Policy Eligibility</text>
+        <text data-detail="context" x="507.5" y="484" class="t-muted" font-size="9" text-anchor="middle">13 clauses · DSCR · LTV</text>
         </g>
 
-        <g id="node-risk" data-node-id="risk" data-node-label="Risk Agent" tabindex="0" role="button" aria-label="Focus Risk Agent, 8-factor scorecard 1–10, Agent Pipeline (sequential)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="8-factor scorecard 1–10" data-node-context="Agent Pipeline (sequential)">
-          <title>Risk Agent · 8-factor scorecard 1–10 · Agent Pipeline (sequential)</title>
-          <rect x="425" y="530" width="155" height="60" rx="8" class="c-mask"/>
-          <rect x="425" y="530" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(431 536) scale(0.6875)">
+        <g id="node-risk" data-node-id="risk" data-node-label="Risk Agent" tabindex="0" role="button" aria-label="Focus Risk Agent, 8-factor scorecard 1–10, Agent Pipeline — sequential" aria-pressed="false" data-node-kind="backend" data-node-sublabel="8-factor scorecard 1–10" data-node-context="Agent Pipeline — sequential">
+          <title>Risk Agent · 8-factor scorecard 1–10 · Agent Pipeline — sequential</title>
+          <rect x="430" y="530" width="155" height="60" rx="8" class="c-mask"/>
+          <rect x="430" y="530" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(436 536) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="502.5" y="558" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Risk Agent</text>
-        <text data-detail="context" x="502.5" y="574" class="t-muted" font-size="9" text-anchor="middle">8-factor scorecard 1–10</text>
+          <text data-node-label="" data-detail-anchor="" x="507.5" y="558" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Risk Agent</text>
+        <text data-detail="context" x="507.5" y="574" class="t-muted" font-size="9" text-anchor="middle">8-factor scorecard 1–10</text>
         </g>
 
-        <g id="node-approval_wf" data-node-id="approval_wf" data-node-label="Approval Workflow" tabindex="0" role="button" aria-label="Focus Approval Workflow, Route · draft conditions, Agent Pipeline (sequential)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Route · draft conditions" data-node-context="Agent Pipeline (sequential)">
-          <title>Approval Workflow · Route · draft conditions · Agent Pipeline (sequential)</title>
-          <rect x="425" y="620" width="155" height="60" rx="8" class="c-mask"/>
-          <rect x="425" y="620" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(431 626) scale(0.6875)">
+        <g id="node-approval_wf" data-node-id="approval_wf" data-node-label="Approval Workflow" tabindex="0" role="button" aria-label="Focus Approval Workflow, Route · draft conditions, Agent Pipeline — sequential" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Route · draft conditions" data-node-context="Agent Pipeline — sequential">
+          <title>Approval Workflow · Route · draft conditions · Agent Pipeline — sequential</title>
+          <rect x="430" y="620" width="155" height="60" rx="8" class="c-mask"/>
+          <rect x="430" y="620" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(436 626) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="502.5" y="648" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Approval Workflow</text>
-        <text data-detail="context" x="502.5" y="664" class="t-muted" font-size="9" text-anchor="middle">Route · draft conditions</text>
+          <text data-node-label="" data-detail-anchor="" x="507.5" y="648" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Approval Workflow</text>
+        <text data-detail="context" x="507.5" y="664" class="t-muted" font-size="9" text-anchor="middle">Route · draft conditions</text>
         </g>
 
-        <g id="node-disbursement" data-node-id="disbursement" data-node-label="Disbursement Agent" tabindex="0" role="button" aria-label="Focus Disbursement Agent, Condition tracker, Agent Pipeline (sequential)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Condition tracker" data-node-context="Agent Pipeline (sequential)">
-          <title>Disbursement Agent · Condition tracker · Agent Pipeline (sequential)</title>
-          <rect x="425" y="710" width="155" height="60" rx="8" class="c-mask"/>
-          <rect x="425" y="710" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(431 716) scale(0.6875)">
+        <g id="node-disbursement" data-node-id="disbursement" data-node-label="Disbursement Agent" tabindex="0" role="button" aria-label="Focus Disbursement Agent, Condition tracker, Agent Pipeline — sequential" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Condition tracker" data-node-context="Agent Pipeline — sequential">
+          <title>Disbursement Agent · Condition tracker · Agent Pipeline — sequential</title>
+          <rect x="430" y="710" width="155" height="60" rx="8" class="c-mask"/>
+          <rect x="430" y="710" width="155" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(436 716) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="502.5" y="738" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Disbursement Agent</text>
-        <text data-detail="context" x="502.5" y="754" class="t-muted" font-size="9" text-anchor="middle">Condition tracker</text>
+          <text data-node-label="" data-detail-anchor="" x="507.5" y="738" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Disbursement Agent</text>
+        <text data-detail="context" x="507.5" y="754" class="t-muted" font-size="9" text-anchor="middle">Condition tracker</text>
         </g>
 
         <g id="node-security" data-node-id="security" data-node-label="PII Vault" tabindex="0" role="button" aria-label="Focus PII Vault, Mask → model → unmask, Bank Boundary — PII stays here" aria-pressed="false" data-node-kind="security" data-node-sublabel="Mask → model → unmask" data-node-context="Bank Boundary — PII stays here">
           <title>PII Vault · Mask → model → unmask · Bank Boundary — PII stays here</title>
-          <rect x="635" y="170" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="635" y="170" width="145" height="60" rx="8" class="c-security" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(641 176) scale(0.6875)">
+          <rect x="645" y="170" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="645" y="170" width="145" height="60" rx="8" class="c-security" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(651 176) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="707.5" y="198" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">PII Vault</text>
-        <text data-detail="context" x="707.5" y="214" class="t-muted" font-size="9" text-anchor="middle">Mask → model → unmask</text>
+          <text data-node-label="" data-detail-anchor="" x="717.5" y="198" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">PII Vault</text>
+        <text data-detail="context" x="717.5" y="214" class="t-muted" font-size="9" text-anchor="middle">Mask → model → unmask</text>
         </g>
 
         <g id="node-screening" data-node-id="screening" data-node-label="Screening Watchlist" tabindex="0" role="button" aria-label="Focus Screening Watchlist, Sanctions / PEP / Adverse, Bank Boundary — PII stays here" aria-pressed="false" data-node-kind="database" data-node-sublabel="Sanctions / PEP / Adverse" data-node-context="Bank Boundary — PII stays here">
           <title>Screening Watchlist · Sanctions / PEP / Adverse · Bank Boundary — PII stays here</title>
-          <rect x="635" y="350" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="635" y="350" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(641 356) scale(0.6875)">
+          <rect x="645" y="350" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="645" y="350" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(651 356) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="707.5" y="378" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Screening Watchlist</text>
-        <text data-detail="context" x="707.5" y="394" class="t-muted" font-size="9" text-anchor="middle">Sanctions / PEP / Adverse</text>
+          <text data-node-label="" data-detail-anchor="" x="717.5" y="378" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Screening Watchlist</text>
+        <text data-detail="context" x="717.5" y="394" class="t-muted" font-size="9" text-anchor="middle">Sanctions / PEP / Adverse</text>
         </g>
 
         <g id="node-llm" data-node-id="llm" data-node-label="LLM Layer" tabindex="0" role="button" aria-label="Focus LLM Layer, MockLLM · OpenRouterLLM, Bank Boundary — PII stays here" aria-pressed="false" data-node-kind="backend" data-node-sublabel="MockLLM · OpenRouterLLM" data-node-context="Bank Boundary — PII stays here">
           <title>LLM Layer · MockLLM · OpenRouterLLM · Bank Boundary — PII stays here</title>
-          <rect x="635" y="470" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="635" y="470" width="145" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(641 476) scale(0.6875)">
+          <rect x="645" y="470" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="645" y="470" width="145" height="60" rx="8" class="c-backend" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(651 476) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="707.5" y="498" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LLM Layer</text>
-        <text data-detail="context" x="707.5" y="514" class="t-muted" font-size="9" text-anchor="middle">MockLLM · OpenRouterLLM</text>
+          <text data-node-label="" data-detail-anchor="" x="717.5" y="498" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LLM Layer</text>
+        <text data-detail="context" x="717.5" y="514" class="t-muted" font-size="9" text-anchor="middle">MockLLM · OpenRouterLLM</text>
         </g>
 
-        <g id="node-knowledge" data-node-id="knowledge" data-node-label="Policy KB" tabindex="0" role="button" aria-label="Focus Policy KB, Hybrid: BM25 40% + Vector 60%, Bank Boundary — PII stays here" aria-pressed="false" data-node-kind="database" data-node-sublabel="Hybrid: BM25 40% + Vector 60%" data-node-context="Bank Boundary — PII stays here">
-          <title>Policy KB · Hybrid: BM25 40% + Vector 60% · Bank Boundary — PII stays here</title>
-          <rect x="635" y="560" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="635" y="560" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(641 566) scale(0.6875)">
+        <g id="node-knowledge" data-node-id="knowledge" data-node-label="Policy KB" tabindex="0" role="button" aria-label="Focus Policy KB, Hybrid: BM25 40% + Vector 60%, Bank Boundary — PII stays here" aria-pressed="false" data-node-kind="database" data-node-sublabel="Hybrid: BM25 40% + Vector 60%" data-node-tag="cached at startup" data-node-context="Bank Boundary — PII stays here">
+          <title>Policy KB · Hybrid: BM25 40% + Vector 60% · Bank Boundary — PII stays here · cached at startup</title>
+          <rect x="645" y="560" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="645" y="560" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(651 566) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="707.5" y="588" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Policy KB</text>
-        <text data-detail="context" x="707.5" y="604" class="t-muted" font-size="7.8" text-anchor="middle">Hybrid: BM25 40% + Vector 60%</text>
+          <text data-node-label="" data-detail-anchor="" x="717.5" y="588" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Policy KB</text>
+        <text data-detail="context" x="717.5" y="604" class="t-muted" font-size="7.8" text-anchor="middle">Hybrid: BM25 40% + Vector 60%</text>
+        <text data-detail="fine" x="717.5" y="612" class="t-database" font-size="7" text-anchor="middle">cached at startup</text>
         </g>
 
         <g id="node-qdrant" data-node-id="qdrant" data-node-label="Qdrant Vector DB" tabindex="0" role="button" aria-label="Focus Qdrant Vector DB, 143 clauses · 1536-dim, Bank Boundary — PII stays here" aria-pressed="false" data-node-kind="database" data-node-sublabel="143 clauses · 1536-dim" data-node-context="Bank Boundary — PII stays here">
           <title>Qdrant Vector DB · 143 clauses · 1536-dim · Bank Boundary — PII stays here</title>
-          <rect x="635" y="650" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="635" y="650" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(641 656) scale(0.6875)">
+          <rect x="645" y="650" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="645" y="650" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(651 656) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="707.5" y="678" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Qdrant Vector DB</text>
-        <text data-detail="context" x="707.5" y="694" class="t-muted" font-size="9" text-anchor="middle">143 clauses · 1536-dim</text>
+          <text data-node-label="" data-detail-anchor="" x="717.5" y="678" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Qdrant Vector DB</text>
+        <text data-detail="context" x="717.5" y="694" class="t-muted" font-size="9" text-anchor="middle">143 clauses · 1536-dim</text>
         </g>
 
         <g id="node-audit" data-node-id="audit" data-node-label="Audit Log" tabindex="0" role="button" aria-label="Focus Audit Log, SHA-256 hash chain, Bank Boundary — PII stays here" aria-pressed="false" data-node-kind="database" data-node-sublabel="SHA-256 hash chain" data-node-context="Bank Boundary — PII stays here">
           <title>Audit Log · SHA-256 hash chain · Bank Boundary — PII stays here</title>
-          <rect x="635" y="740" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="635" y="740" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:9" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(641 746) scale(0.6875)">
+          <rect x="645" y="740" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="645" y="740" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:9" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(651 746) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="707.5" y="768" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Audit Log</text>
-        <text data-detail="context" x="707.5" y="784" class="t-muted" font-size="9" text-anchor="middle">SHA-256 hash chain</text>
+          <text data-node-label="" data-detail-anchor="" x="717.5" y="768" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Audit Log</text>
+        <text data-detail="context" x="717.5" y="784" class="t-muted" font-size="9" text-anchor="middle">SHA-256 hash chain</text>
         </g>
 
         <g id="node-output" data-node-id="output" data-node-label="Output + Case Report" tabindex="0" role="button" aria-label="Focus Output + Case Report, Summary · Record · Tracker · UI, Bank Boundary — PII stays here" aria-pressed="false" data-node-kind="database" data-node-sublabel="Summary · Record · Tracker · UI" data-node-context="Bank Boundary — PII stays here">
           <title>Output + Case Report · Summary · Record · Tracker · UI · Bank Boundary — PII stays here</title>
-          <rect x="635" y="830" width="145" height="60" rx="8" class="c-mask"/>
-          <rect x="635" y="830" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(641 836) scale(0.6875)">
+          <rect x="645" y="830" width="145" height="60" rx="8" class="c-mask"/>
+          <rect x="645" y="830" width="145" height="60" rx="8" class="c-database" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(651 836) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="707.5" y="858" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Output + Case Report</text>
-        <text data-detail="context" x="707.5" y="874" class="t-muted" font-size="7.3" text-anchor="middle">Summary · Record · Tracker · UI</text>
+          <text data-node-label="" data-detail-anchor="" x="717.5" y="858" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Output + Case Report</text>
+        <text data-detail="context" x="717.5" y="874" class="t-muted" font-size="7.3" text-anchor="middle">Summary · Record · Tracker · UI</text>
         </g>
 
         <g id="node-openrouter" data-node-id="openrouter" data-node-label="OpenRouter API" tabindex="0" role="button" aria-label="Focus OpenRouter API, LLM completions + embeddings, External: OpenRouter" aria-pressed="false" data-node-kind="external" data-node-sublabel="LLM completions + embeddings" data-node-context="External: OpenRouter">
           <title>OpenRouter API · LLM completions + embeddings · External: OpenRouter</title>
-          <rect x="852" y="510" width="155" height="65" rx="8" class="c-mask"/>
-          <rect x="852" y="510" width="155" height="65" rx="8" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(858 516) scale(0.6875)">
+          <rect x="860" y="510" width="155" height="65" rx="8" class="c-mask"/>
+          <rect x="860" y="510" width="155" height="65" rx="8" class="c-external" data-animate="node" style="--step:12" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(866 516) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="929.5" y="540.5" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">OpenRouter API</text>
-        <text data-detail="context" x="929.5" y="556.5" class="t-muted" font-size="8.7" text-anchor="middle">LLM completions + embeddings</text>
+          <text data-node-label="" data-detail-anchor="" x="937.5" y="540.5" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">OpenRouter API</text>
+        <text data-detail="context" x="937.5" y="556.5" class="t-muted" font-size="8.7" text-anchor="middle">LLM completions + embeddings</text>
         </g>
 
         <!-- Connection labels -->
         <g data-detail="context" data-edge-from="applicant" data-edge-to="webui" data-edge-label="submit" data-edge-key="0" data-edge-id="applicant-webui">
-          <rect x="165.6" y="90" width="38.8" height="14" rx="3" class="c-mask"/>
-          <text x="185" y="100" class="t-edge-emphasis" font-size="8" text-anchor="middle">submit</text>
+          <rect x="175.6" y="90" width="38.8" height="14" rx="3" class="c-mask"/>
+          <text x="195" y="100" class="t-edge-emphasis" font-size="8" text-anchor="middle">submit</text>
         </g>
         <g data-detail="context" data-edge-from="webui" data-edge-to="orchestrator" data-edge-label="run_case()" data-edge-key="1" data-edge-id="webui-orch">
-          <rect x="115.25" y="36" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="144.25" y="46" class="t-edge-emphasis" font-size="8" text-anchor="middle">run_case()</text>
+          <rect x="325" y="236" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="354" y="246" class="t-edge-emphasis" font-size="8" text-anchor="middle">run_case()</text>
         </g>
         <g data-detail="context" data-edge-from="cli" data-edge-to="orchestrator" data-edge-label="run_case()" data-edge-key="2" data-edge-id="cli-orch">
-          <rect x="49.900000000000006" y="267.5" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="78.9" y="277.5" class="t-edge-emphasis" font-size="8" text-anchor="middle">run_case()</text>
+          <rect x="59.900000000000006" y="277.5" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="88.9" y="287.5" class="t-edge-emphasis" font-size="8" text-anchor="middle">run_case()</text>
         </g>
         <g data-detail="context" data-edge-from="cli" data-edge-to="appdata" data-edge-label="load app" data-edge-key="3" data-edge-id="cli-appdata">
-          <rect x="236.15000000000003" y="235.5" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="260.35" y="245.5" class="t-edge-dashed" font-size="8" text-anchor="middle">load app</text>
+          <rect x="246.15000000000003" y="235.5" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="270.35" y="245.5" class="t-edge-dashed" font-size="8" text-anchor="middle">load app</text>
         </g>
         <g data-detail="context" data-edge-from="orchestrator" data-edge-to="intake" data-edge-label="start pipeline" data-edge-key="4" data-edge-id="orch-intake">
-          <rect x="362.4" y="239.47500000000002" width="77.2" height="14" rx="3" class="c-mask"/>
-          <text x="401" y="249.47500000000002" class="t-edge-emphasis" font-size="8" text-anchor="middle">start pipeline</text>
+          <rect x="130.36249999999998" y="464" width="77.2" height="14" rx="3" class="c-mask"/>
+          <text x="168.96249999999998" y="474" class="t-edge-emphasis" font-size="8" text-anchor="middle">start pipeline</text>
         </g>
-        <g data-detail="context" data-edge-from="orchestrator" data-edge-to="human_compliance" data-edge-label="PEP gate" data-edge-key="5" data-edge-id="orch-compliance">
-          <rect x="121.3" y="565" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="145.5" y="575" class="t-edge-security" font-size="8" text-anchor="middle">PEP gate</text>
+        <g data-detail="context" data-edge-from="orchestrator" data-edge-to="hitl" data-edge-label="avg conf &lt; 75%" data-edge-key="5" data-edge-id="orch-hitl">
+          <rect x="204.65" y="358" width="77.2" height="14" rx="3" class="c-mask"/>
+          <text x="243.25" y="368" class="t-edge-security" font-size="8" text-anchor="middle">avg conf &lt; 75%</text>
         </g>
-        <g data-detail="context" data-edge-from="orchestrator" data-edge-to="human_credit" data-edge-label="credit decision" data-edge-key="6" data-edge-id="orch-credit">
-          <rect x="119.025" y="475" width="82" height="14" rx="3" class="c-mask"/>
-          <text x="160.025" y="485" class="t-edge-emphasis" font-size="8" text-anchor="middle">credit decision</text>
+        <g data-detail="context" data-edge-from="orchestrator" data-edge-to="human_compliance" data-edge-label="PEP gate" data-edge-key="6" data-edge-id="orch-compliance">
+          <rect x="145.82500000000002" y="510" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="170.025" y="520" class="t-edge-security" font-size="8" text-anchor="middle">PEP gate</text>
         </g>
-        <g data-detail="context" data-edge-from="orchestrator" data-edge-to="hitl" data-edge-label="confidence &lt; 75%" data-edge-key="7" data-edge-id="orch-hitl">
-          <rect x="84.6" y="641" width="86.8" height="14" rx="3" class="c-mask"/>
-          <text x="128" y="651" class="t-edge-security" font-size="8" text-anchor="middle">confidence &lt; 75%</text>
+        <g data-detail="context" data-edge-from="orchestrator" data-edge-to="human_credit" data-edge-label="credit decision" data-edge-key="7" data-edge-id="orch-credit">
+          <rect x="121.5" y="600" width="82" height="14" rx="3" class="c-mask"/>
+          <text x="162.5" y="610" class="t-edge-emphasis" font-size="8" text-anchor="middle">credit decision</text>
         </g>
         <g data-detail="context" data-edge-from="orchestrator" data-edge-to="audit" data-edge-label="log events" data-edge-key="8" data-edge-id="orch-audit">
-          <rect x="342.5" y="434" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="371.5" y="444" class="t-edge-dashed" font-size="8" text-anchor="middle">log events</text>
+          <rect x="338.475" y="764" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="367.475" y="774" class="t-edge-dashed" font-size="8" text-anchor="middle">log events</text>
         </g>
 
 
@@ -5649,53 +5650,53 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
         <g data-detail="context" data-edge-from="docint" data-edge-to="security" data-edge-label="mask PII" data-edge-key="16" data-edge-id="docint-pii">
-          <rect x="583.3" y="180" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="607.5" y="190" class="t-edge-security" font-size="8" text-anchor="middle">mask PII</text>
+          <rect x="590.8" y="180" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="615" y="190" class="t-edge-security" font-size="8" text-anchor="middle">mask PII</text>
         </g>
         <g data-detail="context" data-edge-from="docint" data-edge-to="llm" data-edge-label="extract fields" data-edge-key="17" data-edge-id="docint-llm">
-          <rect x="618.15" y="234" width="77.2" height="14" rx="3" class="c-mask"/>
-          <text x="656.75" y="244" class="t-edge-default" font-size="8" text-anchor="middle">extract fields</text>
+          <rect x="625.65" y="234" width="77.2" height="14" rx="3" class="c-mask"/>
+          <text x="664.25" y="244" class="t-edge-default" font-size="8" text-anchor="middle">extract fields</text>
         </g>
-        <g data-detail="context" data-edge-from="duediligence" data-edge-to="screening" data-edge-label="screen" data-edge-key="18" data-edge-id="duediligence-screen">
-          <rect x="588.1" y="360" width="38.8" height="14" rx="3" class="c-mask"/>
-          <text x="607.5" y="370" class="t-edge-default" font-size="8" text-anchor="middle">screen</text>
+        <g data-detail="context" data-edge-from="duediligence" data-edge-to="screening" data-edge-label="screen entity" data-edge-key="18" data-edge-id="duediligence-screen">
+          <rect x="583.3" y="414" width="72.4" height="14" rx="3" class="c-mask"/>
+          <text x="619.5" y="424" class="t-edge-default" font-size="8" text-anchor="middle">screen entity</text>
         </g>
 
 
 
 
         <g data-detail="context" data-edge-from="disbursement" data-edge-to="output" data-edge-label="write outputs" data-edge-key="23" data-edge-id="disbursement-output">
-          <rect x="563.3" y="826" width="72.4" height="14" rx="3" class="c-mask"/>
-          <text x="599.5" y="836" class="t-edge-default" font-size="8" text-anchor="middle">write outputs</text>
+          <rect x="570.8" y="826" width="72.4" height="14" rx="3" class="c-mask"/>
+          <text x="607" y="836" class="t-edge-default" font-size="8" text-anchor="middle">write outputs</text>
         </g>
         <g data-detail="context" data-edge-from="llm" data-edge-to="openrouter" data-edge-label="LLM completions" data-edge-key="24" data-edge-id="llm-openrouter">
-          <rect x="827" y="485" width="82" height="14" rx="3" class="c-mask"/>
-          <text x="868" y="495" class="t-edge-default" font-size="8" text-anchor="middle">LLM completions</text>
+          <rect x="835" y="485" width="82" height="14" rx="3" class="c-mask"/>
+          <text x="876" y="495" class="t-edge-default" font-size="8" text-anchor="middle">LLM completions</text>
         </g>
         <g data-detail="context" data-edge-from="qdrant" data-edge-to="openrouter" data-edge-label="embed query" data-edge-key="25" data-edge-id="qdrant-openrouter">
-          <rect x="836.6" y="600.5" width="62.8" height="14" rx="3" class="c-mask"/>
-          <text x="868" y="610.5" class="t-edge-default" font-size="8" text-anchor="middle">embed query</text>
+          <rect x="844.6" y="600.5" width="62.8" height="14" rx="3" class="c-mask"/>
+          <text x="876" y="610.5" class="t-edge-default" font-size="8" text-anchor="middle">embed query</text>
         </g>
 
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="Human Gates (SoD enforced)">
-          <rect data-graph-role="structural-frame-label-mask" x="184" y="445" width="150.4" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="188" y="458" class="t-cloud" font-size="9" font-weight="600">Human Gates (SoD enforced)</text>
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="Human Gates — SoD enforced">
+          <rect data-graph-role="structural-frame-label-mask" x="194" y="390" width="150.4" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="198" y="403" class="t-cloud" font-size="9" font-weight="600">Human Gates — SoD enforced</text>
         </g>
 
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Agent Pipeline (sequential)">
-          <rect data-graph-role="structural-frame-label-mask" x="399" y="60" width="155.79999999999998" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="403" y="73" class="t-cloud" font-size="9" font-weight="600">Agent Pipeline (sequential)</text>
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Agent Pipeline — sequential">
+          <rect data-graph-role="structural-frame-label-mask" x="404" y="60" width="155.79999999999998" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="408" y="73" class="t-cloud" font-size="9" font-weight="600">Agent Pipeline — sequential</text>
         </g>
 
         <g data-graph-role="structural-frame-label" data-composition-frame-id="2" data-composition-frame-kind="security-group" data-composition-frame-label="Bank Boundary — PII stays here">
-          <rect data-graph-role="structural-frame-label-mask" x="609" y="150" width="172" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="613" y="163" class="t-security" font-size="9" font-weight="600">Bank Boundary — PII stays here</text>
+          <rect data-graph-role="structural-frame-label-mask" x="619" y="150" width="172" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="623" y="163" class="t-security" font-size="9" font-weight="600">Bank Boundary — PII stays here</text>
         </g>
 
         <g data-graph-role="structural-frame-label" data-composition-frame-id="3" data-composition-frame-kind="region" data-composition-frame-label="External: OpenRouter">
-          <rect data-graph-role="structural-frame-label-mask" x="915" y="490" width="118" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="919" y="503" class="t-cloud" font-size="9" font-weight="600">External: OpenRouter</text>
+          <rect data-graph-role="structural-frame-label-mask" x="923" y="490" width="118" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="927" y="503" class="t-cloud" font-size="9" font-weight="600">External: OpenRouter</text>
         </g>
 
         <!-- Legend -->
@@ -5908,7 +5909,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <li>Browser (Web UI) or CLI submits application</li>
           <li>application.json: borrower, facility, RM details</li>
           <li>7 document types: financials, KYC, valuation, bank statement</li>
-          <li>Scripted (demo) or interactive human approvers</li>
+          <li>Scripted or interactive human approvers at each gate</li>
         </ul>
       </div>
 
@@ -5919,23 +5920,23 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </div>
         <ul>
           <li>8 agents run sequentially through the orchestrator</li>
-          <li>Document Intelligence extracts 35+ fields with confidence scores</li>
-          <li>PolicyEligibilityAgent runs 13 credit policy clauses</li>
+          <li>Document Intelligence: extracts 35+ fields with line citations and avg_extraction_confidence</li>
+          <li>PolicyEligibilityAgent: 13 credit policy clauses via Hybrid RAG</li>
           <li>Hybrid RAG: 40% BM25 keyword + 60% Qdrant vector cosine</li>
-          <li>HITL gate triggered when avg field confidence &lt; 75%</li>
+          <li>Policy KB cached at server startup — re-indexed only on SHA-256 change</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot violet"></div>
-          <h3>Controls</h3>
+          <h3>3 Human Gates</h3>
         </div>
         <ul>
-          <li>PII Vault masks identifiers before any model call</li>
-          <li>SHA-256 hash-chained audit log detects tampering</li>
-          <li>3 human gates: Credit Authority, Compliance Officer, HITL Validator</li>
-          <li>OpenRouter provides LLM completions and embeddings via one key</li>
+          <li>Gate 0 (Senior Analyst): avg conf &lt; 75% → PROCEED or RETURN FOR RESUBMISSION</li>
+          <li>Gate 1 (Compliance Officer): PEP / sanctions hit → EDD CLEARED or EDD NOT CLEARED</li>
+          <li>Gate 2 (Credit Authority): SCM / Committee / Board → APPROVE / DECLINE / RETURN TO RM</li>
+          <li>Wrong role or insufficient authority → attempt blocked and logged in audit trail</li>
         </ul>
       </div>
 
@@ -5945,11 +5946,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <h3>Outputs</h3>
         </div>
         <ul>
-          <li>Case Report: reliability %, avg confidence, grounded evidence</li>
+          <li>Case Report: reliability %, avg_extraction_confidence, grounded evidence</li>
           <li>decision_summary.md — human-readable markdown</li>
-          <li>decision_record.json — machine-readable downstream record</li>
+          <li>decision_record.json — avg_extraction_confidence + full machine record</li>
           <li>conditions_tracker.json — disbursement readiness</li>
-          <li>extracted_fields.json — cited evidence per field</li>
+          <li>audit_log.jsonl — SHA-256 hash-chained, tamper-evident</li>
         </ul>
       </div>
     </div>
