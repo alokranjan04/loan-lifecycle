@@ -25,6 +25,9 @@ prototype/evals/results/
 prototype/data/applications/APP-2026-[0-9][0-9][0-9][1-9]/
 prototype/data/applications/APP-202[7-9]-*/
 prototype/data/applications/APP-20[3-9][0-9]-*/
+# Seed / demo cases — always tracked
+!prototype/data/applications/APP-2026-0142/
+!prototype/data/applications/APP-2026-0157/
 
 # OS / editor
 .DS_Store

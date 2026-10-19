@@ -1,0 +1,11 @@
+STATEMENT SUMMARY - OPERATING ACCOUNT 2201887734
+Account holder: Northwind Precision Components LLC
+Bank: Great Lakes National Bank
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 8,650,000
+Total debits (12 months): 8,420,000
+Average monthly balance: 690,000
+Lowest month-end balance: 312,000 (Jan-2026)
+
+Returned items (inward cheque / ACH returns): 0

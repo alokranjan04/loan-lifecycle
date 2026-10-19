@@ -7,6 +7,8 @@ __pycache__
 venv
 prototype/output
 prototype/data/applications
+!prototype/data/applications/APP-2026-0142
+!prototype/data/applications/APP-2026-0157
 *.md
 .archify
 prototype/evals

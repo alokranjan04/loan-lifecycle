@@ -1,0 +1,32 @@
+{
+  "application_id": "APP-2026-0157",
+  "submitted_on": "2026-10-06",
+  "channel": "Relationship Manager portal",
+  "relationship_manager": "Marcus Lee",
+  "credit_analyst": "Daniel Okafor",
+  "borrower": {
+    "legal_name": "Northwind Precision Components LLC",
+    "registration_no": "OH-4418276",
+    "incorporated_on": "2012-06-01",
+    "sector": "Industrial manufacturing",
+    "country": "United States",
+    "existing_group_exposure_usd": 1200000
+  },
+  "facility": {
+    "type": "Secured term loan (equipment)",
+    "amount_usd": 1600000,
+    "tenor_months": 60,
+    "purpose": "Purchase of two 5-axis CNC machining centres",
+    "proposed_rate": "SOFR + 2.25%",
+    "security": "First charge on the financed equipment and existing factory building"
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "kyc_ubo_declaration.txt",
+    "collateral_valuation.txt",
+    "tax_returns.txt",
+    "board_resolution.txt"
+  ],
+  "rm_notes": "Supplier to two Tier-1 automotive OEMs. Clean repayment history on existing loan."
+}

@@ -1,0 +1,31 @@
+{
+  "application_id": "APP-2026-0142",
+  "submitted_on": "2026-10-02",
+  "channel": "Relationship Manager portal",
+  "relationship_manager": "Priya Nair",
+  "credit_analyst": "Daniel Okafor",
+  "borrower": {
+    "legal_name": "Meridian Agro Processing Pvt Ltd",
+    "registration_no": "U15490KA2017PTC104233",
+    "incorporated_on": "2017-03-14",
+    "sector": "Agri and food processing",
+    "country": "India",
+    "existing_group_exposure_usd": 3000000
+  },
+  "facility": {
+    "type": "Secured term loan (project finance)",
+    "amount_usd": 4500000,
+    "tenor_months": 84,
+    "purpose": "Construction of a 12,000 tonne multi-temperature cold storage and ripening facility at Hosur",
+    "proposed_rate": "SOFR + 3.10%",
+    "security": "First charge on project land and building; hypothecation of plant and machinery"
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "kyc_ubo_declaration.txt",
+    "collateral_valuation.txt",
+    "project_report.txt"
+  ],
+  "rm_notes": "Long-standing client, strong export orders from two Gulf retailers. Client keen to close before the harvest season."
+}

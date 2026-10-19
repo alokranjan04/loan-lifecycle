@@ -1,0 +1,19 @@
+NORTHWIND PRECISION COMPONENTS LLC
+AUDITED FINANCIAL STATEMENTS - SUMMARY (USD)
+Auditor: Barrett Hale CPAs
+Audit opinion: Unqualified
+
+INCOME STATEMENT              FY2023        FY2024        FY2025
+Revenue                    7,900,000     8,400,000     9,100,000
+EBITDA                     1,420,000     1,560,000     1,710,000
+Interest expense             110,000       100,000        95,000
+Net profit                   780,000       860,000       950,000
+
+BALANCE SHEET (as at 31 December 2025)
+Total debt                                             1,200,000
+Current assets                                         3,600,000
+Current liabilities                                    2,100,000
+Shareholders equity                                    4,800,000
+
+DEBT SERVICE (FY2025)
+Scheduled principal repayment                            300,000
