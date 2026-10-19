@@ -5,18 +5,22 @@
 
 ---
 
-## Summary
+## Realigned Plan — Current State vs Remaining Work
 
-| Week | Theme | Exit Criteria |
-|------|-------|---------------|
-| 1 | DevOps Foundation | Docker runs locally; CI/CD green; `/health` live |
-| 2 | Auth & RBAC | OAuth2 login; hardcoded password gone; role gates enforced |
-| 3 | Persistence | Sessions in Redis; decisions in PostgreSQL; no data lost on restart |
-| 4 | Durable Workflow | Cases survive server crash; approval timeout enforced |
-| 5 | Security Hardening | Secrets in Vault; PII encrypted at rest; HTTPS enforced |
-| 6 | Observability | Logs in ELK; metrics in Grafana; alerts firing |
-| 7 | Compliance & Governance | Immutable audit log; activity log; SR 11-7 pack |
-| 8 | Testing & Go-Live | Load test passed; pen test passed; runbooks written |
+| Week | Theme | Original Deliverable | ✅ Built | Remaining to Production |
+|------|-------|---------------------|----------|------------------------|
+| **1** | Foundation & DevOps | Discovery, lifecycle map, policy corpus, evaluation dataset, success criteria | 8-agent pipeline · Hybrid RAG · 3-gate HITL · Docker · GitHub Actions · Cloud Run deployed · Qdrant Cloud live | `/health` readiness probe · fix bare `except` clauses |
+| **2** | Auth & Identity | Architecture, data model, security design, agent definitions, UX wireframes | Architecture finalised · all agents defined · Web UI live · SoD enforced | OAuth2/OIDC login · JWT cookies · remove `demo123` · backend RBAC per endpoint |
+| **3** | Persistence | Intake + Document Intelligence Agent: OCR, extraction, validation, missing-doc detection | IntakeAgent + DocumentIntelligenceAgent complete · 35+ fields · avg_extraction_confidence | PostgreSQL schema · Redis session store · no data lost on container restart |
+| **4** | Durable Workflow | Policy & Eligibility Agent: RAG corpus, retrieval, rule evaluation, citations | PolicyEligibilityAgent · 13 clauses · BM25 40% + Qdrant 60% · citations verified | Temporal/Step Functions · cases survive crash · approval timeout escalation |
+| **5** | Security Hardening | Due-Diligence + Risk Agent: watchlist checks, financial ratios, risk narrative | DueDiligenceAgent + RiskAgent · 8-factor scorecard · PII vault · prompt injection screening | Vault/Secret Manager for all keys · AES-256 field encryption · file upload scanning |
+| **6** | Observability | Approval/Workflow Agent: routing, HITL console, audit trail, decision summary | ApprovalWorkflowAgent · 3-tier routing · 3-gate HITL console · SHA-256 audit trail · case report UI | structlog → ELK · OpenTelemetry traces · Prometheus + Grafana · 5 alert rules |
+| **7** | Compliance & Governance | End-to-end testing, evaluation, accuracy tuning, dashboard, security review | 26 unit + integration tests · 39-case golden set · audit chain verification · policy library UI | WORM audit log · 7-year activity log · compliance-pack export · SR 11-7 model card |
+| **8** | UAT & Go-Live | UAT, demo, business-case validation, production roadmap | Demo live on GCP Cloud Run · Qdrant Cloud hybrid RAG · GitHub Actions CI/CD | Load test (Locust) · OWASP ZAP pen test · chaos engineering · runbooks · client sign-off |
+
+---
+
+## Summary
 
 ---
 
