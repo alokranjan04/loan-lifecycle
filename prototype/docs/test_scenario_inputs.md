@@ -1,8 +1,8 @@
 # Test Scenario Fill-In Guide
 ### What to type in each field of the New Application form
 
-> Login as **amara.osei / demo123** (credit officer — can view results)
-> Login as **newuser / demo123** (applicant — can only submit)
+> Login as **amara.osei / Loanlifecycledemo@123** (credit officer — can view results)
+> Login as **newuser / Loanlifecycledemo@123** (applicant — can only submit)
 >
 > Go to: **http://localhost:8000 → + New application**
 >
@@ -818,9 +818,9 @@ The rest of the financial data should look normal (copy from SC-01). The system 
 
 | Facility Size | Approver role | Login to use |
 |---|---|---|
-| ≤ USD 2M | Senior Credit Manager | `amara.osei / demo123` |
-| ≤ USD 10M | Regional Credit Committee | `amara.osei / demo123` |
-| > USD 10M | Board Credit Committee | `amara.osei / demo123` |
+| ≤ USD 2M | Senior Credit Manager | `amara.osei / Loanlifecycledemo@123` |
+| ≤ USD 10M | Regional Credit Committee | `amara.osei / Loanlifecycledemo@123` |
+| > USD 10M | Board Credit Committee | `amara.osei / Loanlifecycledemo@123` |
 
 > In the current demo all credit officer functions are on the `amara.osei` account.
-> `newuser / demo123` is the applicant — they can submit but cannot view results or approve.
+> `newuser / Loanlifecycledemo@123` is the applicant — they can submit but cannot view results or approve.

@@ -520,7 +520,7 @@ Step-by-step verification of the primary demo script (Part 4 of `video_script.md
 
 | Step | Action | Expected |
 |---|---|---|
-| 1 | Login as `amara.osei / demo123` | Dashboard visible; RAG badge green |
+| 1 | Login as `amara.osei / Loanlifecycledemo@123` | Dashboard visible; RAG badge green |
 | 2 | Click APP-2026-0201 | Case Report tab opens; 100% reliability badge |
 | 3 | View pipeline flow | 3 steps shown (no HITL gate) |
 | 4 | View Policy Flags | POL-2.3 FLAG visible; DSCR 1.39× vs 1.40× |
@@ -529,7 +529,7 @@ Step-by-step verification of the primary demo script (Part 4 of `video_script.md
 | 7 | Edit a clause | Save triggers success toast |
 | 8 | Run eval (offline) | Completes in < 15s; metrics table shown |
 | 9 | Navigate to Decision Log | Audit entries listed; hash verified |
-| 10 | Login as `newuser / demo123` | Applicant portal only; Policy Library hidden |
+| 10 | Login as `newuser / Loanlifecycledemo@123` | Applicant portal only; Policy Library hidden |
 
 **Acceptance criteria**: All 10 steps complete without error; SoD demonstrated in step 10.
 

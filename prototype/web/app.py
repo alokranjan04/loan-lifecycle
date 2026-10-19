@@ -357,7 +357,7 @@ class LoginRequest(BaseModel):
 @app.post("/api/auth/login")
 def auth_login(body: LoginRequest):
     """Validate credentials and return role + display name."""
-    DEMO_PASSWORD = "demo123"
+    DEMO_PASSWORD = "Loanlifecycledemo@123"
     if body.password != DEMO_PASSWORD:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     if body.username.lower() == "newuser":
@@ -368,7 +368,7 @@ def auth_login(body: LoginRequest):
         if len(parts) >= 2:
             if body.username.lower() == f"{parts[0].lower()}.{parts[-1].lower()}":
                 return {"role": "admin", "name": a["name"], "username": body.username.lower(), "approver_role": a["role"]}
-    raise HTTPException(status_code=401, detail="Invalid credentials. Admins: first.last / demo123  ·  New users: newuser / demo123")
+    raise HTTPException(status_code=401, detail="Invalid credentials. Admins: first.last / Loanlifecycledemo@123  ·  New users: newuser / Loanlifecycledemo@123")
 
 
 class NewApplicationRequest(BaseModel):

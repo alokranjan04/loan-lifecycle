@@ -90,8 +90,8 @@ Check:
 - This script on your phone or second screen
 
 ### Step 3: Pre-flight checks
-- [ ] Login as `newuser / demo123` — applicant portal appears, no admin screens
-- [ ] Login as `amara.osei / demo123` — Dashboard, Cases, Policy Library, Decision Log all visible
+- [ ] Login as `newuser / Loanlifecycledemo@123` — applicant portal appears, no admin screens
+- [ ] Login as `amara.osei / Loanlifecycledemo@123` — Dashboard, Cases, Policy Library, Decision Log all visible
 - [ ] Open Cases → click APP-2026-0201 → Case Report tab loads with 100% reliability badge
 - [ ] Run eval (offline mock) — completes in ~10 s, shows metrics table
 - [ ] RAG badge in sidebar is green
@@ -122,7 +122,7 @@ Check:
 
 ### Part 2 · What I built — the dashboard (1 min)
 
-**Do:** Open browser. Log in as `amara.osei / demo123`. Dashboard appears.
+**Do:** Open browser. Log in as `amara.osei / Loanlifecycledemo@123`. Dashboard appears.
 
 **Say:** "Hi, I'm Alok. This is LoanPilot — eight AI agents that take a commercial loan from first document to final approval. Instead of just showing slides, I'll run it live against 39 test cases. Every result is produced by the system running on this laptop right now, not pre-recorded."
 
@@ -164,7 +164,7 @@ Check:
 
 ### Part 4 · The end-to-end demo case — Sunrise Cold Chain (3 min) ← NEW
 
-**Do:** Sign out → log in as `amara.osei / demo123`. Click Cases → click **APP-2026-0201** (Sunrise Cold Chain Logistics Ltd).
+**Do:** Sign out → log in as `amara.osei / Loanlifecycledemo@123`. Click Cases → click **APP-2026-0201** (Sunrise Cold Chain Logistics Ltd).
 
 **Say:** "This is the demo approval case I built to show the full end-to-end flow with confidence scores and reliability. Sunrise Cold Chain is applying for USD 3.8 million, 60-month secured term loan to acquire a Grade-A refrigerated warehouse in Bhiwandi Logistics Park."
 
@@ -216,7 +216,7 @@ Check:
 
 ### Part 7 · Human in the loop — the centrepiece (4 min)
 
-**Do:** Still logged in as `amara.osei / demo123`. Open **Control demos** → click **Launch demo**.
+**Do:** Still logged in as `amara.osei / Loanlifecycledemo@123`. Open **Control demos** → click **Launch demo**.
 
 **Say:** "This is the heart of it. I'm running Meridian Agro Processing — USD 4.5 million — with me as the live approver. Five problems are hidden in its documents: a politically exposed director, a stale valuation, an expired passport, excess returned cheques, and weak bank-credit coverage."
 
@@ -228,7 +228,7 @@ Check:
 
 **Say:** "Gate 1 — the compliance gate. I — Amara Osei, Board Credit Committee — am not getting the approval panel, because my role doesn't qualify for compliance clearance. Only a Compliance Officer can clear EDD. Notice there is no notification bell for me — the bell only appears for roles that have something to act on."
 
-**Do:** Open second browser tab → log in as `grace.mwangi / demo123` (Compliance Officer). Point at the notification bell with the red badge.
+**Do:** Open second browser tab → log in as `grace.mwangi / Loanlifecycledemo@123` (Compliance Officer). Point at the notification bell with the red badge.
 
 **Say:** "Grace Mwangi, Compliance Officer, sees the pending approval badge immediately. Her identity is fixed from login — she can't pretend to be someone else."
 
@@ -339,8 +339,8 @@ Check:
 - [ ] Server started via `start_web.bat` — RAG badge in sidebar is **green**
 - [ ] APP-2026-0201 shows APPROVED WITH CONDITIONS in Cases list
 - [ ] Eval mock run completes in ~10s — metrics table appears
-- [ ] Login as `newuser / demo123` → applicant portal, no admin screens
-- [ ] Login as `amara.osei / demo123` → all tabs visible
+- [ ] Login as `newuser / Loanlifecycledemo@123` → applicant portal, no admin screens
+- [ ] Login as `amara.osei / Loanlifecycledemo@123` → all tabs visible
 - [ ] Policy Library → open `collateral_valuation_policy.md` → Preview loads with coloured clause badges
 - [ ] Logged in as `amara.osei` — notification bell is NOT visible (admin-only)
 - [ ] Logged in as `admin` account — notification bell IS visible with pending badge if any gate is open

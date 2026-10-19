@@ -11,7 +11,7 @@
 | Week | Theme | Design Principles | Exit Criteria |
 |------|-------|-------------------|---------------|
 | **1** | Foundation Hardening | Observability First | `/health` + `/ready` live · structured logs · CI green on every PR |
-| **2** | Zero Trust Auth | Zero Trust · Single Responsibility | IAP login · JWT 15 min · RBAC on every endpoint · `demo123` gone |
+| **2** | Zero Trust Auth | Zero Trust · Single Responsibility | IAP login · JWT 15 min · RBAC on every endpoint · `Loanlifecycledemo@123` gone |
 | **3** | Persistence & CQRS | CP over AP · CQRS · Idempotency | PostgreSQL HA · Redis HA · PgBouncer · no data lost on restart |
 | **4** | Event-Driven Pipeline | Event-Driven · Bulkhead · Circuit Breaker · Saga | Pub/Sub topics live · 8 agent workers deployed · DLQ alerting |
 | **5** | Security Hardening | Defence in Depth · Zero Trust | Cloud Armor · VPC SC · CMEK · Cloud DLP · Binary Authorization |
@@ -56,7 +56,7 @@
 ### 2.1 Identity Provider
 - Enable **Identity-Aware Proxy (IAP)** on Cloud Run — Google-managed OAuth2
 - Staff log in with their Google/company account — no password to manage
-- Remove hardcoded `demo123` from `web/app.py`
+- Remove hardcoded `Loanlifecycledemo@123` from `web/app.py`
 - Local dev: use `gcloud auth print-identity-token` to get a token
 
 ### 2.2 JWT middleware

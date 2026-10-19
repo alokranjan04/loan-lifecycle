@@ -76,7 +76,7 @@ double-click start_web.bat          # Windows
 python -m uvicorn web.app:app --host 0.0.0.0 --port 8000
 
 # Open http://localhost:8000
-# Login: amara.osei / demo123
+# Login: amara.osei / Loanlifecycledemo@123
 ```
 
 **Prerequisites**: Python 3.10+, Docker for Qdrant
