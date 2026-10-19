@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env*
+*.pyc
+__pycache__
+.venv
+venv
+prototype/output
+prototype/data/applications
+*.md
+.archify
+prototype/evals
+prototype/workbench
+prototype/tests
+node_modules

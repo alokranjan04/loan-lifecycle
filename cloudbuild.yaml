@@ -1,0 +1,46 @@
+steps:
+  # 1 — Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - -t
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}'
+      - -t
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:latest'
+      - .
+
+  # 2 — Push to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - push
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}'
+
+  # 3 — Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - '${_SERVICE}'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:${SHORT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--cpu=2'
+      - '--memory=2Gi'
+      - '--min-instances=1'
+      - '--max-instances=5'
+      - '--concurrency=10'
+      - '--timeout=3600'
+      - '--no-cpu-throttling'
+      - '--set-secrets=OPENROUTER_API_KEY=OPENROUTER_API_KEY:latest'
+      - '--set-env-vars=PYTHONUNBUFFERED=1,PYTHONPATH=/app/prototype'
+
+substitutions:
+  _REGION: asia-south1        # Mumbai — change to your region
+  _REPO:   loan-lifecycle
+  _SERVICE: loan-lifecycle-api
+
+options:
+  logging: CLOUD_LOGGING_ONLY
