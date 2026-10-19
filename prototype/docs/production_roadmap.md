@@ -1,414 +1,402 @@
-# 8-Week Production Readiness Roadmap
-## Agentic Loan Lifecycle Management
+# 8-Week Production Roadmap
+## Agentic Loan Lifecycle — Scalable · Available · Secure
 
-**Start date:** 2026-10-26 · **Target go-live:** 2026-12-21
-
----
-
-## Realigned Plan — Current State vs Remaining Work
-
-| Week | Theme | Original Deliverable | ✅ Built | Remaining to Production |
-|------|-------|---------------------|----------|------------------------|
-| **1** | Foundation & DevOps | Discovery, lifecycle map, policy corpus, evaluation dataset, success criteria | 8-agent pipeline · Hybrid RAG · 3-gate HITL · Docker · GitHub Actions · Cloud Run deployed · Qdrant Cloud live | `/health` readiness probe · fix bare `except` clauses |
-| **2** | Auth & Identity | Architecture, data model, security design, agent definitions, UX wireframes | Architecture finalised · all agents defined · Web UI live · SoD enforced | OAuth2/OIDC login · JWT cookies · remove `demo123` · backend RBAC per endpoint |
-| **3** | Persistence | Intake + Document Intelligence Agent: OCR, extraction, validation, missing-doc detection | IntakeAgent + DocumentIntelligenceAgent complete · 35+ fields · avg_extraction_confidence | PostgreSQL schema · Redis session store · no data lost on container restart |
-| **4** | Durable Workflow | Policy & Eligibility Agent: RAG corpus, retrieval, rule evaluation, citations | PolicyEligibilityAgent · 13 clauses · BM25 40% + Qdrant 60% · citations verified | Temporal/Step Functions · cases survive crash · approval timeout escalation |
-| **5** | Security Hardening | Due-Diligence + Risk Agent: watchlist checks, financial ratios, risk narrative | DueDiligenceAgent + RiskAgent · 8-factor scorecard · PII vault · prompt injection screening | Vault/Secret Manager for all keys · AES-256 field encryption · file upload scanning |
-| **6** | Observability | Approval/Workflow Agent: routing, HITL console, audit trail, decision summary | ApprovalWorkflowAgent · 3-tier routing · 3-gate HITL console · SHA-256 audit trail · case report UI | structlog → ELK · OpenTelemetry traces · Prometheus + Grafana · 5 alert rules |
-| **7** | Compliance & Governance | End-to-end testing, evaluation, accuracy tuning, dashboard, security review | 26 unit + integration tests · 39-case golden set · audit chain verification · policy library UI | WORM audit log · 7-year activity log · compliance-pack export · SR 11-7 model card |
-| **8** | UAT & Go-Live | UAT, demo, business-case validation, production roadmap | Demo live on GCP Cloud Run · Qdrant Cloud hybrid RAG · GitHub Actions CI/CD | Load test (Locust) · OWASP ZAP pen test · chaos engineering · runbooks · client sign-off |
+**Start:** 2026-10-26 · **Go-live:** 2026-12-21
+**Based on:** [System Design](system_design.md) — 12 design principles, multi-region GCP, event-driven pipeline
 
 ---
 
-## Summary
+## Master Plan
+
+| Week | Theme | Design Principles | Exit Criteria |
+|------|-------|-------------------|---------------|
+| **1** | Foundation Hardening | Observability First | `/health` + `/ready` live · structured logs · CI green on every PR |
+| **2** | Zero Trust Auth | Zero Trust · Single Responsibility | IAP login · JWT 15 min · RBAC on every endpoint · `demo123` gone |
+| **3** | Persistence & CQRS | CP over AP · CQRS · Idempotency | PostgreSQL HA · Redis HA · PgBouncer · no data lost on restart |
+| **4** | Event-Driven Pipeline | Event-Driven · Bulkhead · Circuit Breaker · Saga | Pub/Sub topics live · 8 agent workers deployed · DLQ alerting |
+| **5** | Security Hardening | Defence in Depth · Zero Trust | Cloud Armor · VPC SC · CMEK · Cloud DLP · Binary Authorization |
+| **6** | Full Observability | Observability First · Fault Tolerance | Traces in Cloud Trace · Grafana 4 dashboards · 5 alert policies |
+| **7** | HA · Compliance · Blue-Green | Immutability · HA · CAP | Multi-region active-active · WORM audit · SR 11-7 model card |
+| **8** | Load Test & Go-Live | All 12 principles | 200 concurrent users pass · chaos pass · ZAP pass · SLO sign-off |
 
 ---
 
-## Week 1 — DevOps Foundation
-**Goal:** Reproducible builds, automated tests on every commit, health checks.
+## Week 1 — Foundation Hardening
+**Design principle:** Observability First — you cannot fix what you cannot see.
 
-### Tasks
+### 1.1 Health & readiness probes
+- `GET /health` — returns `{"status":"ok","db":"ok","redis":"ok","qdrant":"ok"}`
+- `GET /ready` — returns 200 only when KB loaded + DB reachable (used by Cloud Run)
+- Wire into Cloud Run `--liveness-probe` and `--startup-probe`
 
-**1.1 Containerise the application**
-- Write `Dockerfile` (Python 3.11 slim, non-root user, multi-stage build)
-- Write `docker-compose.yml` with services: `api`, `qdrant`, `redis`, `postgres`
-- Replace `start_web.bat` with `docker compose up`
-- Test: `docker build` succeeds, all 20+ existing tests pass inside the container
+### 1.2 Structured logging
+- Replace all `print()` with `structlog` (JSON output)
+- Every log line carries: `case_id`, `agent`, `trace_id`, `user_id`, `duration_ms`, `level`
+- Replace 8+ bare `except Exception: pass` with `logger.exception()`
+- Logs automatically shipped to Cloud Logging from Cloud Run stdout
 
-**1.2 CI/CD pipeline (GitHub Actions)**
-- Workflow triggers on every PR and merge to `main`
-- Steps: lint (ruff) → unit tests → integration tests → docker build
-- Fail-fast on any test failure; block merge if red
-- Add `.github/workflows/ci.yml`
+### 1.3 CI pipeline hardening
+- Add `ruff` linter + `pytest` to GitHub Actions (currently only builds)
+- Add step: `pytest prototype/tests/ -x` — fail PR if any test red
+- Add step: `docker build` smoke test on every PR (not just main)
+- Add Dependabot for `requirements.txt` updates
 
-**1.3 Health & readiness endpoints**
-- `GET /health` — returns `{"status":"ok","version":"...","qdrant":"ok","db":"ok"}`
-- `GET /ready` — returns 200 only when KB is loaded and DB is reachable
-- Used by Kubernetes liveness and readiness probes
+### 1.4 Config management
+- Move all hardcoded values (`AS_OF`, `BASE_DIR`, ports) to `config.py` using Pydantic `Settings`
+- Every env var documented in `env.example`
+- Validate required vars at startup — fail fast with clear error if missing
 
-**1.4 Environment configuration**
-- Replace all hardcoded values (`AS_OF`, `BASE_DIR`, port) with env vars
-- Add `config.py` with a Pydantic `Settings` model (reads `.env`)
-- Document every required env var in `.env.example`
-
-**1.5 Fix bare except clauses**
-- Replace 8+ `except Exception: pass` blocks in `web/app.py` with proper logging
-- Add `import logging` and a module-level logger to every file
-
-**Deliverables:** `Dockerfile`, `docker-compose.yml`, `.github/workflows/ci.yml`, `config.py`, `GET /health`
+**Deliverables:** `/health`, `/ready`, structured logs, CI on PRs, `config.py`
 
 ---
 
-## Week 2 — Authentication & RBAC
-**Goal:** Every API call is authenticated; role gates are enforced by the backend, not just the frontend.
+## Week 2 — Zero Trust Auth
+**Design principle:** Zero Trust — every request verified; no implicit trust.
 
-### Tasks
+### 2.1 Identity Provider
+- Enable **Identity-Aware Proxy (IAP)** on Cloud Run — Google-managed OAuth2
+- Staff log in with their Google/company account — no password to manage
+- Remove hardcoded `demo123` from `web/app.py`
+- Local dev: use `gcloud auth print-identity-token` to get a token
 
-**2.1 Identity provider integration**
-- Integrate OAuth2/OIDC (Azure AD, Keycloak, or Auth0)
-- Issue short-lived JWT access tokens (15 min) + refresh tokens (8 h)
-- Add `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`
-- Remove hardcoded `demo123` password from `web/app.py`
+### 2.2 JWT middleware
+- Validate IAP JWT on every API request (`x-goog-iap-jwt-assertion` header)
+- Extract: `email`, `sub`, `hd` (hosted domain) — map to internal role
+- Short-lived: 15-min expiry enforced; client refreshes silently
+- Add `require_role(*roles)` FastAPI dependency — returns 403 if role missing
 
-**2.2 Backend RBAC middleware**
-- Define roles: `rm`, `senior_analyst`, `compliance_officer`, `credit_manager`, `credit_committee`, `board`, `admin`
-- Add FastAPI dependency `require_role(*roles)` — returns 403 if caller lacks role
-- Protect every `/api/*` endpoint with `require_role`
-- Approver gate validation in `orchestrator.validate_human_action` cross-checks JWT role (not just the form field)
+### 2.3 Backend RBAC
+- Define roles: `rm`, `senior_analyst`, `compliance_officer`, `credit_manager`, `committee`, `board`, `admin`
+- Protect every `/api/*` endpoint with correct role requirement
+- Gate validation in `orchestrator.validate_human_action` cross-checks JWT role — not the form field
+- SoD: same user cannot approve at two different gates (already built, now backed by JWT)
 
-**2.3 Per-case access control**
-- RMs can only see their own cases (filter by `rm_id` from JWT)
-- Approvers see only cases pending their role
-- Admins see all cases
-- Add `case_id` → `authorized_roles` mapping in the session store
+### 2.4 Workload Identity (service-to-service)
+- Each Cloud Run service gets its own GCP service account
+- Services call each other using short-lived tokens from Workload Identity Federation
+- No JSON key files anywhere — key-less auth throughout
+- Pipeline workers authenticate to Cloud SQL + Pub/Sub via Workload Identity
 
-**2.4 Frontend updates**
-- Replace the username dropdown with a real login page
-- Store JWT in `httpOnly` cookie (not localStorage — prevents XSS theft)
-- Remove client-side role logic — trust backend responses instead
+### 2.5 API keys for integrations
+- `POST /admin/api-keys` — scoped key for core banking / reporting systems
+- Keys stored hashed in DB; rate-limited 60 req/min
+- Shown once at creation; never retrievable again
 
-**2.5 API key support for system integrations**
-- `POST /admin/api-keys` — generate scoped API key for downstream systems (e.g., core banking)
-- Keys stored hashed in DB; never returned after creation
-- Rate-limited to 60 req/min per key
-
-**Deliverables:** Auth middleware, RBAC dependency, login/logout endpoints, JWT cookie flow
+**Deliverables:** IAP login, JWT middleware, RBAC on all endpoints, Workload Identity, API key management
 
 ---
 
-## Week 3 — Persistence Layer
-**Goal:** Zero data loss on server restart; decision records are queryable.
+## Week 3 — Persistence & CQRS
+**Design principle:** CP over AP (consistency) · CQRS (read/write separation) · Idempotency.
 
-### Tasks
-
-**3.1 Database schema (PostgreSQL)**
-
+### 3.1 PostgreSQL HA (Cloud SQL)
+Schema — 6 core tables:
 ```
-cases            (case_id, app_id, rm_id, status, created_at, updated_at)
-agents_steps     (step_id, case_id, agent_name, result_json, started_at, completed_at)
-gate_events      (event_id, case_id, gate_type, role, decision, rationale, actor_id, decided_at)
-decision_records (record_id, case_id, final_decision, summary_md, record_json, created_at)
-audit_entries    (entry_id, case_id, seq, event_type, payload_json, sha256, prev_sha256)
-extracted_fields (field_id, case_id, field_name, value, confidence, citation, created_at)
+cases            (case_id, app_id, rm_id, status, version, created_at)
+agent_steps      (step_id, case_id, agent, result_json, started_at, completed_at)
+gate_events      (event_id, case_id, gate, role, decision, actor_id, rationale, decided_at)
+decision_records (record_id, case_id, final, summary_md, record_json, created_at)
+audit_entries    (entry_id, case_id, seq, event, payload, sha256, prev_sha256)
+activity_log     (log_id, actor_id, role, endpoint, case_id, ip, status, ts)
 ```
+- Cloud SQL HA: synchronous standby, automatic failover <30s
+- Read replica in same region — all GET queries routed here
+- Alembic migrations: version-controlled, backward-compatible, tested on DB clone
 
-- Add Alembic for schema migrations (version-controlled, never manual `ALTER TABLE`)
-- Connection pool via `asyncpg` + SQLAlchemy async
+### 3.2 Redis HA (Cloud Memorystore)
+- Replace `_sessions: dict` with Redis hash per `case_id` (TTL 30 days)
+- Redis Streams for SSE — pipeline workers publish events, API streams to browser
+- Rate limiting counters per user (LLM cost guard)
+- Distributed locks for approval idempotency
+- Failover: Cloud Memorystore HA mode — automatic replica promotion <30s
 
-**3.2 Migrate session store to Redis**
-- Replace `_sessions: dict` in `app.py` with Redis hash per `case_id`
-- TTL of 30 days on each key
-- On server restart: sessions reload from Redis, no pending approvals lost
-- Use `redis-py` async client
+### 3.3 PgBouncer (connection pooling)
+- Deploy PgBouncer as Cloud Run sidecar
+- Transaction mode: 1000 client connections → 100 server connections
+- Prevents Cloud SQL connection exhaustion under load
 
-**3.3 Migrate file outputs to database**
-- `decision_summary.md`, `decision_record.json`, `conditions_tracker.json` → write to `decision_records` table
-- `audit_log.jsonl` entries → write to `audit_entries` table (file remains as backup)
-- `extracted_fields.json` → write to `extracted_fields` table
-- Keep file writing as secondary output for CLI compatibility
+### 3.4 CQRS implementation
+- **Write path**: `POST /api/run`, `POST /api/approve` → Cloud SQL primary
+- **Read path**: `GET /api/cases`, `GET /api/cases/{id}/history` → read replica
+- Cache layer: Redis caches active case status (TTL 30s, invalidated on state change)
 
-**3.4 Case query API**
-- `GET /api/cases?status=pending&role=senior_analyst` — paginated list (cursor-based)
-- `GET /api/cases/{case_id}/history` — full agent step + gate event timeline
-- `GET /api/cases/{case_id}/fields` — extracted fields with confidence + citations
-- These replace the current file-based output reads
+### 3.5 Idempotency
+- `POST /api/run` checks DB for existing case with same `app_id` — returns existing if found
+- Gate approvals use `version` column + optimistic locking — 409 Conflict on duplicate submit
+- All Pub/Sub messages carry `message_id` — workers deduplicate using Redis SET NX
 
-**3.5 Data migration utility**
-- Script `tools/migrate_file_cases.py` to bulk-import existing `output/APP-*/` into DB
-- Idempotent (safe to run twice)
-
-**Deliverables:** PostgreSQL schema + Alembic, Redis session store, case query API, migration script
+**Deliverables:** PostgreSQL HA + Alembic, Redis HA, PgBouncer, CQRS routing, idempotency keys
 
 ---
 
-## Week 4 — Durable Workflow & State Management
-**Goal:** Pipeline survives server crash; approvals never time out silently; no race conditions.
+## Week 4 — Event-Driven Pipeline
+**Design principle:** Event-Driven · Bulkhead · Circuit Breaker · Saga.
 
-### Tasks
+### 4.1 Pub/Sub topic design
+```
+case.submitted       → IntakeWorker
+agent.completed      → next agent worker (choreography)
+gate.pending         → notification service + timeout timer
+gate.resolved        → resume pipeline worker
+case.finalised       → report generator
+case.dlq             → dead-letter (alert ops, manual retry)
+```
 
-**4.1 Durable task engine**
-- Integrate **Temporal** (self-hosted) or **AWS Step Functions** (managed)
-- Wrap `orchestrator.run_case()` as a Temporal Workflow; each agent becomes an Activity
-- On server restart, Temporal replays the workflow from the last checkpoint — no orphaned cases
-- Human gates become `workflow.wait_for_signal()` — the workflow sleeps until an approval arrives
+### 4.2 Agent workers (Cloud Run services)
+Each agent becomes an independent Cloud Run service:
+- `intake-worker`, `docint-worker`, `completeness-worker`, `duediligence-worker`
+- `policy-worker`, `risk-worker`, `approval-worker`, `disbursement-worker`
 
-**4.2 Approval timeout enforcement**
-- Current: 30-min timeout exists in `app.py` but is never enforced (no background job)
-- With Temporal: set `start_to_close_timeout=timedelta(days=3)` on gate activities
-- On timeout: escalate to next authority tier; notify RM by email; log in audit
+Each worker:
+1. Pulls one Pub/Sub message
+2. Loads case from PostgreSQL
+3. Runs agent logic (unchanged from current `agents.py`)
+4. Writes result to `agent_steps` table
+5. Publishes `agent.completed` event
+6. Acks message
 
-**4.3 Concurrency locking**
-- Add optimistic locking to `gate_events` table: `version` column + `WHERE version = :expected` on insert
-- Return 409 Conflict if two approvers submit simultaneously; frontend retries
+Scales to zero between runs — no idle cost.
 
-**4.4 Idempotency on pipeline start**
-- `POST /api/run` checks DB for existing case with same `app_id` — returns existing case ID if already running
-- Prevents duplicate pipeline runs from double-clicks or retries
+### 4.3 Circuit Breaker (LLM)
+```
+States: CLOSED → OPEN → HALF-OPEN
+CLOSED:    all calls go to OpenRouter
+OPEN:      5 failures in 60s → switch to MockLLM, fire alert
+HALF-OPEN: after 5 min → probe 1 real call → if OK, back to CLOSED
+```
+Implemented in `llm.py` using Redis counter for failure tracking (shared across instances).
 
-**4.5 Dead-letter queue**
-- Cases that fail after 3 retries go to a `cases_failed` table
-- Alert fires to on-call; case can be restarted manually with `POST /api/cases/{id}/restart`
+### 4.4 Retry + Dead-Letter Queue
+- Pub/Sub retry policy: 3 attempts with exponential backoff (2s, 4s, 8s)
+- After 3 failures: message routed to `case.dlq`
+- DLQ subscriber: writes to `cases_failed` table + fires PagerDuty P2 alert
+- Manual retry: `POST /admin/cases/{id}/retry` — re-publishes from last checkpoint
 
-**Deliverables:** Temporal workflow wrapper, approval signals, timeout escalation, optimistic locking
+### 4.5 Approval timeout
+- On `gate.pending` event: Cloud Tasks creates a task delayed by 72h
+- If task fires: escalate to next authority tier + notify RM + log in audit
+- On `gate.resolved` event: cancel the Cloud Tasks task
+
+**Deliverables:** 8 Pub/Sub topics · 8 agent workers deployed · circuit breaker · DLQ · approval timeout
 
 ---
 
 ## Week 5 — Security Hardening
-**Goal:** No secrets on disk; PII encrypted at rest; HTTPS enforced; inputs validated.
+**Design principle:** Defence in Depth — 7 security layers.
 
-### Tasks
+### 5.1 Cloud Armor (Layer 1 — Network)
+- Enable on Global HTTPS Load Balancer
+- Rules: OWASP CRS preconfigured rules, rate limit 100 req/s per IP, geo-block high-risk regions
+- DDoS protection: L3/L4 always on, L7 adaptive protection enabled
+- Log all blocked requests to Cloud Logging
 
-**5.1 Secrets management**
-- Migrate all API keys from `.env.local` to **HashiCorp Vault** (or AWS Secrets Manager / Azure Key Vault)
-- App fetches secrets at startup via Vault Agent; secrets never written to disk
-- Rotate OpenRouter API key every 90 days; rotation is automated via Vault lease renewal
-- Each service (API, worker) gets its own Vault role with least-privilege policy
+### 5.2 VPC Service Controls (Layer 1 — Network)
+- Define a perimeter around: Cloud Run, Cloud SQL, Memorystore, Secret Manager, Qdrant
+- Block access from outside the perimeter — data cannot leave even via compromised credential
+- Exceptions: OpenRouter API (egress allowlist)
 
-**5.2 Encryption at rest**
-- Encrypt `decision_records.record_json`, `extracted_fields.value` using AES-256-GCM (envelope encryption)
-- Master key in Vault; per-record data encryption keys (DEKs) rotated per case
-- PII Vault (`security.py`) persisted to DB encrypted; token → real-value map survives restarts
-- Encrypt `audit_log.jsonl` backup files at rest (S3 SSE-KMS or equivalent)
+### 5.3 Cloud KMS — CMEK (Layer 5 — Data)
+- Customer-managed encryption keys for: Cloud SQL, Cloud Storage (audit backups), Pub/Sub
+- Key rotation policy: 90 days automatic
+- Key access logged in Cloud Audit Logs — every decrypt operation recorded
 
-**5.3 HTTPS enforcement**
-- Add `nginx` reverse proxy to `docker-compose.yml` with TLS termination
-- `app.py` adds HSTS header (`Strict-Transport-Security: max-age=31536000`)
-- Redirect all HTTP → HTTPS (301)
-- Certificate via Let's Encrypt (Certbot) or internal PKI
+### 5.4 Cloud DLP — PII scanning (Layer 5 — Data)
+- Scan uploaded documents before ingestion: detect SSN, passport, bank account patterns
+- Redact detected PII from raw text before storing in `agent_steps`
+- PII tokenisation (already built in `security.py`) remains the LLM-facing layer
 
-**5.4 Input validation**
-- Add document upload endpoint `POST /api/cases/{id}/documents` (currently docs are sent as text)
-- Validate: file type whitelist (PDF, DOCX, PNG, JPEG), max size 10 MB, MIME sniff check
-- Scan uploaded files with ClamAV before processing
-- Reject filenames with path traversal patterns (extend existing `app.py:89–97` check)
+### 5.5 Binary Authorization (Layer 2 — Identity)
+- Only container images signed by the CI/CD pipeline's attestor can deploy to Cloud Run
+- Unsigned images rejected at deploy time — prevents supply chain attack
+- Attestor key stored in Cloud KMS
 
-**5.5 Content Security Policy & headers**
-- Add `SecurityHeadersMiddleware` to FastAPI:
-  - `Content-Security-Policy: default-src 'self'; script-src 'self' cdn.tailwindcss.com`
-  - `X-Frame-Options: DENY`
-  - `X-Content-Type-Options: nosniff`
-  - `Referrer-Policy: no-referrer`
-- Run OWASP ZAP scan; fix all HIGH/MEDIUM findings
+### 5.6 Field-level encryption (Layer 5 — Data)
+- `decision_records.record_json` and `extracted_fields.value` encrypted with AES-256-GCM
+- Envelope encryption: DEK per record, KEK in Cloud KMS
+- PII vault token map persisted to encrypted DB column (survives restarts — fixes current bug)
 
-**Deliverables:** Vault integration, field-level encryption, nginx+TLS, file upload endpoint, security headers
+**Deliverables:** Cloud Armor rules · VPC SC perimeter · CMEK on all stores · Cloud DLP · Binary Auth · field encryption
 
 ---
 
-## Week 6 — Observability & Monitoring
-**Goal:** Full visibility into what the system is doing; alerts fire before users notice problems.
+## Week 6 — Full Observability
+**Design principle:** Observability First — logs + traces + metrics as one unified signal.
 
-### Tasks
-
-**6.1 Structured logging**
-- Replace all `print()` with `structlog` (JSON format)
-- Every log line includes: `case_id`, `agent`, `trace_id`, `user_id`, `duration_ms`, `level`
-- Ship logs to **Elasticsearch** via Filebeat → Kibana dashboards
-- Log retention: 90 days hot, 1 year cold (S3/Azure Blob)
-
-**6.2 OpenTelemetry tracing**
+### 6.1 Distributed tracing (OpenTelemetry → Cloud Trace)
 - Instrument FastAPI with `opentelemetry-instrumentation-fastapi`
 - Each agent step creates a child span under the case trace
-- LLM calls include token count + cost as span attributes
-- Export to **Jaeger** (self-hosted) or **Datadog APM**
-- `trace_id` propagated in HTTP headers for cross-service tracing
+- Trace spans carry: `case_id`, `agent`, `llm_tokens`, `llm_cost_usd`, `qdrant_latency_ms`
+- `trace_id` propagated across Pub/Sub messages (custom attribute)
+- View full pipeline trace: single request from submit to decision in Cloud Trace
 
-**6.3 Prometheus metrics**
-- Add `/metrics` endpoint (Prometheus format)
-- Key metrics:
-  - `loan_pipeline_duration_seconds{agent}` — histogram
-  - `loan_gate_decision_total{gate,decision}` — counter
-  - `loan_llm_tokens_total{provider,model}` — counter
-  - `loan_llm_cost_usd_total{provider}` — counter
-  - `loan_cases_pending{gate}` — gauge
-  - `loan_cases_total{status}` — counter
+### 6.2 Metrics (Cloud Monitoring)
+Key metrics exported:
+```
+loan_pipeline_duration_seconds{agent}     histogram
+loan_gate_decision_total{gate, decision}  counter
+loan_llm_tokens_total{provider, model}    counter
+loan_llm_cost_usd_total{provider}         counter
+loan_cases_pending{gate}                  gauge
+loan_cases_total{status}                  counter
+loan_dlq_depth                            gauge
+```
 
-**6.4 Grafana dashboards**
-- Dashboard 1: **Operations** — active cases, pipeline throughput, error rate, p95 latency
-- Dashboard 2: **LLM Cost** — daily spend by provider/model, cost per case, budget burn rate
-- Dashboard 3: **HITL Gates** — time-to-decision per gate, approval rates, override rates
-- Dashboard 4: **Compliance** — PEP hits, blocked actions, audit chain verification status
+### 6.3 Grafana dashboards (4)
+- **Operations**: active cases, pipeline p95 latency, error rate, DLQ depth
+- **LLM Cost**: daily spend, cost/case, budget burn rate, model distribution
+- **HITL Gates**: time-to-decision per gate, approval/decline rates, override rates
+- **Compliance**: PEP hits, blocked actions, audit chain status, SLO burn rate
 
-**6.5 Alerting rules**
-- `PipelineErrorRate > 5%` for 5 min → PagerDuty P2
-- `GatePendingCount > 10` for 30 min → Slack #loan-ops
-- `LLMCostDaily > $50` → Slack #finops
-- `AuditChainBroken` (any case) → PagerDuty P1
-- `ApprovalTimeoutExpired` (any case) → Slack #loan-ops + RM email
+### 6.4 Alert policies (5)
+```
+PipelineErrorRate > 5% for 5 min     → PagerDuty P2
+DLQDepth > 0                          → PagerDuty P2
+GatePendingCount > 10 for 30 min     → Slack #loan-ops
+LLMCostDaily > $50                    → Slack #finops
+AuditChainBroken (any)                → PagerDuty P1
+```
 
-**Deliverables:** structlog, OpenTelemetry, `/metrics`, 4 Grafana dashboards, 5 alert rules
+### 6.5 SLO monitoring
+- Define SLO windows in Cloud Monitoring (rolling 28-day)
+- Error budget burn rate alerts at 2× and 5× baseline
+- SLO report auto-generated weekly → emailed to stakeholders
 
----
-
-## Week 7 — Compliance & Governance
-**Goal:** Meet bank-grade regulatory requirements; model risk governance documented.
-
-### Tasks
-
-**7.1 Immutable audit log**
-- Move audit entries to a PostgreSQL `UNLOGGED` table with `WORM`-style constraints:
-  - No UPDATE, no DELETE (enforce via row-level trigger)
-  - INSERT only by the `audit_writer` DB role
-- File backup: `audit_log.jsonl` streamed to S3 with Object Lock (Compliance mode, 7-year retention)
-- Verify hash chain daily via scheduled job; alert on any break
-
-**7.2 Activity log (access audit)**
-- Log every API call: `actor_id`, `role`, `endpoint`, `case_id`, `ip_address`, `user_agent`, `timestamp`, `response_code`
-- Separate `activity_log` table — never commingled with case audit log
-- Supports regulator query: "show all actions taken by user X on case Y between date A and B"
-- Retention: 7 years (SOX / MAS TRM requirement)
-
-**7.3 Compliance evidence export**
-- `GET /admin/cases/{id}/compliance-pack` — ZIP containing:
-  - `decision_record.json` (signed with server private key)
-  - `audit_log.jsonl` (with hash chain verification proof)
-  - `extracted_fields.json` (with citations)
-  - `gate_decisions.json` (all HITL approvals with actor, role, timestamp, rationale)
-  - `policy_clauses_checked.json` (which RAG clauses were retrieved and their scores)
-- Used for regulator inspection or internal audit
-
-**7.4 Model risk governance (SR 11-7 / MAS MG-14)**
-- Write `docs/model_risk/model_card.md`:
-  - Model purpose, inputs, outputs, performance metrics
-  - Known limitations (MockLLM vs real LLM divergence, RAG recall rate)
-  - Validation results (39-case golden set pass rates)
-  - Monitoring plan (drift detection, quarterly revalidation)
-- Write `docs/model_risk/change_log.md` — version history of policy thresholds and agent logic
-- Identify Model Owner, Model Validator, and Model Risk Officer roles
-
-**7.5 Data retention & deletion**
-- Policy: case data retained 7 years after decision date
-- Implement `POST /admin/cases/{id}/purge` — hard-delete PII fields; retain decision record skeleton
-- GDPR/PDPA right-to-erasure: PII fields nulled, audit log entries kept (only metadata)
-- Scheduled job: auto-purge cases older than 7 years
-
-**Deliverables:** WORM audit log, activity log, compliance-pack endpoint, model card, data retention policy
+**Deliverables:** OpenTelemetry traces · `/metrics` endpoint · 4 Grafana dashboards · 5 alert policies · SLO burn rate
 
 ---
 
-## Week 8 — Testing & Go-Live
-**Goal:** System handles production load; security validated; team knows how to operate it.
+## Week 7 — HA · Compliance · Blue-Green
+**Design principle:** Immutability · High Availability · CAP-CP.
 
-### Tasks
+### 7.1 Multi-region active-active
+- Deploy Cloud Run to `asia-south1` (primary) + `asia-southeast1` (secondary)
+- Global HTTPS LB: anycast IP routes to nearest healthy region
+- Failover: if primary returns 5xx for 30s → LB shifts 100% to secondary
+- Cloud SQL: primary in asia-south1, async read replica in asia-southeast1
+- Test: kill primary region → verify failover < 10s
 
-**8.1 Performance & load testing**
-- Tool: **Locust** or **k6`
-- Scenario A: 50 concurrent users submitting applications — target p95 < 30s per pipeline
-- Scenario B: 200 concurrent users viewing case status — target p95 < 500ms
-- Scenario C: 10 simultaneous HITL approvals — no race conditions, no lost votes
-- Baseline: document throughput, LLM cost per case, DB query p95
+### 7.2 Blue-Green deployment
+- Cloud Run traffic splitting: `--traffic=LATEST=10` for canary, `=100` for full rollout
+- Automated rollback trigger: if error rate > 1% on new revision → shift back to stable
+- Database migrations run as pre-deploy Cloud Run Job (backward-compatible required)
+- Runbook: rollback procedure documented + tested
 
-**8.2 Chaos engineering**
-- Kill Qdrant mid-pipeline → verify BM25 fallback activates, case resumes
-- Kill Redis mid-approval → verify session recovers from DB
-- Simulate OpenRouter timeout → verify retry + exponential backoff + circuit breaker
-- Kill Temporal worker mid-workflow → verify workflow replays correctly from checkpoint
-- Disconnect DB → verify health endpoint returns 503 and no silent data loss
+### 7.3 WORM audit log (immutability)
+- Audit entries: DB trigger prevents UPDATE/DELETE on `audit_entries` table
+- File backup: Cloud Storage bucket with Object Lock enabled (Compliance mode, 7-year retention)
+- Daily job: verify SHA-256 hash chain integrity; alert on any break
+- Compliance export: `GET /admin/cases/{id}/compliance-pack` — ZIP with signed decision record + audit log
 
-**8.3 Security penetration test**
-- Run **OWASP ZAP** full active scan against staging environment
-- Manual test: IDOR (can RM A see RM B's case by guessing case ID?)
-- Manual test: privilege escalation (can `rm` role call `/api/approve`?)
-- Manual test: prompt injection via application fields (borrower name contains jailbreak)
-- Fix all HIGH findings before go-live; track MEDIUM in backlog
+### 7.4 Activity log (7-year)
+- Every API call logged: `actor_id`, `role`, `endpoint`, `case_id`, `ip`, `user_agent`, `ts`, `response_code`
+- Separate table, separate DB role — immutable inserts only
+- Retention: 7 years (Cloud Storage cold tier after 90 days)
+- Supports regulator query: "all actions by user X on case Y between date A and B"
 
-**8.4 Runbooks & documentation**
-- `docs/ops/runbook_approval_timeout.md` — what to do when a case times out
-- `docs/ops/runbook_audit_chain_break.md` — incident response for tampered audit
-- `docs/ops/runbook_llm_outage.md` — how to switch to MockLLM and back
-- `docs/ops/runbook_scaling.md` — how to add more workers
-- `docs/api_contract.md` — OpenAPI spec exported from FastAPI (`/openapi.json`)
-- Update architecture diagram to reflect all production components
+### 7.5 SR 11-7 Model Card
+- `docs/model_risk/model_card.md`: purpose, inputs, outputs, performance, limitations
+- `docs/model_risk/change_log.md`: version history of policy thresholds + agent logic
+- Validation report: 39-case golden set results, BM25 vs hybrid RAG accuracy delta
+- Sign-off: Model Owner, Model Validator, Model Risk Officer
 
-**8.5 Staging → Production promotion**
-- Deploy to staging (identical to production); run full regression suite
-- Smoke test checklist:
-  - [ ] New application submits via Web UI
-  - [ ] Pipeline runs end-to-end with real LLM
-  - [ ] All 3 HITL gates fire and resolve correctly
-  - [ ] Audit chain verifies after full run
-  - [ ] Compliance pack downloads and validates
-  - [ ] Metrics visible in Grafana
-  - [ ] Alert fires when approval times out
-- Sign-off required from: Tech Lead, Model Risk Officer, Head of Compliance, CISO
+**Deliverables:** Multi-region LB · blue-green rollback · WORM audit · activity log · compliance-pack · SR 11-7 model card
 
-**Deliverables:** Load test report, pen test findings + fixes, 4 runbooks, API contract, go-live sign-off
+---
+
+## Week 8 — Load Test & Go-Live
+**Design principle:** All 12 — validated under load.
+
+### 8.1 Load test (Locust)
+```
+Scenario A — 50 concurrent submissions
+  Target: p95 < 200ms (submit), pipeline complete < 5 min
+  Pass: 0 errors, 0 data loss
+
+Scenario B — 200 concurrent status reads
+  Target: p95 < 50ms
+  Pass: Redis hit rate > 95%
+
+Scenario C — 20 simultaneous approvals
+  Target: no race conditions, no lost votes
+  Pass: all gate_events have unique optimistic lock version
+```
+
+### 8.2 Chaos engineering
+```
+Kill Qdrant          → BM25 fallback activates, pipeline continues
+Kill Redis           → session recovers from DB, SSE reconnects
+Throttle OpenRouter  → circuit breaker opens, MockLLM activates, alert fires
+Kill primary DB      → read replica promoted in <30s, pipeline resumes
+Kill asia-south1     → LB routes to asia-southeast1 in <10s
+Kill one agent worker → Pub/Sub retries, message re-routed to healthy instance
+```
+
+### 8.3 Security pen test (OWASP ZAP + manual)
+- Full active scan against staging
+- Manual: IDOR (can RM A see RM B's case?), privilege escalation, prompt injection via borrower name
+- Binary Auth: attempt to deploy unsigned image — must be rejected
+- VPC SC: attempt data exfiltration — must be blocked
+- Fix all HIGH findings before go-live; MEDIUM in 30-day backlog
+
+### 8.4 Runbooks
+- `ops/runbook_approval_timeout.md` — case timed out at gate
+- `ops/runbook_audit_chain_break.md` — tampered audit log
+- `ops/runbook_llm_outage.md` — OpenRouter down, circuit open
+- `ops/runbook_db_failover.md` — primary DB unavailable
+- `ops/runbook_rollback.md` — bad deploy, revert to previous revision
+
+### 8.5 Go-live checklist
+- [ ] All 8 agent workers deployed and passing health checks
+- [ ] Multi-region LB routing verified from both regions
+- [ ] Alert policies firing correctly in staging
+- [ ] Compliance pack downloads and hash-chain validates
+- [ ] Load test: all 3 scenarios pass
+- [ ] Chaos: all 6 scenarios recover within SLO
+- [ ] Pen test: zero HIGH findings open
+- [ ] Runbooks reviewed by on-call engineer
+- [ ] SLO targets agreed and signed by: Tech Lead · Model Risk Officer · Compliance · CISO
+
+**Deliverables:** Load test report · chaos results · pen test report + fixes · 5 runbooks · go-live sign-off
 
 ---
 
 ## Dependency Map
-
 ```
-Week 1 (DevOps) ──► Week 2 (Auth) ──► Week 3 (Persistence) ──► Week 4 (Workflow)
-                                                │
-                                                ▼
-Week 5 (Security) ◄──────────────────── Week 3 (Persistence)
-       │
-       ▼
-Week 6 (Observability) ──► Week 7 (Compliance) ──► Week 8 (Go-Live)
+Week 1 (Foundation) ──► Week 2 (Auth) ──► Week 3 (Persistence) ──► Week 4 (Event-Driven)
+                                                    │
+                                                    ▼
+                              Week 5 (Security) ◄──┘
+                                    │
+                                    ▼
+                              Week 6 (Observability) ──► Week 7 (HA + Compliance) ──► Week 8 (Go-Live)
 ```
-
-Weeks 1–4 are strictly sequential. Weeks 5 and 6 can run in parallel after Week 3.
-
----
-
-## Team Sizing
-
-| Role | Weeks Active | Responsibility |
-|------|-------------|----------------|
-| Backend Engineer (×2) | All 8 weeks | API, persistence, workflow |
-| DevOps / Platform Engineer | Weeks 1, 4, 6, 8 | Docker, CI/CD, Temporal, Grafana |
-| Security Engineer | Weeks 2, 5, 8 | Auth, encryption, pen test |
-| Data Engineer | Week 3 | Schema design, migrations, query API |
-| Compliance / Risk Analyst | Week 7 | Model card, SR 11-7, activity log spec |
-| QA Engineer | Week 8 | Load test, chaos, regression |
+Weeks 5 and 6 can run in parallel after Week 3 is complete.
 
 ---
 
-## What Is NOT Changing
+## Team & Roles
 
-The following components are **production-grade today** and require no rework:
-
-- **8-agent pipeline logic** — sound architecture, independently testable
-- **Hybrid RAG** — BM25 + Qdrant with graceful fallback
-- **Segregation of Duties enforcement** — orchestrator blocks wrong-role approvals
-- **PII masking** — identifiers removed before any LLM call
-- **Hash-chained audit trail** — tamper detection works
-- **39-case golden test set** — regression safety net
-- **Prompt injection screening** — 14-rule quarantine filter
+| Role | Weeks | Focus |
+|------|-------|-------|
+| Backend Engineer ×2 | All 8 | API, pipeline workers, CQRS, circuit breaker |
+| Platform / DevOps | 1, 4, 7, 8 | Cloud Run, Pub/Sub, multi-region, blue-green |
+| Security Engineer | 2, 5, 8 | IAP, Cloud Armor, VPC SC, KMS, pen test |
+| Data Engineer | 3 | PostgreSQL schema, Alembic, PgBouncer, CQRS |
+| Observability Engineer | 6 | OpenTelemetry, Grafana, alert policies |
+| Compliance / Risk Analyst | 7 | WORM audit, activity log, SR 11-7 model card |
+| QA Engineer | 8 | Locust load test, chaos, regression |
 
 ---
 
-## Cost Estimate (Infrastructure, Monthly at Go-Live)
+## SLOs at Go-Live
 
-| Component | Service | Est. Cost/Month |
-|-----------|---------|----------------|
-| App server | 2× 4-vCPU VM (active-standby) | $200 |
-| PostgreSQL | Managed DB, 100 GB | $150 |
-| Redis | Managed cache, 1 GB | $30 |
-| Qdrant | 1× 4-vCPU VM | $80 |
-| Temporal | Self-hosted on 2× 2-vCPU | $100 |
-| Log storage | Elasticsearch + S3 (90 days hot) | $120 |
-| OpenRouter | ~200 cases/month × $0.50/case | $100 |
-| **Total** | | **~$780/month** |
-
-Vault, Grafana, CI/CD assumed self-hosted or existing enterprise licence.
+| SLO | Target |
+|-----|--------|
+| API availability | 99.95% |
+| Submit P95 latency | < 200ms |
+| Case status P95 latency | < 50ms |
+| Pipeline P95 (real LLM) | < 5 min |
+| Audit chain integrity | 100% |
+| Data durability | 99.9999999% |
+| RTO (region failure) | < 10 min |
+| RPO (data loss window) | < 30 sec |
