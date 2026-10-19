@@ -17,7 +17,7 @@
 
     { "id": "human_credit",     "type": "external",   "label": "Credit Authority",       "sublabel": "SCM · Committee · Board",            "pos": [210, 465], "size": [145, 60] },
     { "id": "human_compliance", "type": "external",   "label": "Compliance Officer",     "sublabel": "PEP / sanctions gate",               "pos": [210, 555], "size": [145, 60] },
-    { "id": "hitl",             "type": "external",   "label": "HITL Validator",         "sublabel": "Confidence < 75% gate",              "pos": [210, 645], "size": [145, 60] },
+    { "id": "hitl",             "type": "external",   "label": "Senior Analyst",         "sublabel": "Data validation gate · avg conf < 75%",  "pos": [210, 645], "size": [145, 60] },
 
     { "id": "intake",           "type": "backend",    "label": "Intake Agent",           "sublabel": "Form completeness · doc list",       "pos": [425, 80],  "size": [155, 60] },
     { "id": "docint",           "type": "backend",    "label": "Document Intelligence",  "sublabel": "35+ fields · confidence scores",     "pos": [425, 170], "size": [155, 60] },

@@ -95,6 +95,21 @@ class MockLLM:
         return TEMPLATES[task](context)
 
 
+class LowConfidenceMockLLM(MockLLM):
+    """MockLLM variant that caps every extracted-field confidence at ``max_conf``.
+    Use in tests that need to trigger the low-confidence HITL gate."""
+
+    def __init__(self, max_conf: float = 0.55):
+        super().__init__()
+        self.max_conf = max_conf
+
+    def extract(self, doc_name: str, doc_type: str, lines: list[str], schema: list[dict]) -> dict:
+        fields = super().extract(doc_name, doc_type, lines, schema)
+        for f in fields.values():
+            f.confidence = self.max_conf
+        return fields
+
+
 PRICES_PER_MTOK = {   # USD per million tokens (input, output), Anthropic first-party list prices
     "claude-opus-5-5": (4.00, 20.00),
     "claude-sonnet-5-5": (2.00, 10.00),
@@ -399,6 +414,8 @@ class OpenRouterLLM:
 
 
 def get_llm(mode: str = "auto"):
+    if mode == "low_confidence":
+        return LowConfidenceMockLLM()
     if mode == "openrouter" or (mode == "auto" and os.environ.get("OPENROUTER_API_KEY")):
         return OpenRouterLLM()
     if mode == "claude" or (mode == "auto" and os.environ.get("ANTHROPIC_API_KEY")):

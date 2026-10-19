@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from loanagent.audit import verify_chain                      # noqa: E402
-from loanagent.llm import ClaudeLLM                           # noqa: E402
+from loanagent.llm import ClaudeLLM, LowConfidenceMockLLM    # noqa: E402
 from loanagent.orchestrator import ControlViolation, ScriptedApprover, run_case  # noqa: E402
 from loanagent.security import PIIVault                       # noqa: E402
 
@@ -19,7 +19,15 @@ SCRIPT = json.loads((ROOT / "data" / "demo_approvals.json").read_text())
 
 def run(app, script, **kw):
     out = Path(tempfile.mkdtemp())
-    case = run_case(APPS / app, ScriptedApprover(script), out, as_of="2026-10-16", llm_mode="mock", verbose=False, **kw)
+    case = run_case(APPS / app, ScriptedApprover(script), out, as_of="2026-10-19", llm_mode="mock", verbose=False, **kw)
+    return case, out / app
+
+
+def run_low_conf(app, script, max_conf=0.55):
+    """Run a case with LowConfidenceMockLLM to trigger the data-validation HITL gate."""
+    out = Path(tempfile.mkdtemp())
+    llm = LowConfidenceMockLLM(max_conf)
+    case = run_case(APPS / app, ScriptedApprover(script), out, as_of="2026-10-19", verbose=False, llm=llm)
     return case, out / app
 
 
@@ -100,6 +108,81 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(out["valuation_date"].value, "2026-02-10")
         self.assertEqual(out["valuation_date"].evidence.quote, "Valuation date: 2026-02-10")
         self.assertNotIn("bogus", out)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SC-09 · HITL Triggered — Low Confidence (avg < 0.75)
+# ─────────────────────────────────────────────────────────────────────────────
+SC09_APP = "APP-SC09-2026"
+
+SC09_PROCEED_SCRIPT = {
+    "data_validation": [{"name": "Priya Iyer", "role": "Senior Analyst", "decision": "PROCEED",
+                         "rationale": "Verified all extracted fields against source documents."}],
+    # USD 2.2 M + POL-3.4 exception escalates to Board Credit Committee
+    "credit": [{"name": "Chen Wei", "role": "Board Credit Committee",
+                "decision": "APPROVE WITH CONDITIONS", "rationale": ""}],
+}
+
+SC09_RETURN_SCRIPT = {
+    "data_validation": [{"name": "Priya Iyer", "role": "Senior Analyst",
+                         "decision": "RETURN FOR RESUBMISSION",
+                         "rationale": "Provisional figures too approximate; formal audited financials required."}],
+    "credit": [],
+}
+
+
+class SC09HITLTests(unittest.TestCase):
+    def test_sc09_data_validation_gate_fires_on_low_confidence(self):
+        """Gate must appear when avg extraction confidence < 0.75."""
+        case, _ = run_low_conf(SC09_APP, SC09_PROCEED_SCRIPT)
+        self.assertLess(case.checklist["avg_extraction_confidence"], 0.75)
+        self.assertIn("data_validation", [g["gate"] for g in case.checklist["gates"]])
+
+    def test_sc09_proceed_allows_pipeline_to_complete(self):
+        """After analyst clicks PROCEED the pipeline reaches a credit decision."""
+        case, _ = run_low_conf(SC09_APP, SC09_PROCEED_SCRIPT)
+        self.assertIn(case.checklist["final_status"],
+                      ("APPROVED", "APPROVED WITH CONDITIONS", "DECLINED", "RETURNED TO RM"))
+        # Credit gate must have fired as well
+        self.assertIn("credit", [d["gate"] for d in case.human_decisions])
+
+    def test_sc09_return_for_resubmission_sets_final_status(self):
+        """RETURN FOR RESUBMISSION at the data-validation gate terminates the pipeline."""
+        case, _ = run_low_conf(SC09_APP, SC09_RETURN_SCRIPT)
+        self.assertEqual(case.checklist["final_status"], "RETURNED TO RM")
+        # Credit gate must NOT have fired
+        self.assertNotIn("credit", [d["gate"] for d in case.human_decisions])
+
+    def test_sc09_wrong_role_blocked_at_data_validation_gate(self):
+        """Only a Senior Analyst may sign off the data-validation gate."""
+        wrong_then_right = {
+            "data_validation": [
+                {"name": "Kenji Watanabe", "role": "Senior Credit Manager",
+                 "decision": "PROCEED", "rationale": "Wrong role"},
+                {"name": "Priya Iyer", "role": "Senior Analyst",
+                 "decision": "PROCEED", "rationale": "Confirmed."},
+            ],
+            "credit": [{"name": "Chen Wei", "role": "Board Credit Committee",
+                        "decision": "APPROVE WITH CONDITIONS", "rationale": ""}],
+        }
+        case, out = run_low_conf(SC09_APP, wrong_then_right)
+        blocked = [json.loads(l) for l in (out / "audit_log.jsonl").read_text().splitlines()
+                   if json.loads(l)["action"] == "human_action_blocked"]
+        self.assertEqual(len(blocked), 1)
+        self.assertEqual(blocked[0]["outputs"]["gate"], "data_validation")
+
+    def test_sc09_no_gate_on_high_confidence(self):
+        """With standard MockLLM (0.98 confidence) the data-validation gate must NOT fire."""
+        case, _ = run(SC09_APP, {"credit": [{"name": "Chen Wei", "role": "Board Credit Committee",
+                                              "decision": "APPROVE WITH CONDITIONS", "rationale": ""}]})
+        self.assertGreaterEqual(case.checklist["avg_extraction_confidence"], 0.75)
+        self.assertNotIn("data_validation", [g["gate"] for g in case.checklist["gates"]])
+
+    def test_sc09_audit_chain_intact_after_data_validation(self):
+        """Audit chain must verify even when the extra gate fires."""
+        _, out = run_low_conf(SC09_APP, SC09_PROCEED_SCRIPT)
+        ok, msg = verify_chain(out / "audit_log.jsonl")
+        self.assertTrue(ok, msg)
 
 
 if __name__ == "__main__":

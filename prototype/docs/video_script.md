@@ -220,19 +220,23 @@ Check:
 
 **Say:** "This is the heart of it. I'm running Meridian Agro Processing — USD 4.5 million — with me as the live approver. Five problems are hidden in its documents: a politically exposed director, a stale valuation, an expired passport, excess returned cheques, and weak bank-credit coverage."
 
-**Do:** Let the pipeline run until the amber EDD compliance gate panel appears.
+**Do:** Let the pipeline run. Mention the three possible gates as the pipeline progresses.
 
-**Say:** "It stops at the compliance gate. I — Amara Osei, Board Credit Committee — am not getting the approval panel, because my role doesn't qualify for compliance clearance. Only a Compliance Officer can clear EDD. The system enforces this in code, not just policy."
+**Say:** "The system has up to three sequential human gates. Gate zero fires first — Data Validation — whenever the AI's average extraction confidence falls below 75%. A Senior Analyst reviews the flagged fields, decides PROCEED or RETURN FOR RESUBMISSION. On this case, confidence is fine, so it skips straight to Gate 1."
 
-**Do:** Open second browser tab → log in as `grace.mwangi / demo123` (Compliance Officer).
+**Do:** Let the amber EDD compliance gate panel appear.
 
-**Say:** "Grace Mwangi, Compliance Officer, gets the notification immediately. Her identity is fixed from login — she can't pretend to be someone else."
+**Say:** "Gate 1 — the compliance gate. I — Amara Osei, Board Credit Committee — am not getting the approval panel, because my role doesn't qualify for compliance clearance. Only a Compliance Officer can clear EDD. Notice there is no notification bell for me — the bell only appears for roles that have something to act on."
+
+**Do:** Open second browser tab → log in as `grace.mwangi / demo123` (Compliance Officer). Point at the notification bell with the red badge.
+
+**Say:** "Grace Mwangi, Compliance Officer, sees the pending approval badge immediately. Her identity is fixed from login — she can't pretend to be someone else."
 
 **Do:** Attempt 1 — EDD NOT CLEARED (wrong decision, to show it records). Then Attempt 2 — EDD CLEARED with rationale.
 
 **Do:** Switch back to amara.osei tab → Gate 2 appears — Board Credit Committee. Amara approves with conditions.
 
-**Say:** "Gate two comes to Amara — her authority level. Both gates, both identities, the wrong-role attempt — all permanently in the audit trail."
+**Say:** "Gate two comes to Amara — her authority level. Three possible gates, three role-enforced identities, the wrong-role attempt — all permanently in the audit trail."
 
 **Do:** Open Audit tab. Point at the blocked attempt and correct approval entries.
 
@@ -284,7 +288,7 @@ Check:
 
 **Do:** Run **Unit tests and release gate** demo.
 
-**Say:** "20 tests on the safety rules. No self-approval, no over-authority, no fail-open, no hidden instructions pass. All 20 pass."
+**Say:** "26 tests on the safety rules. No self-approval, no over-authority, no fail-open, no hidden instructions pass. The six new SC-09 tests cover the data-validation gate: gate fires on low confidence, PROCEED continues, RETURN FOR RESUBMISSION terminates, wrong role is blocked, high confidence skips the gate, audit chain intact. All 26 pass."
 
 ---
 
@@ -338,6 +342,8 @@ Check:
 - [ ] Login as `newuser / demo123` → applicant portal, no admin screens
 - [ ] Login as `amara.osei / demo123` → all tabs visible
 - [ ] Policy Library → open `collateral_valuation_policy.md` → Preview loads with coloured clause badges
+- [ ] Logged in as `amara.osei` — notification bell is NOT visible (admin-only)
+- [ ] Logged in as `admin` account — notification bell IS visible with pending badge if any gate is open
 - [ ] No API key, password or notification visible in any screen
 - [ ] Do Not Disturb on; email and chat closed
 
@@ -354,7 +360,9 @@ Check:
 | How does re-ingesting policy work? | Edit any `.md` file in the Policy Library, save it. The SHA-256 of all policy files changes → new Qdrant collection name → `_try_init()` auto-indexes all 143 clauses on next start. Old collection is left in Qdrant as an immutable snapshot. |
 | What does it cost? | About 7 cents per test case with mock. Roughly USD 0.50 for 39 real cases via OpenRouter. About USD 1.20 for a full real-world case, against ~USD 1,000+ of analyst time. |
 | Is the confidence score reliable? | The mock LLM gives 0.97–0.98 by pattern. With a live LLM, confidence comes from the model's self-reported certainty. The citation verification step (comparing extracted value against the quoted text) is the harder, code-enforced check that cannot be faked. |
-| You said 100% reliability — is that meaningful? | On the Sunrise demo documents, which were clean and structured: yes. On real messy scans, confidence will be lower and the HITL confidence-threshold gate (described in the scenario design) would pause the pipeline for a human data analyst to verify. |
+| You said 100% reliability — is that meaningful? | On the Sunrise demo documents, which were clean and structured: yes. On real messy scans, confidence will be lower and the data-validation HITL gate fires automatically when avg confidence drops below 75% — the pipeline pauses for a Senior Analyst to review before any credit decision is made. |
+| Who decides at the data-validation gate? | A Senior Analyst (e.g. Priya Iyer). Their two choices: PROCEED (pipeline continues to Due Diligence) or RETURN FOR RESUBMISSION (pipeline terminates immediately with status RETURNED TO RM — the credit gate never fires). The system enforces this role in code via `validate_human_action`. |
+| Why does the spinning icon stop when the pipeline is waiting for approval? | The "Run again" button spins only while the pipeline is actively processing (`sessionStatus === 'running'`). When it's paused at a human gate (`awaiting_approval`), the spinner stops — nothing is processing, so the visual accurately reflects the state. |
 | Why isn't Portfolio Monitoring in the demo? | It needs live core banking account feeds for continuous covenant tests. Not available in a prototype. Fully designed in docs: inputs, tools, outputs, autonomy level, and what it's never allowed to do. First agent added in POC Phase 2. |
 | Which cloud? | Whatever the bank uses. Mapped to Azure first; AWS and Google alternatives documented in `docs/deployment_mapping.md`. |
 

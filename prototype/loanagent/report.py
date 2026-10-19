@@ -127,6 +127,7 @@ def write_outputs(case: CaseFile, out: Path, audit, tracer, llm, kb, vault):
         "findings": sorted([x.to_dict() for x in case.findings], key=lambda x: -SEVERITY_ORDER[x["severity"]]),
         "conditions": [asdict(c) for c in case.conditions],
         "gates": case.checklist.get("gates", []), "security_flags": case.checklist.get("security_flags", []),
+        "avg_extraction_confidence": case.checklist.get("avg_extraction_confidence", 1.0),
         "policy": {"version": kb.version, "effective_from": kb.effective_from, "sha256": kb.sha256},
         "controls": {"model": llm.name, "prompt_version": llm.PROMPT_VERSION, "policy_kb": kb.version, "pii_tokens_masked": vault.total,
                      "audit_head": audit.head, "trace_id": tracer.trace_id, **llm.stats.snapshot()},
@@ -150,6 +151,7 @@ def write_pending(case: CaseFile, out: Path, llm, kb, vault):
         "findings": sorted([x.to_dict() for x in case.findings], key=lambda x: -SEVERITY_ORDER[x["severity"]]),
         "conditions": [asdict(c) for c in case.conditions], "missing": case.checklist.get("missing", []),
         "security_flags": case.checklist.get("security_flags", []), "rm_request": case.rm_request,
+        "avg_extraction_confidence": case.checklist.get("avg_extraction_confidence", 1.0),
         "controls": {"model": llm.name, "pii_tokens_masked": vault.total, **llm.stats.snapshot()},
     }
     (out / "pending_record.json").write_text(json.dumps(record, indent=2, default=str))

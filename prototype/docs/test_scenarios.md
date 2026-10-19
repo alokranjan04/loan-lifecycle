@@ -122,45 +122,48 @@ Cases that must not be approved.
 
 ## Category 3 — Human-in-the-loop (HITL) scenarios
 
-Cases where AI extraction confidence falls below 75%, requiring human data validation before policy checks run.
+Cases where AI extraction confidence falls below 75%, triggering a data_validation gate before policy checks run. The gate requires a **Senior Analyst**; PROCEED continues the pipeline, RETURN FOR RESUBMISSION terminates it with `final_status = "RETURNED TO RM"`.
 
-### SC-09 · HITL triggered — poor document quality
+Tested with `LowConfidenceMockLLM(max_conf=0.55)` which caps all extracted-field confidence scores, forcing `avg_extraction_confidence < 0.75`.
 
-| | |
-|---|---|
-| **Application** | APP-2026-0205 · Rajshree Textile Mills · USD 2,200,000 |
-| **Trigger** | Scanned financials with handwritten annotations; 8 fields extracted at < 60% confidence |
-| **Avg confidence** | ~62% (below 75% threshold) |
-| **HITL gate** | Human data validator reviews flagged fields in workbench |
-| **Human action** | Confirms 6 fields; corrects 2 (revenue ₹ vs. USD conversion error; LTV recalculated) |
-| **Post-HITL outcome** | APPROVED WITH CONDITIONS (DSCR 1.44× after correction) |
-| **Acceptance criteria** | Pipeline pauses at HITL gate; CaseFile.hitl_triggered = True; corrected fields logged with actor = human_validator; pipeline resumes and completes; Case Report shows HITL step in decision flow |
-
-### SC-10 · HITL triggered — conflicting figures across documents
+### SC-09 · HITL triggered — low extraction confidence
 
 | | |
 |---|---|
-| **Application** | Revenue in financials USD 4.2M · revenue in project report USD 3.8M |
-| **Trigger** | DataExtractor reports `conflict` flag on revenue field; confidence 58% |
-| **HITL gate** | Human selects authoritative value (audited financials) |
-| **Acceptance criteria** | Conflict surfaced in HITL workbench; human selection recorded; downstream DSCR uses chosen value |
+| **Application** | APP-SC09-2026 |
+| **Trigger** | `LowConfidenceMockLLM` — all fields capped at 0.55 confidence; `avg_extraction_confidence = 0.55 < 0.75` |
+| **HITL gate** | `data_validation` — requires Senior Analyst |
+| **Decisions** | PROCEED · RETURN FOR RESUBMISSION |
+| **Test file** | `tests/test_workflow.py` — `SC09HITLTests` (6 tests) |
 
-### SC-11 · HITL NOT triggered — all fields high confidence
+**Sub-scenarios (all 6 in test suite pass):**
+
+| Sub-scenario | Test | Expected |
+|---|---|---|
+| Gate fires on low confidence | `test_sc09_data_validation_gate_fires_on_low_confidence` | `data_validation` in `gates`; `avg_conf < 0.75` |
+| PROCEED allows pipeline to complete | `test_sc09_proceed_allows_pipeline_to_complete` | `final_status` ∈ {APPROVED, APPROVED WITH CONDITIONS, DECLINED, RETURNED TO RM}; credit gate also fires |
+| RETURN FOR RESUBMISSION terminates pipeline | `test_sc09_return_for_resubmission_sets_final_status` | `final_status = "RETURNED TO RM"`; credit gate does NOT fire |
+| Wrong role blocked at data_validation gate | `test_sc09_wrong_role_blocked_at_data_validation_gate` | `human_action_blocked` in audit log; gate = `data_validation` |
+| No gate on high confidence (standard MockLLM ≥ 0.98) | `test_sc09_no_gate_on_high_confidence` | `data_validation` NOT in `gates`; `avg_conf ≥ 0.75` |
+| Audit chain intact after extra gate | `test_sc09_audit_chain_intact_after_data_validation` | `verify_chain` returns `ok = True` |
+
+### SC-10 · HITL NOT triggered — all fields high confidence
 
 | | |
 |---|---|
 | **Application** | APP-2026-0201 (standard demo case) |
-| **Avg confidence** | 98% |
-| **Expected outcome** | No HITL gate; pipeline flows directly to policy checks |
-| **Acceptance criteria** | CaseFile.hitl_triggered = False; Case Report shows no human gate step in pipeline flow |
+| **Avg confidence** | 98% (standard MockLLM) |
+| **Expected outcome** | No HITL gate; pipeline flows directly to Due Diligence |
+| **Acceptance criteria** | `data_validation` NOT in `gates`; Case Report shows no data-validation step in pipeline flow |
 
-### SC-12 · HITL — human rejects a case at validation stage
+### SC-11 · HITL — analyst returns case for resubmission
 
 | | |
 |---|---|
-| **Application** | Documents appear fabricated (inconsistent dates, unusual formatting) |
-| **HITL gate** | Human data validator flags as suspicious, marks case REFERRED |
-| **Acceptance criteria** | Outcome = REFERRED; pipeline terminates; audit log records human rejection with rationale; no policy checks run |
+| **Application** | APP-SC09-2026 with `LowConfidenceMockLLM` |
+| **Human action** | RETURN FOR RESUBMISSION (Senior Analyst, written rationale) |
+| **Expected outcome** | `final_status = "RETURNED TO RM"`; pipeline terminates; credit gate does not fire |
+| **Acceptance criteria** | `test_sc09_return_for_resubmission_sets_final_status` passes; audit log records human action at data_validation gate |
 
 ---
 

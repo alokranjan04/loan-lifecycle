@@ -11,7 +11,13 @@ flowchart TD
     Submit --> Load["Orchestrator creates CaseFile\nassigns APP-YYYY-NNNN"]
     Load --> Intake["Intake Agent\nvalidates required form fields"]
     Intake --> DocInt["Document Intelligence\nextracts ~50 fields with citations"]
-    DocInt --> Complete["Completeness Agent\nchecks for missing documents"]
+    DocInt --> ConfGate{"avg_extraction_confidence\n≥ 75%?"}
+    ConfGate -->|"Yes"| Complete
+    ConfGate -->|"No → data_validation gate\nSenior Analyst reviews"| DVGate{"PROCEED or\nRETURN FOR RESUBMISSION?"}
+    DVGate -->|"PROCEED"| Complete
+    DVGate -->|"RETURN FOR RESUBMISSION"| Reject0(["RETURNED TO RM\n(pipeline terminates)"])
+
+    Complete["Completeness Agent\nchecks for missing documents"]
 
     Complete -->|"Docs missing"| RMReq["RM request drafted\nrm_request.txt sent"]
     RMReq --> WaitRM["Case paused\nwaiting for resubmission"]
@@ -52,7 +58,8 @@ flowchart TD
 |---|---|---|
 | **Submit** | RM / Applicant | Application JSON + docs uploaded via web portal or placed in `data/applications/APP-*/` for CLI |
 | **Intake** | IntakeAgent | Checks that all required fields are present; lists expected document types |
-| **Doc extraction** | DocumentIntelligenceAgent | Calls LLM (PII masked) to extract structured fields from each document with line citations |
+| **Doc extraction** | DocumentIntelligenceAgent | Calls LLM (PII masked) to extract structured fields from each document with line citations; computes `avg_extraction_confidence` |
+| **Data validation gate** | Senior Analyst | Fires when `avg_extraction_confidence < 0.75`; PROCEED → continue, RETURN FOR RESUBMISSION → pipeline terminates (RETURNED TO RM) |
 | **Completeness** | CompletenessAgent | Flags missing or expired documents; drafts an RM request if blocking |
 | **Due diligence** | DueDiligenceAgent | Screens borrower name and directors against sanctions, PEP, and adverse media watchlists |
 | **Compliance gate** | Compliance Officer | Manual clearance required if a watchlist hit is found; blocked if officer lacks authority |

@@ -23,6 +23,7 @@ from .security import PIIVault
 ROOT = Path(__file__).resolve().parent.parent
 CREDIT_DECISIONS = ["APPROVE WITH CONDITIONS", "APPROVE", "DECLINE", "RETURN TO RM"]
 COMPLIANCE_DECISIONS = ["EDD CLEARED", "EDD NOT CLEARED"]
+DATA_VALIDATION_DECISIONS = ["PROCEED", "RETURN FOR RESUBMISSION"]
 
 
 class Context:
@@ -41,7 +42,9 @@ class InteractiveApprover:
     """Terminal prompt. Stands in for the approval screen in the loan origination system."""
 
     def ask(self, gate: dict, case: CaseFile, attempt: int) -> dict:
-        options = COMPLIANCE_DECISIONS if gate["gate"] == "compliance" else CREDIT_DECISIONS
+        options = (COMPLIANCE_DECISIONS if gate["gate"] == "compliance"
+                   else DATA_VALIDATION_DECISIONS if gate["gate"] == "data_validation"
+                   else CREDIT_DECISIONS)
         print(f"\n=== HUMAN GATE: {gate['role']} ===  ({gate['reason']})")
         if gate["gate"] == "credit":
             print(f"System recommendation: {case.recommendation['action']}  ({case.recommendation['reason']})")
@@ -85,15 +88,19 @@ def validate_human_action(gate: dict, action: dict, case: CaseFile) -> list[str]
             errors.append(f"insufficient authority: {action.get('role')} cannot approve; requires {gate['role']} (POL-6.1)")
         if action.get("decision") != case.recommendation["action"] and len(action.get("rationale", "")) < 20:
             errors.append("override of the system recommendation needs a written rationale of at least 20 characters (POL-6.2)")
-    elif action.get("role") != "Compliance Officer":
-        errors.append("EDD sign-off must come from a Compliance Officer (POL-3.3)")
+    elif gate["gate"] == "compliance":
+        if action.get("role") != "Compliance Officer":
+            errors.append("EDD sign-off must come from a Compliance Officer (POL-3.3)")
+    elif gate["gate"] == "data_validation":
+        if action.get("role") != "Senior Analyst":
+            errors.append("data quality review must be performed by a Senior Analyst")
     return errors
 
 
 # ---------------------------------------------------------------------------------------------
 def run_case(app_dir: Path, approver, out_root: Path, as_of: str | None = None, llm_mode: str = "auto",
              watchlist_path: Path | None = None, verbose: bool = True, policy_version: str | None = None,
-             llm=None, prepare_only: bool = False) -> CaseFile:
+             llm=None, prepare_only: bool = False, kb=None) -> CaseFile:
     say = print if verbose else (lambda *a, **k: None)
     application = json.loads((app_dir / "application.json").read_text())
     case = CaseFile(application, as_of or date.today().isoformat())
@@ -101,7 +108,7 @@ def run_case(app_dir: Path, approver, out_root: Path, as_of: str | None = None, 
     out.mkdir(parents=True, exist_ok=True)
 
     llm = llm or get_llm(llm_mode)
-    kb = get_knowledge_base(ROOT / "data" / "policy", case.as_of, policy_version)
+    kb = kb or get_knowledge_base(ROOT / "data" / "policy", case.as_of, policy_version)
     ctx = Context(llm, kb)
     audit = AuditLog(out / "audit_log.jsonl", case.app_id)
     tracer = Tracer(out / "trace.jsonl", llm)
@@ -163,6 +170,9 @@ def run_case(app_dir: Path, approver, out_root: Path, as_of: str | None = None, 
                      {"decision": action["decision"], "rationale": action["rationale"], "override": override},
                      policy_refs=["POL-3.3"] if gate["gate"] == "compliance" else ["POL-6.1", "POL-6.2"])
         say(f"  [HUMAN] {action['name']} ({action['role']}): {action['decision']}" + ("  (OVERRIDE)" if override else ""))
+        if gate["gate"] == "data_validation" and action["decision"] == "RETURN FOR RESUBMISSION":
+            final = "RETURNED TO RM"
+            break
         if gate["gate"] == "compliance" and action["decision"] == "EDD NOT CLEARED":
             final = "DECLINED (compliance)"
             break

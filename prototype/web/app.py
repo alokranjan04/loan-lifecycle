@@ -74,6 +74,7 @@ from loanagent.orchestrator import (          # noqa: E402
     CREDIT_DECISIONS, COMPLIANCE_DECISIONS,
     ScriptedApprover, run_case, validate_human_action,
 )
+from loanagent.rag import get_knowledge_base  # noqa: E402
 
 DATA    = PROTO / "data" / "applications"
 GOLDEN  = PROTO / "evals" / "golden"
@@ -100,12 +101,33 @@ def out_dir(app_id: str) -> Path:
     return case_source(app_id)["out_root"] / app_id
 
 
+# ── Knowledge base cache (built once at startup, reused per request) ──────────
+_kb_cache: dict = {}   # sha256 → HybridPolicyKB instance
+
+def _get_cached_kb(policy_dir: Path, as_of: str, policy_version=None):
+    kb = get_knowledge_base(policy_dir, as_of, policy_version)
+    key = kb.sha256
+    if key not in _kb_cache:
+        _kb_cache[key] = kb
+    return _kb_cache[key]
+
+
 # ── FastAPI app ───────────────────────────────────────────────────────────────
 app = FastAPI(title="Loan Lifecycle Manager")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+def _warm_kb():
+    """Pre-build / verify the Qdrant vector index at server startup so the first
+    pipeline run is not penalised by the index-build time."""
+    try:
+        _get_cached_kb(PROTO / "data" / "policy", AS_OF)
+    except Exception:
+        pass  # non-fatal; pipeline will build on demand
 
 # ── Session store (in-process; fine for demo) ─────────────────────────────────
 _sessions:  dict[str, "Session"] = {}
@@ -177,13 +199,20 @@ class AutoApprover:
 
     def ask(self, gate: dict, case, attempt: int) -> dict:
         if attempt == 0:
-            role = "Compliance Officer" if gate["gate"] == "compliance" else gate["role"]
-            decision = "EDD CLEARED" if gate["gate"] == "compliance" else case.recommendation["action"]
+            role = ("Compliance Officer" if gate["gate"] == "compliance"
+                    else "Senior Analyst" if gate["gate"] == "data_validation"
+                    else gate["role"])
+            decision = ("EDD CLEARED" if gate["gate"] == "compliance"
+                        else "PROCEED" if gate["gate"] == "data_validation"
+                        else case.recommendation["action"])
             return {"name": case.application["credit_analyst"], "role": role, "decision": decision,
                     "rationale": "Analyst approving own proposal."}
         if gate["gate"] == "compliance":
             return {"name": "Grace Mwangi", "role": "Compliance Officer", "decision": "EDD CLEARED",
                     "rationale": "EDD completed: source of wealth verified, no adverse findings on the individual."}
+        if gate["gate"] == "data_validation":
+            return {"name": "Priya Iyer", "role": "Senior Analyst", "decision": "PROCEED",
+                    "rationale": "Extracted fields verified against source documents."}
         return {"name": "Sofia Alvarez", "role": gate["role"], "decision": case.recommendation["action"],
                 "rationale": "Accepting the recommendation after reviewing the cited evidence."}
 
@@ -251,6 +280,10 @@ def _run_pipeline(session: Session) -> None:
         session.status = "running"
         session.push({"type": "status", "data": {"status": "running"}})
         approver = WebApprover(session) if session.approver == "web" else scripted_approver(session.app_id)
+        try:
+            cached_kb = _get_cached_kb(PROTO / "data" / "policy", src["as_of"])
+        except Exception:
+            cached_kb = None
         run_case(
             app_dir        = src["dir"],
             approver       = approver,
@@ -259,6 +292,7 @@ def _run_pipeline(session: Session) -> None:
             llm_mode       = session.llm_mode,
             watchlist_path = src["watchlist"],
             verbose        = False,
+            kb             = cached_kb,
         )
         session.status = "complete"
         tailer.join(timeout=3)
@@ -291,6 +325,7 @@ def _summary(d: Path, kind: str, extra: dict) -> dict:
         "submitted_on":  data.get("submitted_on"),
         "rm":            data.get("relationship_manager"),
         "analyst":       data.get("credit_analyst"),
+        "channel":       data.get("channel"),
         "has_result":    rec is not None,
         "final_status":  rec.get("final_status") if rec else None,
         "recommendation": (rec or {}).get("recommendation", {}).get("action"),
@@ -388,10 +423,21 @@ def create_application(req: NewApplicationRequest):
         "doc_kyc":            "kyc_ubo_declaration.txt",
         "doc_project_report": "project_report.txt",
     }
+    # Classifier keyword that must appear in each document type for it to be recognised
+    _doc_kw = {
+        "doc_financials":     "AUDITED FINANCIAL STATEMENTS",
+        "doc_bank_statement": "STATEMENT SUMMARY",
+        "doc_valuation":      "VALUATION REPORT",
+        "doc_kyc":            "KYC DECLARATION",
+        "doc_project_report": "PROJECT REPORT",
+    }
     declared = []
     for field, filename in doc_map.items():
         content = (getattr(req, field) or "").strip()
         if content:
+            kw = _doc_kw.get(field, "")
+            if kw and kw not in content.upper():
+                content = kw + "\n\n" + content
             (doc_dir / filename).write_text(content, encoding="utf-8")
             declared.append(filename)
     application = {
@@ -476,6 +522,93 @@ def get_results(app_id: str):
     return rec
 
 
+@app.get("/api/my-applications")
+def get_my_applications():
+    """Return all apps submitted via the Web portal, newest first, with their current status."""
+    results = []
+    for folder in sorted(OUT.iterdir(), reverse=True):
+        rec_path = folder / "decision_record.json"
+        if not rec_path.exists():
+            continue
+        try:
+            rec = json.loads(rec_path.read_text())
+            app = rec.get("application", {})
+            if app.get("channel") != "Web portal":
+                continue
+            facility = app.get("facility", {})
+            preDisb = [c for c in rec.get("conditions", []) if c.get("stage") != "post-disbursement covenant"]
+            fail_checks = [
+                {"rule_id": c["rule_id"], "name": c.get("name",""), "actual": c.get("actual",""),
+                 "threshold": c.get("threshold",""), "status": c.get("status","")}
+                for c in rec.get("policy_checks", []) if c.get("status") in ("FAIL", "FLAG")
+            ]
+            hitl_cleared = False
+            hitl_reason = ""
+            for h in rec.get("human_decisions", []):
+                if h.get("gate") == "data_validation" and h.get("decision") == "PROCEED":
+                    hitl_cleared = True
+                    for g in rec.get("gates", []):
+                        if g.get("gate") == "data_validation":
+                            hitl_reason = g.get("reason", "")
+                    break
+            results.append({
+                "app_id":         rec.get("case_id"),
+                "borrower_name":  app.get("borrower", {}).get("legal_name", ""),
+                "facility":       (facility.get("type", "") + " · USD " +
+                                   f"{facility.get('amount_usd', 0):,.0f}"),
+                "submitted_at":   app.get("submitted_on", ""),
+                "status":         "complete",
+                "decision":       rec.get("final_status"),
+                "conditions":     len(preDisb),
+                "conditionList":  preDisb,
+                "declineReason":  rec.get("recommendation", {}).get("reason", ""),
+                "failChecks":     fail_checks,
+                "hitlCleared":    hitl_cleared,
+                "hitlReason":     hitl_reason,
+            })
+        except Exception:
+            continue
+
+    # Also include any active sessions awaiting approval (portal apps not yet decided)
+    seen_ids = {r["app_id"] for r in results}
+    for app_id, sid in list(_app_sid.items()):
+        s = _sessions.get(sid)
+        if not s or s.status not in ("running", "awaiting_approval"):
+            continue
+        if app_id in seen_ids:
+            continue
+        # Only include portal apps
+        try:
+            src = case_source(app_id)
+            app_data = json.loads((src["dir"] / "application.json").read_text())
+            if app_data.get("channel") != "Web portal":
+                continue
+            b = app_data.get("borrower", {})
+            fac = app_data.get("facility", {})
+            gate = (s.pending_gate_info or {}) if s.status == "awaiting_approval" else {}
+            results.insert(0, {
+                "app_id": app_id,
+                "borrower_name": b.get("legal_name", app_id),
+                "facility": fac.get("type", "") + " · USD " + f"{fac.get('amount_usd', 0):,.0f}",
+                "submitted_at": app_data.get("submitted_on", ""),
+                "status": s.status,
+                "decision": None,
+                "conditions": 0,
+                "conditionList": [],
+                "declineReason": "",
+                "failChecks": [],
+                "hitlCleared": False,
+                "hitlReason": "",
+                "pendingGate": gate.get("gate_type", "") if gate else "",
+                "requiredRole": gate.get("required_role", "") if gate else "",
+                "recommendation": gate.get("recommendation", "") if gate else "",
+            })
+            seen_ids.add(app_id)
+        except Exception:
+            continue
+    return results
+
+
 @app.get("/api/audit/{app_id}")
 def get_audit_log(app_id: str):
     f = out_dir(app_id) / "audit_log.jsonl"
@@ -494,6 +627,40 @@ def get_audit_verified(app_id: str):
     return {"entries": get_audit_log(app_id), "chain_ok": ok, "chain_message": msg}
 
 
+@app.get("/api/pending-approvals")
+def get_pending_approvals():
+    """Active sessions that are paused at a human gate, waiting for admin approval."""
+    result = []
+    for app_id, sid in list(_app_sid.items()):
+        s = _sessions.get(sid)
+        if not s or s.status != "awaiting_approval":
+            continue
+        gate = s.pending_gate_info or {}
+        # Get borrower name from application
+        borrower = app_id
+        amount_usd = 0
+        try:
+            src = case_source(app_id)
+            app_data = json.loads((src["dir"] / "application.json").read_text())
+            borrower = app_data.get("borrower", {}).get("legal_name", app_id)
+            amount_usd = app_data.get("facility", {}).get("amount_usd", 0)
+        except Exception:
+            pass
+        result.append({
+            "app_id": app_id,
+            "session_id": sid,
+            "borrower": borrower,
+            "amount_usd": amount_usd,
+            "gate_type": gate.get("gate_type"),
+            "required_role": gate.get("required_role"),
+            "reason": gate.get("reason", ""),
+            "recommendation": gate.get("recommendation"),
+            "risk_rating": gate.get("risk_rating"),
+            "risk_grade": gate.get("risk_grade"),
+        })
+    return result
+
+
 class RunRequest(BaseModel):
     llm_mode: str = "auto"
     approver: str = "web"
@@ -502,7 +669,7 @@ class RunRequest(BaseModel):
 @app.post("/api/run/{app_id}")
 def start_run(app_id: str, req: RunRequest = RunRequest()):
     case_source(app_id)
-    if req.llm_mode not in ("auto", "mock", "claude", "openrouter") or req.approver not in ("web", "scripted"):
+    if req.llm_mode not in ("auto", "mock", "claude", "openrouter", "low_confidence") or req.approver not in ("web", "scripted"):
         raise HTTPException(400, "Bad run options")
     if req.llm_mode == "claude" and not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(400, "Set ANTHROPIC_API_KEY to use Claude directly")
@@ -589,18 +756,25 @@ def decision_options():
 def decision_log():
     """All completed human decisions across every case, with timestamps from the audit log."""
     rows = []
+    seen_ids: set[str] = set()  # deduplicate: demo sub-runs (redteam/, policy-change/) share case_ids
     # scan both sample output and golden output dirs
     search_roots = [OUT, OUT / "golden"]
     for root in search_roots:
         if not root.exists():
             continue
-        for rec_path in sorted(root.rglob("decision_record.json")):
+        # Only direct children of root, not nested demo sub-runs
+        for rec_path in sorted(p / "decision_record.json" for p in root.iterdir()
+                               if p.is_dir() and (p / "decision_record.json").exists()):
             try:
                 rec = json.loads(rec_path.read_text())
             except Exception:
                 continue
             if not rec.get("human_decisions"):
                 continue
+            cid = rec.get("case_id", "")
+            if cid in seen_ids:
+                continue
+            seen_ids.add(cid)
             # build a ts map from the audit log: action -> ts
             ts_map: dict[str, str] = {}
             audit_path = rec_path.parent / "audit_log.jsonl"
@@ -656,7 +830,7 @@ def list_approvers():
                 for entry in gate_entries:
                     if isinstance(entry, dict) and "name" in entry and "role" in entry:
                         seen[entry["name"]] = entry["role"]
-    order = ["Compliance Officer", "Senior Credit Manager", "Regional Credit Committee", "Board Credit Committee", "Credit Analyst"]
+    order = ["Compliance Officer", "Senior Analyst", "Senior Credit Manager", "Regional Credit Committee", "Board Credit Committee", "Credit Analyst"]
     approvers = sorted(seen.items(), key=lambda x: (order.index(x[1]) if x[1] in order else 99, x[0]))
     return [{"name": n, "role": r} for n, r in approvers]
 

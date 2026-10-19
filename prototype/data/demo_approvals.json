@@ -1,6 +1,14 @@
 {
   "_note": "Scripted human responses so the demo runs unattended. Each gate lists attempts in order; the first attempts are deliberately invalid to show the controls blocking them (segregation of duties, and authority: APP-2026-0142 carries open policy exceptions, so POL-6.1 escalates it from the Regional to the Board Credit Committee). Use --interactive to type the decisions yourself.",
   "APP-2026-0142": {
+    "data_validation": [
+      {
+        "name": "Priya Iyer",
+        "role": "Senior Analyst",
+        "decision": "PROCEED",
+        "rationale": "Extracted fields verified against source documents. Confidence scores reviewed — key financial ratios are correctly captured."
+      }
+    ],
     "compliance": [
       {
         "name": "Daniel Okafor",

@@ -73,8 +73,9 @@ flowchart LR
     CF -->|metrics + policy result| Score
     Score -->|rating · grade · PD| CF
 
-    CF -->|avg confidence < 75%| HITL
-    HITL -->|corrected fields| CF
+    CF -->|avg_extraction_confidence < 0.75| HITL
+    HITL -->|"PROCEED → continue"| CF
+    HITL -->|"RETURN FOR RESUBMISSION → RETURNED TO RM"| CF
 
     CF -->|LLM drafts narrative + conditions| LLM
     LLM -->|risk narrative · conditions text| CF
@@ -107,6 +108,12 @@ Confidence scoring:
 - **≥ 90%** — citation verified, value present on the cited line
 - **75–89%** — value extracted but citation is approximate
 - **< 75%** — low-confidence; triggers HITL data validation gate
+
+`avg_extraction_confidence` is computed by `DocumentIntelligenceAgent`, stored in `CaseFile.checklist["avg_extraction_confidence"]`, and written to both `decision_record.json` and `pending_record.json`.
+
+HITL gate outcomes:
+- **PROCEED** (Senior Analyst) — pipeline continues to Due Diligence
+- **RETURN FOR RESUBMISSION** (Senior Analyst) — pipeline terminates immediately with `final_status = "RETURNED TO RM"`; credit gate does not fire
 
 ## RAG search pipeline
 

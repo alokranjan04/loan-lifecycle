@@ -75,7 +75,7 @@ SCHEMAS: dict[str, list[dict]] = {
     ],
     "project_report": [
         {"name": "total_project_cost", "type": "money", "description": "Total project cost", "mock_pattern": r"Total project cost \(USD\):\s*([\d,]+)"},
-        {"name": "promoter_equity", "type": "money", "description": "Promoter equity contribution", "mock_pattern": r"Promoter equity contribution \(USD\):\s*([\d,]+)"},
+        {"name": "promoter_equity", "type": "money", "description": "Promoter equity contribution", "mock_pattern": r"Promoter equity[^:\n]*:\s*([\d,]+)"},
         {"name": "dscr_by_year", "type": "float_list", "description": "Projected DSCR for each year", "mock_pattern": r"Projected DSCR by year:\s*(.+)$"},
         {"name": "dscr_avg", "type": "float", "description": "Average projected DSCR", "mock_pattern": r"Average projected DSCR:\s*([\d.]+)"},
         {"name": "cod", "type": "str", "description": "Commercial operations date", "mock_pattern": r"Commercial operations date:\s*(\S+)"},
@@ -93,7 +93,7 @@ SCHEMAS: dict[str, list[dict]] = {
 
 CLASSIFIER = [
     ("financials", "AUDITED FINANCIAL STATEMENTS"), ("bank_statement", "STATEMENT SUMMARY"),
-    ("kyc", "BENEFICIAL OWNERSHIP"), ("valuation", "VALUATION REPORT"), ("project_report", "PROJECT REPORT"),
+    ("kyc", "BENEFICIAL OWNERSHIP"), ("kyc", "KYC DECLARATION"), ("valuation", "VALUATION REPORT"), ("project_report", "PROJECT REPORT"),
     ("tax_return", "TAX RETURN"), ("board_resolution", "RESOLUTION"),
 ]
 
@@ -207,7 +207,10 @@ class DocumentIntelligenceAgent(Agent):
             processed.append({"document": path.name, "type": doc_type, "fields_extracted": len(fields),
                               "expected_fields": len(SCHEMAS[doc_type])})
         self._cross_checks(case)
-        return {"documents": processed, "pii_tokens_masked": vault.total}
+        all_confs = [f.confidence for fields in case.extracted.values() for f in fields.values()]
+        case.checklist["avg_extraction_confidence"] = round(sum(all_confs) / len(all_confs), 3) if all_confs else 1.0
+        return {"documents": processed, "pii_tokens_masked": vault.total,
+                "avg_extraction_confidence": case.checklist["avg_extraction_confidence"]}
 
     # Fields where a document might state two figures, and the conservative choice if it does.
     CONFLICT_FIELDS = {
@@ -385,10 +388,12 @@ class PolicyEligibilityAgent(Agent):
                 m["dscr_proj_source"] = f"computed: FY2025 EBITDA / (existing debt service + new annuity at {ASSUMED_NEW_LOAN_RATE:.1%})"
         if case.field("valuation", "realisable_value"):
             m["ltv"] = amount / case.field("valuation", "realisable_value")
-        if f("current_liabilities"):
+        if f("current_liabilities") and f("current_assets") is not None:
             m["current_ratio"] = f("current_assets") / f("current_liabilities")
-        if case.field("project_report", "total_project_cost"):
-            m["promoter_share"] = case.field("project_report", "promoter_equity") / case.field("project_report", "total_project_cost")
+        _pe = case.field("project_report", "promoter_equity")
+        _tpc = case.field("project_report", "total_project_cost")
+        if _tpc and _pe is not None:
+            m["promoter_share"] = _pe / _tpc
         m["group_exposure_post"] = b.get("existing_group_exposure_usd", 0) + amount
         m["sector_appetite"] = SECTOR_APPETITE.get(b["sector"].lower(), "Not classified")
 
@@ -636,6 +641,11 @@ class ApprovalWorkflowAgent(Agent):
             levels = [lvl for _, lvl in limits]
             authority = levels[min(levels.index(authority) + 1, len(levels) - 1)]
         gates = []
+        avg_conf = case.checklist.get("avg_extraction_confidence", 1.0)
+        if avg_conf < 0.75:
+            gates.append({"gate": "data_validation", "role": "Senior Analyst",
+                          "reason": f"Average extraction confidence {avg_conf:.2f} is below the 0.75 threshold — "
+                                    "analyst must confirm extracted values before the case advances"})
         if case.checklist.get("edd_required"):
             gates.append({"gate": "compliance", "role": "Compliance Officer", "reason": "PEP match requires EDD sign-off before approval (POL-3.3)"})
         gates.append({"gate": "credit", "role": authority, "reason": f"Delegated authority for {_money(amount)} (POL-6.1)"
