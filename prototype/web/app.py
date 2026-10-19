@@ -843,7 +843,8 @@ def rag_status():
     from datetime import date
     key_set = bool(_auth_key())
     qdrant_url = os.environ.get("QDRANT_URL", QDRANT_DEFAULT_URL)
-    qdrant_alive = _Qdrant(qdrant_url).alive() if key_set else False
+    qdrant_api_key = os.environ.get("QDRANT_API_KEY", "")
+    qdrant_alive = _Qdrant(qdrant_url, api_key=qdrant_api_key).alive() if key_set else False
     if key_set and qdrant_alive:
         try:
             kb = get_knowledge_base(PROTO / "data" / "policy", date.today().isoformat())
