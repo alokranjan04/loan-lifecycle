@@ -606,6 +606,37 @@ def get_my_applications():
             seen_ids.add(app_id)
         except Exception:
             continue
+    # Also include portal apps in DATA that have never been run (no output yet)
+    for folder in sorted(DATA.iterdir(), reverse=True):
+        if not (folder / "application.json").exists():
+            continue
+        app_id = folder.name
+        if app_id in seen_ids:
+            continue
+        try:
+            app_data = json.loads((folder / "application.json").read_text())
+            if app_data.get("channel") != "Web portal":
+                continue
+            b = app_data.get("borrower", {})
+            fac = app_data.get("facility", {})
+            results.append({
+                "app_id":        app_id,
+                "borrower_name": b.get("legal_name", app_id),
+                "facility":      fac.get("type", "") + " · USD " + f"{fac.get('amount_usd', 0):,.0f}",
+                "submitted_at":  app_data.get("submitted_on", ""),
+                "status":        "not_run",
+                "decision":      None,
+                "conditions":    0,
+                "conditionList": [],
+                "declineReason": "",
+                "failChecks":    [],
+                "hitlCleared":   False,
+                "hitlReason":    "",
+            })
+            seen_ids.add(app_id)
+        except Exception:
+            continue
+
     return results
 
 

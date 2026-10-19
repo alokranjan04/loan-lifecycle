@@ -2085,7 +2085,8 @@
              :style="app.status==='complete' && app.decision && app.decision.startsWith('APPROVED') ? 'border-left-color:#22c55e' :
                      app.status==='complete' && app.decision && app.decision.startsWith('DECLINED') ? 'border-left-color:#ef4444' :
                      app.status==='awaiting_approval' ? 'border-left-color:#f59e0b' :
-                     app.status==='running' ? 'border-left-color:#6366f1' : 'border-left-color:#e2e8f0'">
+                     app.status==='running' ? 'border-left-color:#6366f1' :
+                     app.status==='not_run' ? 'border-left-color:#c7d2fe' : 'border-left-color:#e2e8f0'">
 
           <!-- Card header -->
           <div style="padding:1rem 1.375rem">
@@ -2098,15 +2099,18 @@
                         :style="app.status==='complete' && app.decision && app.decision.startsWith('APPROVED') ? 'background:#dcfce7;color:#15803d' :
                                 app.status==='complete' && app.decision && app.decision.startsWith('DECLINED') ? 'background:#fee2e2;color:#b91c1c' :
                                 app.status==='awaiting_approval' ? 'background:#fef9c3;color:#92400e' :
-                                app.status==='running' ? 'background:#ede9fe;color:#5b21b6' : 'background:#f1f5f9;color:#64748b'">
+                                app.status==='running' ? 'background:#ede9fe;color:#5b21b6' :
+                                app.status==='not_run' ? 'background:#eef2ff;color:#4338ca' : 'background:#f1f5f9;color:#64748b'">
                     <span style="width:.42rem;height:.42rem;border-radius:50%;flex-shrink:0"
                           :style="app.status==='complete' && app.decision && app.decision.startsWith('APPROVED') ? 'background:#22c55e' :
                                   app.status==='complete' && app.decision && app.decision.startsWith('DECLINED') ? 'background:#ef4444' :
                                   app.status==='awaiting_approval' ? 'background:#f59e0b' :
-                                  app.status==='running' ? 'background:#818cf8' : 'background:#94a3b8'"></span>
+                                  app.status==='running' ? 'background:#818cf8' :
+                                  app.status==='not_run' ? 'background:#6366f1' : 'background:#94a3b8'"></span>
                     <span x-text="app.status==='running' ? 'Processing' :
                                   app.status==='awaiting_approval' ? 'Under Review' :
                                   app.status==='complete' ? (app.decision||'Complete') :
+                                  app.status==='not_run' ? 'Submitted — Awaiting Review' :
                                   app.status==='error' ? 'Error' : 'Loading'"></span>
                   </span>
                 </div>
@@ -2129,6 +2133,64 @@
               </template>
             </div>
           </div>
+
+          <!-- ── Not-run: expandable status timeline ── -->
+          <template x-if="app.status==='not_run'">
+            <div style="border-top:1px solid #f1f5f9">
+              <div @click="open=!open"
+                   style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1.375rem;cursor:pointer;user-select:none;background:#f5f7ff;transition:filter .15s"
+                   onmouseover="this.style.filter='brightness(.97)'" onmouseout="this.style.filter=''">
+                <div style="width:1.875rem;height:1.875rem;border-radius:.5rem;background:#e0e7ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="12" height="12" fill="none" stroke="#4338ca" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:.8rem;font-weight:700;color:#3730a3">Submitted — awaiting analyst review</div>
+                  <div style="font-size:.68rem;color:#64748b;margin-top:.08rem">Tap to see what happens next</div>
+                </div>
+                <svg :style="'flex-shrink:0;transition:transform .2s;color:#94a3b8;' + (open ? 'transform:rotate(180deg)' : '')"
+                     width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div x-show="open" style="padding:1rem 1.375rem 1.25rem;background:#fff">
+                <div style="font-size:.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.875rem">What happens next</div>
+                <div style="display:flex;flex-direction:column;gap:0">
+                  <div style="display:flex;gap:.875rem;align-items:flex-start">
+                    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+                      <div style="width:1.75rem;height:1.75rem;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+                      <div style="width:2px;height:1.5rem;background:#e2e8f0"></div>
+                    </div>
+                    <div style="padding-top:.2rem;padding-bottom:.75rem">
+                      <div style="font-size:.78rem;font-weight:600;color:#0f172a">Document extraction</div>
+                      <div style="font-size:.68rem;color:#64748b;margin-top:.1rem">8 AI agents extract ~45 fields, run 12 policy checks, and score credit risk.</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:.875rem;align-items:flex-start">
+                    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+                      <div style="width:1.75rem;height:1.75rem;border-radius:50%;background:#f59e0b;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+                      <div style="width:2px;height:1.5rem;background:#e2e8f0"></div>
+                    </div>
+                    <div style="padding-top:.2rem;padding-bottom:.75rem">
+                      <div style="font-size:.78rem;font-weight:600;color:#0f172a">Human credit review</div>
+                      <div style="font-size:.68rem;color:#64748b;margin-top:.1rem">A credit committee reviews the AI recommendation and issues the binding decision.</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:.875rem;align-items:flex-start">
+                    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+                      <div style="width:1.75rem;height:1.75rem;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+                    </div>
+                    <div style="padding-top:.2rem">
+                      <div style="font-size:.78rem;font-weight:600;color:#0f172a">Decision issued</div>
+                      <div style="font-size:.68rem;color:#64748b;margin-top:.1rem">You'll see the result here — Approved, Approved with Conditions, or Declined — with full rationale.</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top:1rem;padding:.625rem 1rem;background:#f8fafc;border-radius:.625rem;border:1px solid #e2e8f0;font-size:.7rem;color:#64748b">
+                  <span style="font-weight:600;color:#334155">Application reference:</span>
+                  <span style="font-family:'JetBrains Mono',monospace;color:#4338ca;font-weight:700;margin-left:.35rem" x-text="app.app_id"></span>
+                  <span style="margin-left:.5rem">· Keep this ID to track your application.</span>
+                </div>
+              </div>
+            </div>
+          </template>
 
           <!-- ── Decision section (complete) ── -->
           <template x-if="app.status==='complete' && app.decision">
