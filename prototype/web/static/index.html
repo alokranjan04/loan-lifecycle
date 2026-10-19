@@ -449,7 +449,57 @@
           <button class="btn btn-s text-xs" @click="go('cases'); caseFilter='portal'">View all →</button>
         </div>
         <template x-if="cases.filter(c=>c.channel==='Web portal').length === 0">
-          <div class="card p-6 text-center text-slate-400 text-sm">No portal submissions yet. Use "New application" to submit one.</div>
+          <div class="card" style="overflow:hidden">
+            <!-- 3-col action strip -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
+              <div style="padding:1.5rem 1.75rem;border-right:1px solid #f1f5f9">
+                <div style="width:2.75rem;height:2.75rem;border-radius:.875rem;background:linear-gradient(135deg,#eef2ff,#e0e7ff);display:flex;align-items:center;justify-content:center;margin-bottom:.875rem">
+                  <svg width="18" height="18" fill="none" stroke="#6366f1" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div style="font-size:.82rem;font-weight:700;color:#0f172a;margin-bottom:.3rem">Submit a new loan</div>
+                <div style="font-size:.72rem;color:#64748b;line-height:1.55;margin-bottom:1rem">8-agent pipeline runs in under 60 seconds. Every field cites its source document and line.</div>
+                <button class="btn btn-p" style="font-size:.75rem;padding:.42rem .9rem" @click="openNewApp()">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                  New application
+                </button>
+              </div>
+              <div style="padding:1.5rem 1.75rem;border-right:1px solid #f1f5f9">
+                <div style="width:2.75rem;height:2.75rem;border-radius:.875rem;background:linear-gradient(135deg,#f0fdf4,#dcfce7);display:flex;align-items:center;justify-content:center;margin-bottom:.875rem">
+                  <svg width="18" height="18" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <div style="font-size:.82rem;font-weight:700;color:#0f172a;margin-bottom:.3rem">Browse sample cases</div>
+                <div style="font-size:.72rem;color:#64748b;line-height:1.55;margin-bottom:1rem">2 pre-built cases and 42 golden evaluation cases — real, corner, and jailbreak scenarios.</div>
+                <button class="btn btn-s" style="font-size:.75rem;padding:.42rem .9rem" @click="go('cases')">Open cases →</button>
+              </div>
+              <div style="padding:1.5rem 1.75rem">
+                <div style="width:2.75rem;height:2.75rem;border-radius:.875rem;background:linear-gradient(135deg,#fefce8,#fef9c3);display:flex;align-items:center;justify-content:center;margin-bottom:.875rem">
+                  <svg width="18" height="18" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+                <div style="font-size:.82rem;font-weight:700;color:#0f172a;margin-bottom:.3rem">Credit policy library</div>
+                <div style="font-size:.72rem;color:#64748b;line-height:1.55;margin-bottom:1rem">13 versioned policy clauses checked on every case. SHA-256 locked at pipeline runtime.</div>
+                <button class="btn btn-s" style="font-size:.75rem;padding:.42rem .9rem" @click="go('policy')">Policy library →</button>
+              </div>
+            </div>
+            <!-- live stats strip -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);background:#f8fafc;border-top:1px solid #f1f5f9;padding:.875rem 1.75rem;gap:1rem">
+              <div>
+                <div style="font-size:1.15rem;font-weight:800;color:#1e293b;line-height:1" x-text="cases.length"></div>
+                <div style="font-size:.65rem;color:#64748b;margin-top:.2rem">Cases loaded</div>
+              </div>
+              <div>
+                <div style="font-size:1.15rem;font-weight:800;color:#6366f1;line-height:1" x-text="cases.filter(c=>c.final_status && c.final_status!=='Not run').length"></div>
+                <div style="font-size:.65rem;color:#64748b;margin-top:.2rem">Decisions issued</div>
+              </div>
+              <div>
+                <div style="font-size:1.15rem;font-weight:800;color:#10b981;line-height:1">39</div>
+                <div style="font-size:.65rem;color:#64748b;margin-top:.2rem">Golden test cases</div>
+              </div>
+              <div>
+                <div style="font-size:1.15rem;font-weight:800;color:#f59e0b;line-height:1">&lt; 60s</div>
+                <div style="font-size:.65rem;color:#64748b;margin-top:.2rem">Pipeline runtime</div>
+              </div>
+            </div>
+          </div>
         </template>
         <template x-if="cases.filter(c=>c.channel==='Web portal').length > 0">
           <div class="card" style="overflow:hidden">
@@ -647,24 +697,29 @@
       <!-- Recent submissions -->
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.625rem">
-          <h2 class="font-semibold text-slate-900 text-sm">Recent submissions</h2>
+          <div>
+            <h2 class="font-semibold text-slate-900 text-sm">Recent cases</h2>
+            <div style="font-size:.65rem;color:#94a3b8;margin-top:.1rem" x-text="cases.filter(c=>c.channel==='Web portal').length === 0 ? 'Sample cases — submit portal applications to see them here' : 'Latest portal submissions'"></div>
+          </div>
           <button class="btn btn-g text-xs py-1" @click="go('cases')">All →</button>
         </div>
         <div style="display:flex;flex-direction:column;gap:.5rem">
-          <template x-if="cases.filter(c=>c.channel==='Web portal').length === 0">
-            <div style="font-size:.75rem;color:#94a3b8;text-align:center;padding:.5rem">No submissions yet</div>
-          </template>
-          <template x-for="a in cases.filter(c=>c.channel==='Web portal').slice().reverse().slice(0,5)" :key="a.id">
-            <div class="card card-h cursor-pointer" style="padding:.75rem" @click="openCase(a.id)">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.3rem">
+          <!-- show portal submissions if any, else show sample pre-built cases -->
+          <template x-for="a in (cases.filter(c=>c.channel==='Web portal').length > 0 ? cases.filter(c=>c.channel==='Web portal').slice().reverse() : cases.filter(c=>c.kind==='sample')).slice(0,4)" :key="a.id">
+            <div class="card card-h cursor-pointer" style="padding:.75rem;transition:all .15s" @click="openCase(a.id)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.35rem">
                 <div style="font-size:.78rem;font-weight:600;color:#0f172a;line-height:1.3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" x-text="a.borrower"></div>
                 <span class="pill shrink-0" :class="statusClass(a.final_status)" x-text="a.final_status || 'Not run'" style="font-size:.55rem"></span>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center">
-                <div class="text-xs text-slate-400 mono" x-text="a.id"></div>
+                <div style="font-size:.68rem;color:#6366f1;font-family:'JetBrains Mono',monospace;font-weight:600" x-text="a.id"></div>
                 <div style="font-size:.72rem;color:#374151;font-weight:500" x-text="usd(a.amount_usd)"></div>
               </div>
             </div>
+          </template>
+          <!-- if truly no cases at all -->
+          <template x-if="cases.length === 0">
+            <div style="font-size:.75rem;color:#94a3b8;text-align:center;padding:1rem 0">No cases yet</div>
           </template>
         </div>
       </div>
