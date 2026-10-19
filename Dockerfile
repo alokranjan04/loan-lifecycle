@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY prototype/web/requirements.txt requirements-web.txt
-COPY prototype/loanagent/requirements.txt requirements-agent.txt 2>/dev/null || true
 
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements-web.txt
