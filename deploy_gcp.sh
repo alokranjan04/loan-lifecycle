@@ -11,8 +11,8 @@ REGION="asia-south1"                      # Mumbai; or us-central1, europe-west1
 SERVICE="loan-lifecycle-api"
 REPO="loan-lifecycle"
 OPENROUTER_KEY="sk-or-..."                # your OpenRouter API key
-QDRANT_URL="https://xxxx.qdrant.io:6333"  # Qdrant Cloud cluster URL
-QDRANT_API_KEY="qdrant-..."               # Qdrant Cloud API key
+QDRANT_URL=""        # set via Secret Manager — see README / env.example
+QDRANT_API_KEY=""    # set via Secret Manager — see README / env.example
 # ─────────────────────────────────────────────────────────────────────────────
 
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}"
