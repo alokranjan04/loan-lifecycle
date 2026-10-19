@@ -6,8 +6,8 @@
 set -euo pipefail
 
 # ── EDIT THESE ────────────────────────────────────────────────────────────────
-PROJECT_ID="your-gcp-project-id"          # gcloud projects list
-REGION="asia-south1"                      # Mumbai; or us-central1, europe-west1
+PROJECT_ID="nth-infusion-490008-h8"
+REGION="asia-south1"
 SERVICE="loan-lifecycle-api"
 REPO="loan-lifecycle"
 OPENROUTER_KEY="sk-or-..."                # your OpenRouter API key
@@ -34,13 +34,17 @@ gcloud artifacts repositories create "${REPO}" \
   --location="${REGION}" \
   --quiet 2>/dev/null || true
 
-echo "▶ Storing secrets in Secret Manager"
+echo "▶ Storing secrets in Secret Manager (skipped if value is empty)"
 for SECRET_NAME in OPENROUTER_API_KEY QDRANT_URL QDRANT_API_KEY; do
   case $SECRET_NAME in
     OPENROUTER_API_KEY) VAL="${OPENROUTER_KEY}" ;;
     QDRANT_URL)         VAL="${QDRANT_URL}" ;;
     QDRANT_API_KEY)     VAL="${QDRANT_API_KEY}" ;;
   esac
+  if [ -z "${VAL}" ]; then
+    echo "  skipping ${SECRET_NAME} (already set via Secret Manager)"
+    continue
+  fi
   printf '%s' "${VAL}" | gcloud secrets create "${SECRET_NAME}" \
     --data-file=- --quiet 2>/dev/null || \
   printf '%s' "${VAL}" | gcloud secrets versions add "${SECRET_NAME}" \
