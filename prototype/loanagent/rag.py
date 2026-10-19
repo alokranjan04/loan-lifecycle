@@ -11,6 +11,7 @@ Authentication (first key found is used):
 
 Qdrant:
   Expects Qdrant running at QDRANT_URL (default http://localhost:6333).
+  For Qdrant Cloud set QDRANT_API_KEY — passed as the `api-key` header.
   Uses only the REST API — no SDK required.
 
 Fallback:
@@ -110,15 +111,24 @@ def _embed(texts: list[str], model: str, batch_size: int = 32) -> list[list[floa
 class _Qdrant:
     """Thin REST wrapper for Qdrant. No SDK needed — all standard-library HTTP."""
 
-    def __init__(self, url: str):
+    def __init__(self, url: str, api_key: str = ""):
         self.url = url.rstrip("/")
+        self._api_key = api_key
+
+    def _headers(self, with_content_type: bool = False) -> dict:
+        h: dict = {}
+        if with_content_type:
+            h["Content-Type"] = "application/json"
+        if self._api_key:
+            h["api-key"] = self._api_key
+        return h
 
     def _req(self, method: str, path: str, body: dict | None = None, timeout: int = 10) -> dict:
         data = json.dumps(body).encode() if body is not None else None
         req = urllib.request.Request(
             f"{self.url}{path}",
             data=data,
-            headers={"Content-Type": "application/json"} if data else {},
+            headers=self._headers(with_content_type=data is not None),
             method=method,
         )
         with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -126,7 +136,12 @@ class _Qdrant:
 
     def alive(self) -> bool:
         try:
-            with urllib.request.urlopen(f"{self.url}/healthz", timeout=2) as r:
+            req = urllib.request.Request(
+                f"{self.url}/healthz",
+                headers=self._headers(),
+                method="GET",
+            )
+            with urllib.request.urlopen(req, timeout=2) as r:
                 return r.status == 200
         except Exception:
             return False
@@ -175,13 +190,14 @@ class HybridPolicyKB(PolicyKnowledgeBase):
         params: dict | None = None,
         effective_from: str = "",
         qdrant_url: str = QDRANT_DEFAULT_URL,
+        qdrant_api_key: str = "",
         embed_model: str | None = None,
         extra_paths: list | None = None,
     ):
         auth = _auth_key()
         provider = auth[1] if auth else "voyage"
         self._model = embed_model or os.environ.get("LOAN_AGENT_EMBED_MODEL", _default_embed_model(provider))
-        self._qdrant = _Qdrant(qdrant_url)
+        self._qdrant = _Qdrant(qdrant_url, api_key=qdrant_api_key)
         self._vector_ready = False
         self._index_error: str = ""
         super().__init__(path, version, params, effective_from, extra_paths=extra_paths)
@@ -305,6 +321,7 @@ class HybridPolicyKB(PolicyKnowledgeBase):
         as_of: str,
         version: str | None = None,
         qdrant_url: str = QDRANT_DEFAULT_URL,
+        qdrant_api_key: str = "",
         embed_model: str | None = None,
     ) -> "HybridPolicyKB":
         from datetime import date
@@ -321,6 +338,7 @@ class HybridPolicyKB(PolicyKnowledgeBase):
             v.get("params"),
             v["effective_from"],
             qdrant_url=qdrant_url,
+            qdrant_api_key=qdrant_api_key,
             embed_model=embed_model,
             extra_paths=extra,
         )
@@ -340,9 +358,14 @@ def get_knowledge_base(
     Returns HybridPolicyKB when VOYAGE_API_KEY or ANTHROPIC_API_KEY is set,
     otherwise returns the plain BM25 PolicyKnowledgeBase.
     Both have the identical interface; the caller does not need to care.
+
+    Reads QDRANT_URL and QDRANT_API_KEY from the environment.
+    QDRANT_API_KEY is required for Qdrant Cloud; ignored for local Qdrant.
     """
     url = qdrant_url or os.environ.get("QDRANT_URL", QDRANT_DEFAULT_URL)
+    api_key = os.environ.get("QDRANT_API_KEY", "")
     if _auth_key():
         return HybridPolicyKB.for_date(policy_dir, as_of, version,
-                                       qdrant_url=url, embed_model=embed_model)
+                                       qdrant_url=url, qdrant_api_key=api_key,
+                                       embed_model=embed_model)
     return PolicyKnowledgeBase.for_date(policy_dir, as_of, version)

@@ -34,7 +34,7 @@ steps:
       - '--concurrency=10'
       - '--timeout=3600'
       - '--no-cpu-throttling'
-      - '--set-secrets=OPENROUTER_API_KEY=OPENROUTER_API_KEY:latest'
+      - '--set-secrets=OPENROUTER_API_KEY=OPENROUTER_API_KEY:latest,QDRANT_URL=QDRANT_URL:latest,QDRANT_API_KEY=QDRANT_API_KEY:latest'
       - '--set-env-vars=PYTHONUNBUFFERED=1,PYTHONPATH=/app/prototype'
 
 substitutions:

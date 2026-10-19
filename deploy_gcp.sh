@@ -11,6 +11,8 @@ REGION="asia-south1"                      # Mumbai; or us-central1, europe-west1
 SERVICE="loan-lifecycle-api"
 REPO="loan-lifecycle"
 OPENROUTER_KEY="sk-or-..."                # your OpenRouter API key
+QDRANT_URL="https://xxxx.qdrant.io:6333"  # Qdrant Cloud cluster URL
+QDRANT_API_KEY="qdrant-..."               # Qdrant Cloud API key
 # ─────────────────────────────────────────────────────────────────────────────
 
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}"
@@ -32,11 +34,18 @@ gcloud artifacts repositories create "${REPO}" \
   --location="${REGION}" \
   --quiet 2>/dev/null || true
 
-echo "▶ Storing OpenRouter API key in Secret Manager"
-printf '%s' "${OPENROUTER_KEY}" | gcloud secrets create OPENROUTER_API_KEY \
-  --data-file=- --quiet 2>/dev/null || \
-printf '%s' "${OPENROUTER_KEY}" | gcloud secrets versions add OPENROUTER_API_KEY \
-  --data-file=- --quiet
+echo "▶ Storing secrets in Secret Manager"
+for SECRET_NAME in OPENROUTER_API_KEY QDRANT_URL QDRANT_API_KEY; do
+  case $SECRET_NAME in
+    OPENROUTER_API_KEY) VAL="${OPENROUTER_KEY}" ;;
+    QDRANT_URL)         VAL="${QDRANT_URL}" ;;
+    QDRANT_API_KEY)     VAL="${QDRANT_API_KEY}" ;;
+  esac
+  printf '%s' "${VAL}" | gcloud secrets create "${SECRET_NAME}" \
+    --data-file=- --quiet 2>/dev/null || \
+  printf '%s' "${VAL}" | gcloud secrets versions add "${SECRET_NAME}" \
+    --data-file=- --quiet
+done
 
 echo "▶ Configuring Docker auth for Artifact Registry"
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
@@ -60,7 +69,7 @@ gcloud run deploy "${SERVICE}" \
   --concurrency=10 \
   --timeout=3600 \
   --no-cpu-throttling \
-  --set-secrets="OPENROUTER_API_KEY=OPENROUTER_API_KEY:latest" \
+  --set-secrets="OPENROUTER_API_KEY=OPENROUTER_API_KEY:latest,QDRANT_URL=QDRANT_URL:latest,QDRANT_API_KEY=QDRANT_API_KEY:latest" \
   --set-env-vars="PYTHONUNBUFFERED=1,PYTHONPATH=/app/prototype,LOAN_AGENT_MODEL=anthropic/claude-sonnet-4-5" \
   --quiet
 
