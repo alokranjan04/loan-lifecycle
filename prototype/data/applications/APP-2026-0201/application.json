@@ -1,0 +1,32 @@
+{
+  "application_id": "APP-2026-0201",
+  "submitted_on": "2026-10-14",
+  "channel": "Relationship Manager portal",
+  "relationship_manager": "Sonal Mehta",
+  "credit_analyst": "Ravi Krishnan",
+  "borrower": {
+    "legal_name": "Sunrise Cold Chain Logistics Ltd",
+    "registration_no": "U63030MH2018PTC312456",
+    "incorporated_on": "2018-08-12",
+    "sector": "Agri and food processing",
+    "country": "India",
+    "existing_group_exposure_usd": 2200000
+  },
+  "facility": {
+    "type": "Secured term loan",
+    "amount_usd": 3800000,
+    "tenor_months": 60,
+    "purpose": "Acquisition and fit-out of a dedicated Grade-A refrigerated warehouse unit (8,500 sq m) in Bhiwandi Logistics Park, Maharashtra, to expand cold storage capacity for perishable agri-produce",
+    "proposed_rate": "SOFR + 2.85%",
+    "security": "First mortgage on warehouse unit; hypothecation of refrigeration plant and equipment; personal guarantee of promoter directors"
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "kyc_ubo_declaration.txt",
+    "collateral_valuation.txt",
+    "board_resolution.txt",
+    "tax_returns.txt"
+  ],
+  "rm_notes": "Sunrise is a 7-year relationship. Revenue has compounded at 22% over 3 years driven by contracts with two national supermarket chains. The Bhiwandi unit is pre-leased at 55% capacity to FreshKart Retail, reducing revenue risk significantly. No prior defaults or restructures."
+}

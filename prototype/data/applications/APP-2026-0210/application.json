@@ -1,0 +1,31 @@
+{
+  "application_id": "APP-2026-0210",
+  "submitted_on": "2026-10-19",
+  "channel": "Web portal",
+  "relationship_manager": "Kavitha Sundaram",
+  "credit_analyst": "Rahul Das",
+  "borrower": {
+    "legal_name": "Indus Garments Manufacturing Ltd",
+    "registration_no": "U17100TN2010PLC198765",
+    "incorporated_on": "2010-04-15",
+    "sector": "Manufacturing",
+    "country": "India",
+    "existing_group_exposure_usd": 0.0
+  },
+  "facility": {
+    "type": "Working capital facility",
+    "amount_usd": 900000.0,
+    "tenor_months": 24,
+    "purpose": "Working capital to fund raw material (cotton yarn) procurement for export orders.",
+    "proposed_rate": "SOFR + 3.75%",
+    "security": "Hypothecation of stocks and book debts. Personal guarantee of promoters."
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "collateral_valuation.txt",
+    "kyc_ubo_declaration.txt",
+    "project_report.txt"
+  ],
+  "rm_notes": "Existing customer. Business under pressure from import competition."
+}

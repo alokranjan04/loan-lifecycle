@@ -1,0 +1,31 @@
+{
+  "application_id": "APP-2026-0209",
+  "submitted_on": "2026-10-19",
+  "channel": "Web portal",
+  "relationship_manager": "Amit Joshi",
+  "credit_analyst": "Sneha Verma",
+  "borrower": {
+    "legal_name": "Vyom Real Estate Developers Pvt Ltd",
+    "registration_no": "U70100MH2018PTC312456",
+    "incorporated_on": "2018-06-01",
+    "sector": "Real estate",
+    "country": "India",
+    "existing_group_exposure_usd": 0.0
+  },
+  "facility": {
+    "type": "Secured term loan",
+    "amount_usd": 2000000.0,
+    "tenor_months": 36,
+    "purpose": "Funding construction of commercial office complex in Navi Mumbai.",
+    "proposed_rate": "SOFR + 4.50%",
+    "security": "Mortgage on under-construction property at Navi Mumbai. Personal guarantee of promoters."
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "collateral_valuation.txt",
+    "kyc_ubo_declaration.txt",
+    "project_report.txt"
+  ],
+  "rm_notes": "New client. Commercial property development project."
+}

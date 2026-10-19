@@ -28,6 +28,16 @@ prototype/data/applications/APP-20[3-9][0-9]-*/
 # Seed / demo cases — always tracked
 !prototype/data/applications/APP-2026-0142/
 !prototype/data/applications/APP-2026-0157/
+!prototype/data/applications/APP-2026-0201/
+!prototype/data/applications/APP-2026-0202/
+!prototype/data/applications/APP-2026-0203/
+!prototype/data/applications/APP-2026-0204/
+!prototype/data/applications/APP-2026-0205/
+!prototype/data/applications/APP-2026-0206/
+!prototype/data/applications/APP-2026-0207/
+!prototype/data/applications/APP-2026-0208/
+!prototype/data/applications/APP-2026-0209/
+!prototype/data/applications/APP-2026-0210/
 
 # OS / editor
 .DS_Store

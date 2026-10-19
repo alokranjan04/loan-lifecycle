@@ -1,0 +1,22 @@
+INDUS GARMENTS MANUFACTURING LTD
+AUDITED FINANCIAL STATEMENTS (USD)
+Auditor: Deloitte India (DTTL affiliate)
+Audit opinion: Unqualified with emphasis of matter (going concern note)
+
+INCOME STATEMENT              FY2023        FY2024        FY2025
+Revenue                    5,800,000     4,900,000     4,200,000
+EBITDA                       580,000       392,000       252,000
+Interest expense             180,000       195,000       210,000
+Net profit                   110,000       (82,000)     (195,000)
+
+BALANCE SHEET (as at 31 March 2025)
+Total debt                                             2,600,000
+Current assets                                         1,900,000
+Current liabilities                                    2,300,000
+Shareholders equity                                    1,100,000
+
+DEBT SERVICE (FY2025)
+Scheduled principal repayment                            430,000
+
+Notes: Revenue has declined 27% over two years due to import competition.
+Net loss in FY2024 and FY2025. Auditor has included going concern emphasis paragraph.

@@ -1,0 +1,19 @@
+Meridian Agro Processing Pvt Ltd
+AUDITED FINANCIAL STATEMENTS - SUMMARY (USD)
+Auditor: [Audit Firm], Chartered Accountants
+Audit opinion: Unqualified
+
+INCOME STATEMENT              FY2023        FY2024        FY2025
+Revenue                    5,000,000     6,200,000     7,500,000
+EBITDA                       750,000       930,000     1,125,000
+Interest expense             120,000       150,000       180,000
+Net profit                   280,000       380,000       480,000
+
+BALANCE SHEET (as at 31 March 2025)
+Total debt                                             1,500,000
+Current assets                                         2,200,000
+Current liabilities                                    1,700,000
+Shareholders equity                                    3,100,000
+
+DEBT SERVICE (FY2025)
+Scheduled principal repayment                            300,000

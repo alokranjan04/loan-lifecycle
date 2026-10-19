@@ -1,0 +1,25 @@
+SUNRISE COLD CHAIN LOGISTICS LTD
+FINANCIAL PROJECTIONS - PROJECT REPORT FOR BHIWANDI WAREHOUSE ACQUISITION
+Prepared by: Sunrise Cold Chain Logistics Ltd with Beacon Advisory Services
+
+Total project cost (USD): 3,800,000
+Promoter equity contribution (USD): 0
+Commercial operations date: 2026-12-01
+
+Projected DSCR by year: 1.29, 1.34, 1.39, 1.44, 1.51
+Average projected DSCR: 1.39
+
+Key assumptions:
+- Revenue growth 14% YoY (below 3-year CAGR of 22%) to be conservative
+- EBITDA margin held at 17% (FY2025 actual)
+- New debt service: USD 3,800,000 at SOFR + 2.85% over 60 months
+- Combined (existing + new) annual debt service: Year 1 USD 1,461,600 declining to USD 1,030,000 in Year 5
+- FreshKart Retail pre-lease covers 55% of warehouse capacity from day 1
+
+Capacity utilisation assumptions:
+- Year 1: 65% (pre-lease base + spot market)
+- Year 2: 72%
+- Year 3: 79%
+- Year 4+: 85% steady-state
+
+Sensitivity: At 10% revenue downside, Year 1 DSCR remains 1.18x with DSRA buffer providing 2 quarters cover.

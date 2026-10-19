@@ -1,0 +1,19 @@
+VYOM REAL ESTATE DEVELOPERS PVT LTD
+AUDITED FINANCIAL STATEMENTS (USD)
+Auditor: Shah & Kothari, Chartered Accountants
+Audit opinion: Unqualified
+
+INCOME STATEMENT              FY2023        FY2024        FY2025
+Revenue                    1,800,000     2,200,000     2,600,000
+EBITDA                       450,000       550,000       650,000
+Interest expense              80,000        95,000       115,000
+Net profit                   215,000       270,000       320,000
+
+BALANCE SHEET (as at 31 March 2025)
+Total debt                                             1,200,000
+Current assets                                           900,000
+Current liabilities                                      600,000
+Shareholders equity                                    2,100,000
+
+DEBT SERVICE (FY2025)
+Scheduled principal repayment                            240,000

@@ -1,0 +1,31 @@
+{
+  "application_id": "APP-2026-0203",
+  "submitted_on": "2026-10-18",
+  "channel": "Web portal",
+  "relationship_manager": "Ravi Shankar",
+  "credit_analyst": "Priya Mehta",
+  "borrower": {
+    "legal_name": "Meridian Agro Processing Pvt Ltd",
+    "registration_no": "U01100KA2015PTC081234",
+    "incorporated_on": "2012-03-12",
+    "sector": "Agriculture & Agro-processing",
+    "country": "India",
+    "existing_group_exposure_usd": 0.0
+  },
+  "facility": {
+    "type": "Secured term loan",
+    "amount_usd": 1500000.0,
+    "tenor_months": 45,
+    "purpose": "Acquisition and installation of grain drying and cold storage equipment at the Tumkur processing plant to expand capacity by 4,000 MT annually.",
+    "proposed_rate": "SOFR + 3.00%",
+    "security": "First charge on plant and machinery. Personal guarantee of two promoter-directors."
+  },
+  "declared_documents": [
+    "audited_financials.txt",
+    "bank_statement_summary.txt",
+    "collateral_valuation.txt",
+    "kyc_ubo_declaration.txt",
+    "project_report.txt"
+  ],
+  "rm_notes": "Strong 10-year track record. Clean PEP/sanctions. Board resolution available."
+}

@@ -1,0 +1,12 @@
+STATEMENT SUMMARY - CURRENT ACCOUNT
+Account holder: Meridian Agro Processing Pvt Ltd
+Bank: [Bank Name], Main Branch
+Period: 01-Oct-2025 to 30-Sep-2026
+
+Total credits (12 months): 6,500,000
+Total debits (12 months): 6,200,000
+Average monthly balance: 280,000
+Lowest month-end balance: 45,000
+
+Returned items: 0
+Overdraft utilisation: nil

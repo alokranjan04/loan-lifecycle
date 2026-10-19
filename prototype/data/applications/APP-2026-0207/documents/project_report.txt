@@ -1,0 +1,18 @@
+MERIDIAN AGRO PROCESSING PVT LTD
+PROJECT REPORT — EQUIPMENT ACQUISITION
+
+Total project cost (USD): 1,500,000
+Promoter equity contribution (USD): 0
+Commercial operations date: 2027-01-01
+
+Projected DSCR by year: 1.65, 1.72, 1.80, 1.89
+Average projected DSCR: 1.77
+
+Key assumptions:
+- New equipment adds 4,000 MT capacity (62% increase)
+- Revenue growth 18% YoY (below 3-yr CAGR of 22%)
+- EBITDA margin held at 18% (FY2025 actual: 18%)
+- New annual debt service: USD 421,250 (principal + interest at SOFR+3%)
+- Existing debt service: USD 277,000 (declining)
+
+Sensitivity: At 15% revenue downside, DSCR remains 1.40x — above policy minimum.
