@@ -24,6 +24,9 @@ ROOT = Path(__file__).resolve().parent.parent
 CREDIT_DECISIONS = ["APPROVE WITH CONDITIONS", "APPROVE", "DECLINE", "RETURN TO RM"]
 COMPLIANCE_DECISIONS = ["EDD CLEARED", "EDD NOT CLEARED"]
 DATA_VALIDATION_DECISIONS = ["PROCEED", "RETURN FOR RESUBMISSION"]
+GATE_DECISIONS = {"credit": CREDIT_DECISIONS, "compliance": COMPLIANCE_DECISIONS,
+                  "data_validation": DATA_VALIDATION_DECISIONS}
+APPROVER_ROLES = ("Compliance Officer", "Senior Analyst", *AUTHORITY_RANK)
 
 
 class Context:
@@ -64,6 +67,8 @@ class InteractiveApprover:
 class ScriptedApprover:
     """Pre-recorded human responses, for demos and tests. Each gate takes a list of attempts."""
 
+    recorded = True
+
     def __init__(self, script: dict[str, list[dict]]):
         self.script = script
 
@@ -72,6 +77,21 @@ class ScriptedApprover:
         if attempt >= len(attempts):
             raise ControlViolation(f"No valid human response scripted for the {gate['gate']} gate")
         return attempts[attempt]
+
+
+def role_for_gate(gate: dict, roles: list[str]) -> str:
+    """Which of an approver's assigned roles applies at this gate. Authority checks still decide if it is enough."""
+    required = {"compliance": "Compliance Officer", "data_validation": "Senior Analyst"}.get(gate["gate"])
+    if required in roles:
+        return required
+    credit_roles = [r for r in roles if r in AUTHORITY_RANK]
+    if gate["gate"] == "credit" and credit_roles:
+        return max(credit_roles, key=AUTHORITY_RANK.get)
+    return roles[0] if roles else ""
+
+
+def has_sanctions_match(case: CaseFile) -> bool:
+    return any(c.rule_id == "POL-3.3" and c.status == "FAIL" for c in case.policy_checks)
 
 
 def validate_human_action(gate: dict, action: dict, case: CaseFile) -> list[str]:
@@ -83,7 +103,11 @@ def validate_human_action(gate: dict, action: dict, case: CaseFile) -> list[str]
         errors.append("approver name is required")
     elif action["name"].lower() in conflicted:
         errors.append(f"segregation of duties: {action['name']} prepared or sponsored this proposal (POL-6.2)")
+    if action.get("decision") not in GATE_DECISIONS[gate["gate"]]:
+        errors.append(f"invalid decision for the {gate['gate']} gate: {action.get('decision')}")
     if gate["gate"] == "credit":
+        if has_sanctions_match(case) and action.get("decision") != "DECLINE":
+            errors.append("a confirmed sanctions match can only be declined (POL-3.3)")
         if AUTHORITY_RANK.get(action.get("role"), 0) < AUTHORITY_RANK[gate["role"]]:
             errors.append(f"insufficient authority: {action.get('role')} cannot approve; requires {gate['role']} (POL-6.1)")
         if action.get("decision") != case.recommendation["action"] and len(action.get("rationale", "")) < 20:
@@ -143,8 +167,8 @@ def run_case(app_dir: Path, approver, out_root: Path, as_of: str | None = None, 
     say(f"  Rating {case.risk['rating']} ({case.risk['grade']}), {len(case.conditions)} conditions, "
         f"gates: {' -> '.join(g['role'] for g in case.checklist['gates'])}")
 
+    write_pending(case, out, llm, kb, vault)   # the evidence an officer needs at the gates
     if prepare_only:   # stop at the first human gate: the reviewer workbench shows this state
-        write_pending(case, out, llm, kb, vault)
         return case
 
     # Human gates, in order. Nothing past this point happens without a person.
@@ -165,9 +189,13 @@ def run_case(app_dir: Path, approver, out_root: Path, as_of: str | None = None, 
                 raise ControlViolation("Too many invalid approval attempts")
         override = gate["gate"] == "credit" and action["decision"] != case.recommendation["action"]
         rec = {**action, "gate": gate["gate"], "required_role": gate["role"], "override": override}
+        outcome = {"decision": action["decision"], "rationale": action["rationale"], "override": override}
+        if action.get("authenticated_account"):
+            outcome["authenticated_account"] = action["authenticated_account"]
+        if getattr(approver, "recorded", False):
+            rec["recorded"] = outcome["recorded"] = True
         case.human_decisions.append(rec)
-        audit.record(action["name"], "human", f"{gate['gate']}_decision", {"gate": gate},
-                     {"decision": action["decision"], "rationale": action["rationale"], "override": override},
+        audit.record(action["name"], "human", f"{gate['gate']}_decision", {"gate": gate}, outcome,
                      policy_refs=["POL-3.3"] if gate["gate"] == "compliance" else ["POL-6.1", "POL-6.2"])
         say(f"  [HUMAN] {action['name']} ({action['role']}): {action['decision']}" + ("  (OVERRIDE)" if override else ""))
         if gate["gate"] == "data_validation" and action["decision"] == "RETURN FOR RESUBMISSION":

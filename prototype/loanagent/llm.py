@@ -250,6 +250,10 @@ TASK_PROMPTS = {
                       "most severe first, each ending with its citations. Then two sentences on mitigants.",
     "decision_rationale": "Write a 4-6 sentence executive summary of the credit proposal and the system recommendation, "
                           "naming the conditions and the human approvals required.",
+    "policy_qa": "Answer the user's policy question concisely using only the supplied retrieved policy clauses. "
+                 "Cite every policy statement with the exact bracketed citation supplied in the evidence. "
+                 "If the evidence does not answer the question, say that the available policy excerpts are insufficient "
+                 "and do not infer or invent a requirement.",
 }
 
 
@@ -281,8 +285,24 @@ def _decision_rationale(c: dict) -> str:
             f"Because the request is USD {c['amount']:,.0f}, it needs sign-off from: {gates}. "
             f"The system has not made the decision; it has prepared the evidence for the approvers.")
 
+def _policy_qa(c: dict) -> str:
+    if not c["evidence"]:
+        return "I could not find a relevant policy clause for that question."
+    excerpts = "\n".join(
+        f"- {item['title']}: {item['text']} {item['citation']}"
+        for item in c["evidence"]
+    )
+    return (
+        f"Relevant policy excerpts from {c['policy_version']}:\n\n{excerpts}\n\n"
+        "This answer is limited to the retrieved clauses; confirm the cited policy before acting."
+    )
 
-TEMPLATES = {"rm_request": _rm_request, "risk_narrative": _risk_narrative, "decision_rationale": _decision_rationale}
+TEMPLATES = {
+    "rm_request": _rm_request,
+    "risk_narrative": _risk_narrative,
+    "decision_rationale": _decision_rationale,
+    "policy_qa": _policy_qa,
+}
 
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -381,7 +401,6 @@ class OpenRouterLLM:
                 continue
         if not isinstance(data, dict):
             return {}
-        from loanagent.citations import ExtractedField, Evidence
         out = {}
         known = {s["name"]: s for s in schema}
         for name, item in data.items():

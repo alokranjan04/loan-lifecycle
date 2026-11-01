@@ -11,9 +11,13 @@ build/
 .eggs/
 
 # Environment / secrets
+*-sa-key.json
 .env
 *.env
 .env.*
+
+# Portal-to-workbench shared secret (generated at runtime)
+prototype/data/.portal_intake_token
 
 # Pipeline output (generated at runtime — not source)
 prototype/output/

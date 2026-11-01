@@ -156,6 +156,34 @@ class PolicyVersionTests(unittest.TestCase):
         self.assertTrue(r["recommendation_reproduced"] and r["final_status_reproduced"])
 
 
+class PolicyAssistantTests(unittest.TestCase):
+    def test_policy_answer_uses_retrieved_citations_and_refuses_empty_evidence(self):
+        kb = PolicyKnowledgeBase.for_date(ROOT / "data" / "policy", "2026-10-19")
+        matches = kb.search("KYC expired identity documents beneficial owners passports", k=4)
+        self.assertTrue(matches)
+        evidence = [
+            {
+                "citation": f"[{kb.ref(clause.id)}]",
+                "title": clause.title,
+                "text": clause.text,
+            }
+            for clause, _ in matches
+        ]
+
+        answer = MockLLM().write(
+            "policy_qa",
+            {"question": "What KYC evidence is required?", "policy_version": kb.version, "evidence": evidence},
+        )
+        self.assertIn(evidence[0]["citation"], answer)
+        self.assertIn(evidence[0]["text"], answer)
+
+        no_evidence = MockLLM().write(
+            "policy_qa",
+            {"question": "Unanswerable question", "policy_version": kb.version, "evidence": []},
+        )
+        self.assertIn("could not find a relevant policy clause", no_evidence)
+
+
 class ConflictTests(unittest.TestCase):
     def test_conflicting_valuation_uses_conservative_figure(self):
         app = copy_app("APP-2026-0157")

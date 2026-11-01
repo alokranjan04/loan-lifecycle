@@ -1,0 +1,30 @@
+{
+  "application_id": "APP-SC09-2026",
+  "submitted_on": "2026-10-19",
+  "channel": "Relationship Manager portal",
+  "relationship_manager": "Lakshmi Nair",
+  "credit_analyst": "Daniel Okafor",
+  "borrower": {
+    "legal_name": "Rajshree Textile Mills Pvt Ltd",
+    "registration_no": "U17119RJ2011PTC037448",
+    "incorporated_on": "2011-09-22",
+    "sector": "Industrial manufacturing",
+    "country": "India",
+    "existing_group_exposure_usd": 0
+  },
+  "facility": {
+    "type": "Secured term loan",
+    "amount_usd": 2200000,
+    "tenor_months": 48,
+    "purpose": "Expansion of weaving capacity — installation of 80 power looms at Bhilwara unit",
+    "proposed_rate": "SOFR + 3.50%",
+    "security": "Factory land and building, Bhilwara, Rajasthan"
+  },
+  "declared_documents": [
+    "financials.txt",
+    "bank_statement.txt",
+    "kyc.txt",
+    "valuation.txt"
+  ],
+  "rm_notes": "Promoter-managed SME in the textile sector. Documents are provisional; formal audited set to follow. SC-09 test case: low-confidence HITL gate."
+}

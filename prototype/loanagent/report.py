@@ -57,14 +57,17 @@ def build_summary(case: CaseFile, llm, kb, vault, audit_head: str, trace) -> str
     L += ["## System recommendation (decision support only)", "",
           f"**{rec['action']}**. {rec['reason']}", "", rec["summary"], ""]
 
-    L += ["## Key metrics", "", "| Metric | Value | Source |", "|---|---|---|"]
-    for k, (label, src) in METRIC_LABELS.items():
-        if k in case.metrics:
-            L.append(f"| {label} | {_fmt_metric(k, case.metrics[k])} | {src} |")
-    L += ["", f"Internal rating **{r['rating']} ({r['grade']})**, scorecard {r['score']}/{r['max_score']}, "
-          f"indicative 1-year PD {r['pd_1y']:.2%}.", "",
-          "| Scorecard factor | Points (0 best) |", "|---|---|"]
-    L += [f"| {k} | {v} |" for k, v in r["scorecard"].items()]
+    if r.get("assessed", True):
+        L += ["## Key metrics", "", "| Metric | Value | Source |", "|---|---|---|"]
+        for k, (label, src) in METRIC_LABELS.items():
+            if k in case.metrics:
+                L.append(f"| {label} | {_fmt_metric(k, case.metrics[k])} | {src} |")
+        L += ["", f"Internal rating **{r['rating']} ({r['grade']})**, scorecard {r['score']}/{r['max_score']}, "
+              f"indicative 1-year PD {r['pd_1y']:.2%}.", "",
+              "| Scorecard factor | Points (0 best) |", "|---|---|"]
+        L += [f"| {k} | {v} |" for k, v in r["scorecard"].items()]
+    else:
+        L += ["## Key metrics", "", "**Not assessed.** The documents do not name the applicant, so no ratios or rating are stated."]
 
     L += ["", "## Policy and eligibility checks", "", f"Credit policy **{kb.version}** (effective {kb.effective_from}, sha256 `{kb.sha256[:16]}`); clause text retrieved and cited per check.", "",
           "| Clause | Check | Result | Actual | Requirement | Evidence |", "|---|---|---|---|---|---|"]

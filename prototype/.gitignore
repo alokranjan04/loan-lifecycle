@@ -30,3 +30,6 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/settings.json
+
+# Approver assignments (contain staff email addresses)
+data/approver_assignments.json

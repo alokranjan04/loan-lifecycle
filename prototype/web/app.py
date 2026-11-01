@@ -1,7 +1,7 @@
-"""FastAPI web server wrapping the loan-lifecycle agent pipeline.
+"""Loopback workbench API for the Northstar administrator portal.
 
-Start it from the prototype folder:
-  python web/app.py                 # then open http://localhost:8000
+Start it alongside the Northstar portal on port 8001. API access requires a
+valid administrator session from the portal on port 8000.
 
 Exposes:
   GET  /api/overview                – counts and latest eval headline for the home page
@@ -20,6 +20,8 @@ Exposes:
   GET  /api/evals/report            – evals/results/REPORT.md
   POST /api/demos/<name>            – red-team, policy-change, tamper, replay
   GET  /api/rag/status              – RAG layer status (vector_ready, embed_model, collection, …)
+  POST /api/assistant/ask           – policy answer grounded in retrieved clauses and citations
+  GET  /api/auth/workbench-session  – current Northstar administrator identity
   GET  /api/policy/docs             – list all policy documents with metadata
   GET  /api/policy/docs/{name}      – fetch markdown content of a policy document
   PUT  /api/policy/docs/{name}      – save updated markdown content (triggers RAG re-index)
@@ -31,16 +33,18 @@ import asyncio
 import json
 import os
 import queue
+import secrets
 import subprocess
 import threading
 import time
+import urllib.error
+import urllib.request
 import uuid
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -70,9 +74,10 @@ def _load_env(*paths: Path) -> None:
 _load_env(PROTO / ".env.local", PROTO / ".env")
 
 from loanagent.audit import verify_chain      # noqa: E402
+from loanagent.llm import get_llm             # noqa: E402
 from loanagent.orchestrator import (          # noqa: E402
-    CREDIT_DECISIONS, COMPLIANCE_DECISIONS,
-    ScriptedApprover, run_case, validate_human_action,
+    APPROVER_ROLES, CREDIT_DECISIONS, COMPLIANCE_DECISIONS,
+    ScriptedApprover, has_sanctions_match, role_for_gate, run_case, validate_human_action,
 )
 from loanagent.rag import get_knowledge_base  # noqa: E402
 
@@ -82,6 +87,27 @@ RESULTS = PROTO / "evals" / "results"
 OUT     = PROTO / "output"
 AS_OF   = "2026-10-16"                       # fixed decision date so runs are reproducible
 OUT.mkdir(exist_ok=True)
+APPROVER_ASSIGNMENTS = Path(os.environ.get("LOAN_APPROVER_ASSIGNMENTS", PROTO / "data" / "approver_assignments.json"))
+INTAKE_TOKEN_FILE = PROTO / "data" / ".portal_intake_token"
+
+
+def intake_token() -> str:
+    """Shared secret the Northstar portal uses to submit applicant cases. Created on first use."""
+    if not INTAKE_TOKEN_FILE.exists():
+        INTAKE_TOKEN_FILE.write_text(secrets.token_urlsafe(32), encoding="utf-8")
+    return INTAKE_TOKEN_FILE.read_text(encoding="utf-8").strip()
+
+
+def approver_roles(email: object) -> list[str]:
+    """Approver roles assigned to a portal account. A missing or unreadable file grants none."""
+    if not isinstance(email, str):
+        return []
+    try:
+        assignments = json.loads(APPROVER_ASSIGNMENTS.read_text(encoding="utf-8"))["assignments"]
+        roles = {k.lower(): v for k, v in assignments.items()}.get(email.lower(), [])
+    except (OSError, ValueError, KeyError, AttributeError):
+        return []
+    return [r for r in roles if r in APPROVER_ROLES] if isinstance(roles, list) else []
 
 
 def case_source(app_id: str) -> dict:
@@ -113,17 +139,76 @@ def _get_cached_kb(policy_dir: Path, as_of: str, policy_version=None):
 
 
 # ── FastAPI app ───────────────────────────────────────────────────────────────
-app = FastAPI(title="Loan Lifecycle Manager")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
-)
+app = FastAPI(title="Loan Lifecycle Manager", docs_url=None, redoc_url=None, openapi_url=None)
+
+
+def _validate_portal_session(cookie: str) -> tuple[int, dict]:
+    url = os.environ.get(
+        "LOAN_PORTAL_AUTH_URL",
+        "http://127.0.0.1:8000/api/admin/workbench-session",
+    )
+    req = urllib.request.Request(url, headers={"Cookie": cookie})
+    try:
+        with urllib.request.urlopen(req, timeout=3) as response:
+            return response.status, json.loads(response.read())
+    except urllib.error.HTTPError as exc:
+        try:
+            payload = json.loads(exc.read())
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            payload = {}
+        return exc.code, payload
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return 503, {"error": "The administrator portal could not verify this session."}
+
+
+@app.middleware("http")
+async def require_portal_admin(request: Request, call_next):
+    if not request.url.path.startswith("/api/"):
+        return await call_next(request)
+    if request.url.path.startswith("/api/portal-intake"):
+        supplied = request.headers.get("x-portal-intake-token", "")
+        if not secrets.compare_digest(supplied.encode(), intake_token().encode()):
+            return JSONResponse({"detail": "Invalid portal intake token."}, status_code=401)
+        return await call_next(request)
+    if request.url.path == "/api/auth/login":
+        return JSONResponse(
+            {"detail": "Sign in through the Northstar administrator portal."},
+            status_code=403,
+        )
+    session_token = request.cookies.get("loan_portal_session")
+    if not session_token:
+        return JSONResponse(
+            {"detail": "Sign in through the Northstar administrator portal."},
+            status_code=401,
+        )
+    cookie = f"loan_portal_session={session_token}"
+    status, payload = await asyncio.to_thread(_validate_portal_session, cookie)
+    if status != 200:
+        return JSONResponse(
+            {"detail": payload.get("error", "Administrator access is required.")},
+            status_code=status if status in {401, 403} else 503,
+        )
+    user = payload.get("user")
+    if not isinstance(user, dict) or user.get("role") != "admin":
+        return JSONResponse(
+            {"detail": "Administrator access is required."},
+            status_code=403,
+        )
+    request.state.portal_user = user
+    return await call_next(request)
+
+
+@app.get("/api/auth/workbench-session")
+def workbench_session(request: Request):
+    user = request.state.portal_user
+    return {"user": user, "approver_roles": approver_roles(user.get("email"))}
 
 
 @app.on_event("startup")
 def _warm_kb():
     """Pre-build / verify the Qdrant vector index at server startup so the first
     pipeline run is not penalised by the index-build time."""
+    intake_token()
     try:
         _get_cached_kb(PROTO / "data" / "policy", AS_OF)
     except Exception:
@@ -174,6 +259,8 @@ class WebApprover:
             "recommendation_reason": (case.recommendation or {}).get("reason"),
             "risk_rating":   (case.risk or {}).get("rating"),
             "risk_grade":    (case.risk or {}).get("grade"),
+            "risk_assessed": (case.risk or {}).get("assessed", True),
+            "sanctions_match": has_sanctions_match(case),
             "pep_hits": [
                 h for h in case.metrics.get("screening", {}).get("pep", [])
             ] if gate["gate"] == "compliance" else [],
@@ -196,6 +283,8 @@ class WebApprover:
 class AutoApprover:
     """For golden cases: the analyst tries to approve their own case (blocked), then the routed role
     accepts the recommendation. Same pattern the eval harness uses."""
+
+    recorded = True
 
     def ask(self, gate: dict, case, attempt: int) -> dict:
         if attempt == 0:
@@ -396,6 +485,8 @@ class NewApplicationRequest(BaseModel):
     doc_valuation: str = ""
     doc_kyc: str = ""
     doc_project_report: str = ""
+    doc_tax_return: str = ""
+    doc_board_resolution: str = ""
 
 
 @app.post("/api/applications")
@@ -422,6 +513,8 @@ def create_application(req: NewApplicationRequest):
         "doc_valuation":      "collateral_valuation.txt",
         "doc_kyc":            "kyc_ubo_declaration.txt",
         "doc_project_report": "project_report.txt",
+        "doc_tax_return":     "tax_returns.txt",
+        "doc_board_resolution": "board_resolution.txt",
     }
     # Classifier keyword that must appear in each document type for it to be recognised
     _doc_kw = {
@@ -430,6 +523,8 @@ def create_application(req: NewApplicationRequest):
         "doc_valuation":      "VALUATION REPORT",
         "doc_kyc":            "KYC DECLARATION",
         "doc_project_report": "PROJECT REPORT",
+        "doc_tax_return":     "TAX RETURN",
+        "doc_board_resolution": "BOARD RESOLUTION",
     }
     declared = []
     for field, filename in doc_map.items():
@@ -467,6 +562,34 @@ def create_application(req: NewApplicationRequest):
     }
     (app_dir / "application.json").write_text(json.dumps(application, indent=2), encoding="utf-8")
     return {"app_id": app_id}
+
+
+class PortalIntakeRequest(NewApplicationRequest):
+    portal_ref: str
+    submitted_by: str
+
+
+@app.post("/api/portal-intake")
+def portal_intake(req: PortalIntakeRequest):
+    """An applicant's submission from the Northstar portal: create the case and start the agents."""
+    app_id = create_application(req)["app_id"]
+    path = DATA / app_id / "application.json"
+    application = json.loads(path.read_text(encoding="utf-8"))
+    application.update(portal_ref=req.portal_ref, submitted_by=req.submitted_by)
+    path.write_text(json.dumps(application, indent=2), encoding="utf-8")
+    return {"app_id": app_id, "session_id": start_run(app_id)["session_id"]}
+
+
+@app.get("/api/portal-intake/{app_id}")
+def portal_intake_status(app_id: str):
+    """Progress for the applicant's status page. Deliberately excludes findings and screening results."""
+    record = case_source(app_id)["out_root"] / app_id / "decision_record.json"
+    rec = json.loads(record.read_bytes().decode("utf-8", errors="replace")) if record.exists() else {}
+    session = _sessions.get(_app_sid.get(app_id))
+    status = session.status if session else "idle"
+    in_progress = status in ("running", "awaiting_approval")
+    return {"session_status": status, "final_status": None if in_progress else rec.get("final_status"),
+            "conditions": len(rec.get("conditions") or [])}
 
 
 @app.delete("/api/applications/{app_id}")
@@ -658,6 +781,19 @@ def get_audit_verified(app_id: str):
     return {"entries": get_audit_log(app_id), "chain_ok": ok, "chain_message": msg}
 
 
+@app.get("/api/review/{app_id}")
+def get_review_packet(app_id: str):
+    """What the agents found, for the officer deciding at an open gate."""
+    session = _sessions.get(_app_sid.get(app_id))
+    pending = out_dir(app_id) / "pending_record.json"
+    if not session or session.status != "awaiting_approval" or not pending.exists():
+        raise HTTPException(404, "This case is not waiting for a decision")
+    record = json.loads(pending.read_text(encoding="utf-8"))
+    fields = pending.parent / "extracted_fields.json"
+    record["extracted_fields"] = json.loads(fields.read_text(encoding="utf-8")) if fields.exists() else {}
+    return record
+
+
 @app.get("/api/pending-approvals")
 def get_pending_approvals():
     """Active sessions that are paused at a human gate, waiting for admin approval."""
@@ -688,6 +824,7 @@ def get_pending_approvals():
             "recommendation": gate.get("recommendation"),
             "risk_rating": gate.get("risk_rating"),
             "risk_grade": gate.get("risk_grade"),
+            "sanctions_match": gate.get("sanctions_match", False),
         })
     return result
 
@@ -699,13 +836,17 @@ class RunRequest(BaseModel):
 
 @app.post("/api/run/{app_id}")
 def start_run(app_id: str, req: RunRequest = RunRequest()):
-    case_source(app_id)
+    src = case_source(app_id)
     if req.llm_mode not in ("auto", "mock", "claude", "openrouter", "low_confidence") or req.approver not in ("web", "scripted"):
         raise HTTPException(400, "Bad run options")
     if req.llm_mode == "claude" and not os.environ.get("ANTHROPIC_API_KEY"):
         raise HTTPException(400, "Set ANTHROPIC_API_KEY to use Claude directly")
     if req.llm_mode == "openrouter" and not os.environ.get("OPENROUTER_API_KEY"):
         raise HTTPException(400, "Set OPENROUTER_API_KEY to use OpenRouter")
+    if req.approver == "scripted":
+        application = json.loads((src["dir"] / "application.json").read_text())
+        if application.get("channel") == "Web portal":
+            raise HTTPException(400, "Recorded approvers are only for sample and golden cases")
     s = Session(app_id, req.llm_mode, req.approver)
     _sessions[s.id] = s
     _app_sid[app_id] = s.id
@@ -740,21 +881,25 @@ async def event_stream(session_id: str):
 
 
 class ApproveRequest(BaseModel):
-    name:      str
-    role:      str
     decision:  str
     rationale: str
 
 
 @app.post("/api/approve/{session_id}")
-def submit_approval(session_id: str, body: ApproveRequest):
+def submit_approval(session_id: str, body: ApproveRequest, request: Request):
     s = _sessions.get(session_id)
     if not s:
         raise HTTPException(404, "Session not found")
     if s.status != "awaiting_approval":
         raise HTTPException(400, "Session is not awaiting approval")
 
-    action = body.model_dump()
+    # Who is deciding comes from the signed-in portal session, never from the request body.
+    user = request.state.portal_user
+    roles = approver_roles(user.get("email"))
+    if not roles:
+        return {"ok": False, "errors": ["Your account has no approver role assigned."]}
+    action = {**body.model_dump(), "name": user.get("full_name", ""), "role": role_for_gate(s._orig_gate, roles),
+              "authenticated_account": user.get("email")}
     errors = validate_human_action(s._orig_gate, action, s.pending_case)
     if errors:
         return {"ok": False, "errors": errors}
@@ -890,6 +1035,59 @@ def rag_status():
         "qdrant_url": qdrant_url,
         "error": (None if key_set and qdrant_alive else
                   ("No OPENROUTER_API_KEY / VOYAGE_API_KEY / ANTHROPIC_API_KEY" if not key_set else f"Qdrant not reachable at {qdrant_url}")),
+    }
+
+
+class PolicyQuestion(BaseModel):
+    question: str
+
+
+@app.post("/api/assistant/ask")
+def ask_policy(body: PolicyQuestion):
+    question = body.question.strip()
+    if not question or len(question) > 600:
+        raise HTTPException(422, "Ask a policy question between 1 and 600 characters.")
+
+    from datetime import date
+
+    kb = _get_cached_kb(PROTO / "data" / "policy", date.today().isoformat())
+    matches = kb.search(question, k=4)
+    evidence = [
+        {
+            "citation": f"[{kb.ref(clause.id)}]",
+            "clause_id": clause.id,
+            "title": clause.title,
+            "text": clause.text,
+            "source": clause.source,
+            "line": clause.line,
+            "score": round(float(score), 4),
+        }
+        for clause, score in matches
+    ]
+    if not evidence:
+        return {
+            "answer": "I couldn't find relevant policy clauses for that question, so I can't give a policy-grounded answer.",
+            "sources": [],
+            "policy_version": kb.version,
+            "retrieval_mode": "hybrid" if getattr(kb, "_vector_ready", False) else "BM25",
+            "model": "not used (no matching clauses)",
+        }
+
+    llm = get_llm("auto")
+    answer = llm.write(
+        "policy_qa",
+        {
+            "question": question,
+            "policy_version": kb.version,
+            "evidence": evidence,
+        },
+    )
+    return {
+        "answer": answer,
+        "sources": evidence,
+        "policy_version": kb.version,
+        "retrieval_mode": "hybrid" if getattr(kb, "_vector_ready", False) else "BM25",
+        "model": llm.name,
     }
 
 
@@ -1183,5 +1381,6 @@ app.mount("/", StaticFiles(directory=str(STATIC), html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    print("Loan Lifecycle Manager: open http://localhost:8000")
-    uvicorn.run(app, host="127.0.0.1", port=int(os.environ.get("PORT", 8000)))
+    port = int(os.environ.get("PORT", 8001))
+    print(f"Loan Lifecycle Manager workbench API listening on http://127.0.0.1:{port}")
+    uvicorn.run(app, host="127.0.0.1", port=port)

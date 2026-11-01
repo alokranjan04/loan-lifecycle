@@ -1,0 +1,7 @@
+{
+  "_note": "Copy to approver_assignments.json. Maps a Northstar portal account email to the approver roles it holds. An account with no entry cannot decide at any gate. Valid roles: Compliance Officer, Senior Analyst, Senior Credit Manager, Regional Credit Committee, Board Credit Committee.",
+  "assignments": {
+    "compliance.officer@example.com": ["Compliance Officer"],
+    "credit.manager@example.com": ["Senior Credit Manager"]
+  }
+}

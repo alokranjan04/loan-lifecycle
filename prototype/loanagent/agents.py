@@ -102,6 +102,23 @@ DOC_LABELS = {
     "kyc": "KYC / UBO declaration", "valuation": "Collateral valuation report", "project_report": "Project report",
     "tax_return": "Latest tax returns", "board_resolution": "Board resolution authorising the borrowing",
 }
+ENTITY_SUFFIXES = {"LLC", "LTD", "LIMITED", "PVT", "PRIVATE", "INC", "INCORPORATED", "CORP", "CORPORATION", "CO", "COMPANY",
+                   "GMBH", "PLC", "LLP", "AG", "SA", "BV", "LP"}
+ENTITY_NAMED_DOCS = {"financials", "bank_statement", "kyc", "project_report", "tax_return", "board_resolution"}   # valuations describe the asset
+BOARD_AMOUNT_MISMATCH_RATIO = 1.5
+
+
+def _name_tokens(text: str) -> list[str]:
+    return re.sub(r"[^A-Z0-9 ]", " ", text.upper()).split()
+
+
+def names_borrower(legal_name: str, document_text: str) -> bool:
+    """Does the document name the borrower? Compares whole words and ignores legal suffixes such as Pvt Ltd."""
+    tokens = _name_tokens(legal_name)
+    core = [t for t in tokens if t not in ENTITY_SUFFIXES] or tokens
+    return f" {' '.join(core)} " in f" {' '.join(_name_tokens(document_text))} "
+
+
 BLOCKING_DOCS = {"financials", "bank_statement", "kyc"}   # cannot be deferred to a condition precedent
 
 SECTOR_APPETITE = {"agri and food processing": "Grow", "industrial manufacturing": "Grow",
@@ -157,7 +174,7 @@ class DocumentIntelligenceAgent(Agent):
     def run(self, case: CaseFile, doc_dir: Path, vault: PIIVault) -> dict:
         processed = []
         for path in sorted(doc_dir.glob("*.txt")):
-            raw = path.read_text()
+            raw = path.read_text(encoding="utf-8", errors="replace")
             masked = vault.mask(raw)
             lines = masked.splitlines()
             doc_type = next((t for t, kw in CLASSIFIER if kw in raw.upper()), "unknown")
@@ -177,6 +194,13 @@ class DocumentIntelligenceAgent(Agent):
                                              "Document could not be classified and needs manual review.",
                                              evidence=[Evidence(path.name)]))
                 continue
+            borrower = case.application["borrower"]["legal_name"]
+            if doc_type in ENTITY_NAMED_DOCS and not names_borrower(borrower, raw):
+                case.checklist.setdefault("entity_mismatches", []).append({"document": path.name, "doc": doc_type})
+                case.findings.append(Finding(self.name, "due_diligence", "high", f"Document does not name the applicant: {path.name}",
+                                             f"The application is for {borrower}, but this {DOC_LABELS[doc_type]} does not mention that "
+                                             "company. It may belong to someone else, so it cannot support this application.",
+                                             "POL-3.4", [Evidence(path.name, 1, lines[0] if lines else "")], curable=False))
             fields = self.llm.extract(path.name, doc_type, lines, SCHEMAS[doc_type])
             unverified = case.checklist.setdefault("unverified_fields", [])
             for name, f in list(fields.items()):
@@ -210,7 +234,8 @@ class DocumentIntelligenceAgent(Agent):
         all_confs = [f.confidence for fields in case.extracted.values() for f in fields.values()]
         case.checklist["avg_extraction_confidence"] = round(sum(all_confs) / len(all_confs), 3) if all_confs else 1.0
         return {"documents": processed, "pii_tokens_masked": vault.total,
-                "avg_extraction_confidence": case.checklist["avg_extraction_confidence"]}
+                "avg_extraction_confidence": case.checklist["avg_extraction_confidence"],
+                "documents_not_naming_applicant": [m["document"] for m in case.checklist.get("entity_mismatches", [])]}
 
     # Fields where a document might state two figures, and the conservative choice if it does.
     CONFLICT_FIELDS = {
@@ -258,6 +283,11 @@ class DocumentIntelligenceAgent(Agent):
             case.findings.append(Finding(self.name, "due_diligence", "high", "Board resolution below facility amount",
                                          f"Resolution authorises {_money(auth)}; facility is {_money(amount)}.", "POL-3.4",
                                          case.ev("board_resolution", "amount")))
+        elif auth is not None and auth > amount * BOARD_AMOUNT_MISMATCH_RATIO:
+            case.findings.append(Finding(self.name, "due_diligence", "medium", "Board resolution far above facility amount",
+                                         f"Resolution authorises {_money(auth)}; the application asks for {_money(amount)}. "
+                                         "Confirm that the resolution relates to this request.", "POL-3.4",
+                                         case.ev("board_resolution", "amount")))
 
 
 # ---------------------------------------------------------------------------------------------
@@ -278,10 +308,16 @@ class CompletenessAgent(Agent):
                                              + ("" if blocking else " Can be taken as a condition precedent (POL-7.1)."),
                                              "POL-3.4", [Evidence("application.json")], curable=not blocking))
         for doc_type, fields in case.extracted.items():
+            if doc_type not in case.checklist["required_documents"]:   # an extra document adds no requirements
+                continue
             for spec in SCHEMAS[doc_type]:
                 if spec["name"] not in fields and not spec.get("optional") and not spec["name"].startswith("related_party") and spec["type"] != "str":
                     missing.append({"doc": doc_type, "title": f"{spec['description']} (not found in {DOC_LABELS[doc_type]})",
                                     "policy_ref": "POL-3.4", "blocking": False})
+        for mismatch in case.checklist.get("entity_mismatches", []):   # not the applicant's document, so it does not count as supplied
+            if mismatch["doc"] not in case.checklist["required_documents"]:
+                continue
+            missing.append({"doc": mismatch["doc"], "title": DOC_LABELS[mismatch["doc"]], "policy_ref": "POL-3.4", "blocking": True})
         case.checklist["missing"] = missing
         case.checklist["blocking_missing"] = [m for m in missing if m["blocking"]]
         if missing:
@@ -496,8 +532,19 @@ class PolicyEligibilityAgent(Agent):
         checks.sort(key=lambda c: order.index(c.rule_id) if c.rule_id in order else 99)
         case.policy_checks = checks
 
+        not_assessed = set()
+        if case.checklist.get("entity_mismatches"):   # the file cannot be trusted, so neither can anything read from it
+            for c in checks:
+                if c.rule_id == "POL-3.3" and c.status != "PASS":   # a screening hit stands, whoever's document named the person
+                    continue
+                if c.rule_id == "POL-3.3" or {e.source for e in c.evidence} - {"application.json"}:
+                    c.status, c.actual, c.note = "NOT_EVALUATED", "Not assessed: documents do not name the applicant", ""
+                    not_assessed.add(c.rule_id)
+
         sev = {"POL-3.3": "high", "POL-5.2": "high", "POL-3.2": "high", "POL-3.1": "high"}
         for c in checks:
+            if c.rule_id in not_assessed:   # the mismatch is already raised, document by document
+                continue
             if c.status == "NOT_EVALUATED":
                 case.findings.append(Finding(self.name, "missing_info", "high", f"{c.rule_id} {c.name}: NOT EVALUATED",
                                              f"This mandatory check could not be run: {c.actual}. It is not treated as a pass.",
@@ -541,24 +588,27 @@ class RiskAgent(Agent):
         rating = 1 + min(9, round(total * 9 / 30))
         case.risk = {"scorecard": factors, "score": total, "max_score": 30, "rating": rating,
                      "grade": self.GRADE[rating], "pd_1y": self.PD[rating]}
+        assessed = not case.checklist.get("entity_mismatches")
+        if not assessed:
+            case.risk.update(assessed=False, scorecard={}, score=None, rating=None, grade=None, pd_1y=None)
 
         # Early warning signals the rules alone would not raise
         yearly = case.field("project_report", "dscr_by_year") or []
-        if yearly and min(yearly) < self.kb.p("dscr_proj_min"):
+        if assessed and yearly and min(yearly) < self.kb.p("dscr_proj_min"):
             yr = yearly.index(min(yearly)) + 1
             case.findings.append(Finding(self.name, "risk", "medium", "Ramp-up year DSCR below policy floor",
                                          f"Projected DSCR in year {yr} is {min(yearly):.2f}x against the {self.kb.p('dscr_proj_min'):.2f}x floor; the average hides a thin first year.",
                                          "POL-2.3", case.ev("project_report", "dscr_by_year")))
         revs = [case.field("financials", f"revenue_fy{y}") for y in (2023, 2024, 2025)]
         mitigants = []
-        if all(revs):
+        if assessed and all(revs):
             cagr = (revs[2] / revs[0]) ** 0.5 - 1
             mitigants.append(f"revenue CAGR {cagr:.1%} over FY2023-25")
-        if (case.field("financials", "audit_opinion") or "").lower().startswith("unqualified"):
+        if assessed and (case.field("financials", "audit_opinion") or "").lower().startswith("unqualified"):
             mitigants.append("unqualified audit opinion")
-        if m.get("ltv", 1) <= self.kb.p("ltv_max"):
+        if assessed and m.get("ltv", 1) <= self.kb.p("ltv_max"):
             mitigants.append(f"LTV {m['ltv']:.0%} within the {self.kb.p('ltv_max'):.0%} limit")
-        if m.get("promoter_share", 0) >= 0.25:
+        if assessed and m.get("promoter_share", 0) >= 0.25:
             mitigants.append(f"promoter equity {m['promoter_share']:.0%} of project cost")
 
         obs = sorted([f for f in case.findings if f.severity != "info"], key=lambda f: -SEVERITY_ORDER[f.severity])
@@ -567,7 +617,7 @@ class RiskAgent(Agent):
                               "citations": [e.cite() for e in o.evidence] + ([f"[{o.policy_ref}]"] if o.policy_ref else [])} for o in obs],
             "mitigants": mitigants})
         case.risk["mitigants"] = mitigants
-        return {"rating": rating, "grade": case.risk["grade"], "score": f"{total}/30", "observations": len(obs)}
+        return {"rating": case.risk["rating"], "grade": case.risk["grade"], "score": f"{total}/30" if assessed else None, "observations": len(obs)}
 
 
 # ---------------------------------------------------------------------------------------------
@@ -595,6 +645,9 @@ class ApprovalWorkflowAgent(Agent):
 
         if any(c.rule_id == "POL-3.3" and c.status == "FAIL" for c in case.policy_checks):
             rec, why = "DECLINE", "Confirmed sanctions match (POL-3.3)."
+        elif case.checklist.get("entity_mismatches"):
+            names = ", ".join(m["document"] for m in case.checklist["entity_mismatches"])
+            rec, why = "RETURN TO RM", f"Documents do not name the applicant, so their figures cannot be relied on: {names}."
         elif crit:
             rec, why = "DECLINE", "Non-curable policy breach: " + "; ".join(f.title for f in crit)
         elif blocking:
@@ -658,7 +711,7 @@ class ApprovalWorkflowAgent(Agent):
             "summary": self.llm.write("decision_rationale", {
                 "borrower": app["borrower"]["legal_name"], "facility_type": app["facility"]["type"], "amount": amount,
                 "tenor": app["facility"]["tenor_months"], "purpose": app["facility"]["purpose"],
-                "rating": case.risk["rating"], "grade": case.risk["grade"], "recommendation": rec,
+                "rating": case.risk["rating"] or "not assessed", "grade": case.risk["grade"] or "documents unverified", "recommendation": rec,
                 "n_conditions": len(conds), "n_high": sev.count("high") + sev.count("critical"), "n_medium": sev.count("medium"),
                 "gates": [f"{g['role']} ({g['gate']})" for g in gates]}),
         }

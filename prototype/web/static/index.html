@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Loan Lifecycle Manager</title>
-  <link rel="stylesheet" href="/vendor/tailwind.css" />
-  <script src="/vendor/marked.min.js"></script>
-  <script defer src="/vendor/alpine.min.js"></script>
+  <link rel="stylesheet" href="vendor/tailwind.css" />
+  <script src="vendor/marked.min.js"></script>
+  <script defer src="vendor/alpine.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     body{font-family:'Inter',sans-serif}
@@ -89,12 +89,14 @@
     .na-doc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.375rem}
     .na-tpl-btn{font-size:.68rem;font-weight:600;color:#6366f1;background:none;border:1px solid #e0e7ff;border-radius:.375rem;padding:.2rem .625rem;cursor:pointer;font-family:inherit;transition:.12s}
     .na-tpl-btn:hover{background:#eef2ff}
+    .gap-x-3{column-gap:.75rem} .p-8{padding:2rem} .top-4{top:1rem} .right-4{right:1rem} .w-80{width:20rem} .z-\[300\]{z-index:300}
+    .pointer-events-none{pointer-events:none} .pointer-events-auto{pointer-events:auto}
   </style>
 </head>
 <body class="h-full bg-slate-50 text-slate-800" x-data="loanApp()" x-init="init()" x-cloak>
 
 <!-- ═══ LOGIN ═════════════════════════════════════════════════════════════ -->
-<div x-show="!loggedIn" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:500">
+<div x-show="!loggedIn && !portalMode" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:500">
 
   <!-- Left: dark branded panel -->
   <div class="login-left login-dot-grid" style="background:linear-gradient(150deg,#0a0f1e 0%,#1e1b4b 55%,#0f172a 100%);position:absolute;top:0;left:0;bottom:0;width:52%">
@@ -229,6 +231,14 @@
   </div>
 </div>
 
+<div x-show="!loggedIn && portalMode" x-cloak style="position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:#f8fafc;padding:1.5rem">
+  <div style="max-width:440px;padding:2rem;border:1px solid #e2e8f0;border-radius:1rem;background:#fff;text-align:center;box-shadow:0 12px 40px rgba(15,23,42,.08)">
+    <div style="font-size:1.15rem;font-weight:800;color:#0f172a">Administrator sign-in required</div>
+    <p style="font-size:.82rem;color:#64748b;line-height:1.6" x-text="portalAuthError || 'Verifying your Northstar administrator session…'"></p>
+    <a :href="portalLoginUrl" target="_top" style="display:inline-flex;margin-top:.5rem;padding:.65rem 1rem;border-radius:.6rem;background:#4f46e5;color:#fff;text-decoration:none;font-size:.8rem;font-weight:700">Return to Northstar sign-in</a>
+  </div>
+</div>
+
 <!-- ═══ TOASTS (fixed top-right) ═══════════════════════════════════════════ -->
 <div x-show="loggedIn" class="fixed top-4 right-4 z-[300] flex flex-col gap-2 w-80 pointer-events-none">
   <template x-for="t in toasts" :key="t.id">
@@ -302,6 +312,10 @@
     <button class="nav-btn" :class="view==='policies' && 'on'" @click="go('policies')">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
       Policy Library
+    </button>
+    <button class="nav-btn" :class="view==='assistant' && 'on'" @click="go('assistant')">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3a9 9 0 00-9 9v1a3 3 0 003 3h1v-5H6a6 6 0 0112 0h-1v5h1a3 3 0 003-3v-1a9 9 0 00-9-9Z"/><path d="M9 18h3"/></svg>
+      Policy Assistant
     </button>
   </nav>
 
@@ -973,6 +987,7 @@
                     :class="{'text-amber-300':e.actor_type==='human','text-indigo-300':e.actor_type==='agent','text-slate-500':!e.actor_type}"
                     x-text="e.actor"></span>
               <span class="text-slate-300" x-text="e.action"></span>
+              <span x-show="agentSummary(e)" class="text-slate-400" x-text="'— '+agentSummary(e)"></span>
             </div>
           </template>
         </div>
@@ -1048,8 +1063,8 @@
         </div>
         <div class="text-center">
           <div class="text-xs text-slate-400 uppercase tracking-wide">Risk grade</div>
-          <div class="text-4xl font-black mt-1.5" :class="{'text-emerald-600':(results.risk||{}).grade==='A'||(results.risk||{}).grade==='AA','text-amber-600':(results.risk||{}).grade==='BB'||(results.risk||{}).grade==='BBB','text-red-600':(results.risk||{}).grade==='CCC'||(results.risk||{}).grade==='D'}" x-text="(results.risk||{}).grade||'—'"></div>
-          <div class="text-xs text-slate-500 mt-0.5" x-text="'Rating ' + ((results.risk||{}).rating||'—') + '/10 · PD ' + pct((results.risk||{}).pd_1y||0, 1)"></div>
+          <div class="text-4xl font-black mt-1.5" :class="{'text-emerald-600':(results.risk||{}).grade==='A'||(results.risk||{}).grade==='AA','text-amber-600':(results.risk||{}).grade==='BB'||(results.risk||{}).grade==='BBB','text-red-600':(results.risk||{}).grade==='CCC'||(results.risk||{}).grade==='D'}" x-text="notAssessed()?'Not assessed':((results.risk||{}).grade||'—')"></div>
+          <div class="text-xs text-slate-500 mt-0.5" x-text="notAssessed()?'Documents not verified':'Rating ' + ((results.risk||{}).rating||'—') + '/10 · PD ' + pct((results.risk||{}).pd_1y||0, 1)"></div>
         </div>
         <div class="flex-1 min-w-[260px]">
           <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">Approval route</div>
@@ -1071,7 +1086,7 @@
           <div>Model <strong class="text-slate-700" x-text="results.controls.model"></strong></div>
           <div>PII masked <strong class="text-slate-700" x-text="results.controls.pii_tokens_masked"></strong></div>
           <div x-show="audit">Audit chain <strong :class="audit&&audit.chain_ok?'text-emerald-600':'text-red-600'" x-text="audit&&audit.chain_ok?'✓ verified':'✕ BROKEN'"></strong></div>
-          <div>Reliability <strong class="text-emerald-600" x-text="reliabilityScore().pct+'%'"></strong> · Confidence <strong class="text-indigo-600" x-text="reliabilityScore().avgConf+'%'"></strong></div>
+          <div x-show="!notAssessed()">Reliability <strong class="text-emerald-600" x-text="reliabilityScore().pct+'%'"></strong> · Confidence <strong class="text-indigo-600" x-text="reliabilityScore().avgConf+'%'"></strong></div>
         </div>
       </div>
 
@@ -1099,7 +1114,11 @@
         <div class="card p-5">
           <div class="flex flex-wrap gap-6 items-center">
             <!-- Reliability donut-style badge -->
-            <div class="flex flex-col items-center justify-center rounded-2xl border-2 px-6 py-4 min-w-[120px]"
+            <div x-show="notAssessed()" class="rounded-2xl border-2 border-amber-300 bg-amber-50 px-6 py-4 text-sm text-slate-700" style="max-width:24rem">
+              <div class="font-semibold">Not assessed: documents not verified</div>
+              <div class="text-xs text-slate-500 mt-1">The documents do not name the applicant, so no scores or ratios are shown.</div>
+            </div>
+            <div x-show="!notAssessed()" class="flex flex-col items-center justify-center rounded-2xl border-2 px-6 py-4 min-w-[120px]"
                  :class="reliabilityScore().pct>=90 ? 'border-emerald-300 bg-emerald-50' : (reliabilityScore().pct>=70 ? 'border-amber-300 bg-amber-50' : 'border-red-300 bg-red-50')">
               <div class="text-4xl font-black leading-none"
                    :class="reliabilityScore().pct>=90 ? 'text-emerald-600' : (reliabilityScore().pct>=70 ? 'text-amber-600' : 'text-red-600')"
@@ -1108,7 +1127,7 @@
               <div class="text-[10px] text-slate-400 mt-0.5" x-text="reliabilityScore().verified+'/'+reliabilityScore().total+' fields cited'"></div>
             </div>
             <!-- Confidence -->
-            <div class="flex flex-col items-center justify-center rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-6 py-4 min-w-[120px]">
+            <div x-show="!notAssessed()" class="flex flex-col items-center justify-center rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-6 py-4 min-w-[120px]">
               <div class="text-4xl font-black leading-none text-indigo-600" x-text="reliabilityScore().avgConf+'%'"></div>
               <div class="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wide">Avg Confidence</div>
               <div class="text-[10px] text-slate-400 mt-0.5">across all extracted fields</div>
@@ -1126,6 +1145,10 @@
               <div class="text-center">
                 <div class="text-3xl font-black text-red-500" x-text="policyCheckCounts().fail"></div>
                 <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mt-0.5">Fail</div>
+              </div>
+              <div class="text-center" x-show="policyCheckCounts().ne>0">
+                <div class="text-3xl font-black text-slate-500" x-text="policyCheckCounts().ne"></div>
+                <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mt-0.5">Not assessed</div>
               </div>
             </div>
             <!-- Outcome pill -->
@@ -1173,7 +1196,7 @@
                 <div class="flex flex-col items-center min-w-[130px]">
                   <div class="w-10 h-10 rounded-full bg-amber-100 border-2 border-amber-400 flex items-center justify-center text-amber-700 font-bold text-sm">4</div>
                   <div class="text-xs font-semibold text-slate-700 mt-2 text-center">Human Review<br>Required</div>
-                  <div class="text-[10px] text-amber-600 mt-1 text-center font-semibold">Threshold not met<br>→ escalated to</div>
+                  <div class="text-[10px] text-amber-600 mt-1 text-center font-semibold">Decision routed to</div>
                   <div class="text-[10px] text-slate-500 mt-0.5 text-center font-medium" x-text="(results.gates[0]||{}).role"></div>
                 </div>
                 <div class="mt-5 text-slate-300 font-bold px-1">→</div>
@@ -1199,7 +1222,7 @@
                   <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0" x-text="(hd.name||'?')[0]"></div>
                   <div>
                     <div class="font-semibold text-slate-800" x-text="hd.name"></div>
-                    <div class="text-xs text-slate-500" x-text="hd.role+' · '+(hd.override?'Override':'Standard approval')"></div>
+                    <div class="text-xs text-slate-500" x-text="hd.role+' · '+(hd.override?'Override of the recommendation':hd.gate==='credit'?'As recommended':'Sign-off')"></div>
                     <div class="text-xs text-slate-600 mt-1 italic" x-text="hd.rationale"></div>
                     <div class="mt-1"><span class="pill text-xs" :class="statusClass(hd.decision)" x-text="hd.decision"></span></div>
                   </div>
@@ -1210,7 +1233,7 @@
         </div>
 
         <!-- Key metrics with grounding -->
-        <div class="card p-5" x-show="results && results.metrics">
+        <div class="card p-5" x-show="results && results.metrics && !notAssessed()">
           <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Key financial metrics — grounded citations</div>
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <!-- DSCR -->
@@ -1996,6 +2019,60 @@
 </div>
 </section>
 
+<!-- ═══ POLICY ASSISTANT ═══════════════════════════════════════════════ -->
+<section x-show="view==='assistant'" class="fade-in" style="max-width:1100px;margin:0 auto;padding:2.5rem 2rem">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
+    <div>
+      <div style="font-size:.68rem;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.1em">Grounded policy intelligence</div>
+      <h1 style="font-size:1.75rem;font-weight:800;color:#0f172a;margin:.35rem 0">Ask the policy assistant</h1>
+      <p style="max-width:680px;font-size:.82rem;color:#64748b;line-height:1.65;margin:0">Ask about credit, KYC, sanctions, PEP, or approval requirements. Answers are generated from retrieved policy clauses and include source citations; the assistant does not make credit decisions.</p>
+    </div>
+    <div style="padding:.45rem .7rem;border:1px solid #dbeafe;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:.68rem;font-weight:700" x-text="ragSt.vector_ready ? 'Hybrid vector + keyword retrieval' : 'Keyword policy retrieval'"></div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem">
+    <button type="button" class="btn btn-s" style="font-size:.7rem" @click="assistantQuestion='What KYC evidence is required for directors and beneficial owners?'">KYC evidence requirements</button>
+    <button type="button" class="btn btn-s" style="font-size:.7rem" @click="assistantQuestion='What happens when a PEP or sanctions screening match is found?'">PEP / sanctions escalation</button>
+    <button type="button" class="btn btn-s" style="font-size:.7rem" @click="assistantQuestion='Which credit authority should approve a large facility?'">Approval authority</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:1rem">
+    <div role="log" aria-live="polite" style="display:grid;gap:.75rem;max-height:52vh;overflow:auto;padding:.25rem">
+      <template x-if="assistantMessages.length===0">
+        <div style="padding:2rem;border:1px dashed #cbd5e1;border-radius:.875rem;background:#fff;text-align:center;color:#64748b;font-size:.8rem">Ask a question to retrieve relevant policy clauses and see a cited answer here.</div>
+      </template>
+      <template x-for="message in assistantMessages" :key="message.id">
+        <article style="padding:1rem 1.1rem;border:1px solid #e2e8f0;border-radius:.875rem;background:#fff">
+          <div style="font-size:.68rem;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:.05em">Your question</div>
+          <div style="margin:.35rem 0 .85rem;color:#1e293b;font-size:.82rem;line-height:1.6;white-space:pre-wrap" x-text="message.question"></div>
+          <div style="font-size:.68rem;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.05em">Policy-grounded answer</div>
+          <div style="margin-top:.35rem;color:#334155;font-size:.82rem;line-height:1.7;white-space:pre-wrap" x-text="message.answer || 'Searching policy clauses…'"></div>
+          <div x-show="message.sources && message.sources.length" style="margin-top:.85rem;padding-top:.7rem;border-top:1px solid #f1f5f9">
+            <div style="font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Retrieved sources · <span x-text="message.policy_version"></span> · <span x-text="message.retrieval_mode"></span></div>
+            <template x-for="source in message.sources" :key="source.citation">
+              <div style="margin-top:.4rem;padding:.55rem .65rem;border-radius:.55rem;background:#f8fafc">
+                <div style="font-size:.72rem;font-weight:700;color:#1e40af"><span x-text="source.citation"></span> · <span x-text="source.title"></span></div>
+                <div style="margin-top:.2rem;font-size:.68rem;color:#64748b" x-text="source.source + ' · line ' + source.line"></div>
+                <div style="margin-top:.25rem;font-size:.72rem;color:#475569;line-height:1.55" x-text="source.text"></div>
+              </div>
+            </template>
+          </div>
+          <div x-show="message.model" style="margin-top:.6rem;color:#94a3b8;font-size:.62rem" x-text="'Answer engine: ' + message.model"></div>
+        </article>
+      </template>
+    </div>
+    <form @submit.prevent="askPolicy()" style="padding:1rem;border:1px solid #e2e8f0;border-radius:.875rem;background:#fff">
+      <label for="policy-assistant-question" style="display:block;margin-bottom:.45rem;font-size:.7rem;font-weight:700;color:#475569">Ask a policy question</label>
+      <textarea id="policy-assistant-question" x-model="assistantQuestion" maxlength="600" rows="3" placeholder="For example: What should happen if an owner's ID has expired?" style="width:100%;resize:vertical;padding:.7rem .8rem;border:1px solid #cbd5e1;border-radius:.6rem;font:inherit;font-size:.8rem;outline:none"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-top:.65rem">
+        <span style="font-size:.65rem;color:#94a3b8">Answers are limited to retrieved policy evidence.</span>
+        <button type="submit" class="btn btn-p" :disabled="assistantBusy || !assistantQuestion.trim()" style="font-size:.75rem" x-text="assistantBusy ? 'Searching…' : 'Ask assistant'"></button>
+      </div>
+      <div x-show="assistantError" role="alert" style="margin-top:.65rem;padding:.6rem .7rem;border:1px solid #fecaca;border-radius:.5rem;background:#fef2f2;color:#b91c1c;font-size:.72rem" x-text="assistantError"></div>
+    </form>
+  </div>
+</section>
+
 </main>
 </div>
 
@@ -2713,11 +2790,68 @@
               <span class="pill text-sm" :class="statusClass(gate&&gate.recommendation)" x-text="gate&&gate.recommendation||'—'"></span>
               <div class="flex items-center gap-2">
                 <span class="text-xl font-black" :class="{'text-emerald-600':gate&&(gate.risk_grade==='A'||gate.risk_grade==='AA'),'text-amber-600':gate&&(gate.risk_grade==='BB'||gate.risk_grade==='BBB'),'text-red-600':gate&&gate.risk_grade==='CCC'}" x-text="gate&&gate.risk_grade||'—'"></span>
-                <span class="text-xs text-slate-500">risk grade</span>
+                <span class="text-xs text-slate-500" x-text="gate&&gate.risk_assessed===false?'risk grade not assessed: documents not verified':'risk grade'"></span>
               </div>
             </div>
             <div class="text-xs text-slate-500 leading-relaxed" x-text="gate&&gate.recommendation_reason"></div>
           </div>
+
+          <!-- What the agents found: everything the officer needs before deciding -->
+          <div x-show="!review" class="text-xs text-slate-400">Loading the agents' evidence…</div>
+          <template x-if="review">
+            <div class="space-y-5">
+              <div class="card p-4">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">What each agent did</div>
+                <template x-for="e in progressLog.filter(p => p.actor_type==='agent')" :key="e.seq">
+                  <div class="border-t first:border-0 py-2">
+                    <div class="text-xs font-semibold text-slate-700" x-text="e.actor"></div>
+                    <div class="text-xs text-slate-600 mt-0.5" x-text="agentSummary(e)"></div>
+                  </div>
+                </template>
+              </div>
+              <div class="card p-4">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2" x-text="'Findings ('+review.findings.length+')'"></div>
+                <div x-show="!review.findings.length" class="text-xs text-slate-500">No findings.</div>
+                <template x-for="f in review.findings">
+                  <div class="border-t first:border-0 py-2">
+                    <div class="flex gap-2 items-center"><span class="pill" :class="sevClass(f.severity)" x-text="f.severity"></span><span class="text-sm font-medium" x-text="f.title"></span></div>
+                    <div class="text-xs text-slate-600 mt-1" x-text="f.detail"></div>
+                  </div>
+                </template>
+              </div>
+              <div class="card p-4">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2" x-text="'Policy checks ('+review.policy_checks.length+') · policy '+review.policy.version"></div>
+                <template x-for="c in review.policy_checks" :key="c.rule_id">
+                  <details class="border-t first:border-0 py-2">
+                    <summary class="cursor-pointer text-xs flex flex-wrap items-center gap-2">
+                      <span class="pill" :class="checkClass(c.status)" x-text="c.status"></span>
+                      <span class="mono text-slate-400" x-text="c.rule_id"></span>
+                      <span class="font-medium text-slate-700" x-text="c.name"></span>
+                      <span class="text-slate-600" x-text="c.actual+' (needs '+c.threshold+')'"></span>
+                    </summary>
+                    <blockquote class="mt-2 border-l-4 border-indigo-200 pl-3 text-xs text-slate-600 italic" x-text="c.clause_text"></blockquote>
+                    <template x-for="ev in c.evidence">
+                      <div class="text-xs mono bg-white rounded px-2 py-1 mt-1"><span class="text-indigo-600 font-medium" x-text="ev.source+(ev.line?':'+ev.line:'')"></span> <span class="text-slate-600" x-text="ev.quote"></span></div>
+                    </template>
+                  </details>
+                </template>
+              </div>
+              <div class="card p-4">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Figures read from the documents</div>
+                <template x-for="[docType, fields] in Object.entries(review.extracted_fields)" :key="docType">
+                  <details class="border-t first:border-0 py-2">
+                    <summary class="cursor-pointer text-xs font-medium text-slate-700" x-text="docType.replaceAll('_',' ')+' ('+Object.keys(fields).length+' fields)'"></summary>
+                    <template x-for="f in Object.values(fields)" :key="f.name">
+                      <div class="text-xs mt-1.5">
+                        <span class="font-medium text-slate-700" x-text="f.name.replaceAll('_',' ')+': '"></span><span class="text-slate-600" x-text="reviewValue(f.value)"></span>
+                        <div class="mono text-slate-400" x-text="f.evidence.source+':'+f.evidence.line+' '+f.evidence.quote"></div>
+                      </div>
+                    </template>
+                  </details>
+                </template>
+              </div>
+            </div>
+          </template>
 
           <!-- PEP hits (compliance gate) -->
           <template x-if="gate&&gate.gate_type==='compliance'&&(gate.pep_hits||[]).length">
@@ -2740,7 +2874,7 @@
 
           <!-- SoD explanation -->
           <div class="text-xs text-slate-500 leading-relaxed">
-            All submissions are validated: role must equal or exceed the required authority, the approver must not be the case analyst, and a rationale is required when departing from the recommendation. Blocked attempts are recorded in the audit log.
+            All submissions are validated: role must equal or exceed the required authority, the approver must not be the case analyst, and a rationale is required when departing from the recommendation. A confirmed sanctions match can only be declined. Blocked attempts are refused with the reason shown.
           </div>
         </div>
 
@@ -2995,6 +3129,22 @@
 </template>
 
 <script>
+// Deployed, the workbench shares the portal's origin under /workbench/; locally it has its own port.
+const appBase = window.location.pathname.startsWith('/workbench/') ? '/workbench' : '';
+if (appBase) {
+  const baseFetch = window.fetch.bind(window);
+  window.fetch = (input, options) => baseFetch(typeof input === 'string' && input.startsWith('/') ? appBase + input : input, options);
+  const BaseEventSource = window.EventSource;
+  window.EventSource = class extends BaseEventSource {
+    constructor(url, options) { super(url.startsWith('/') ? appBase + url : url, options); }
+  };
+}
+const portalIntegration = new URLSearchParams(window.location.search).get('portal') === '1';
+if (portalIntegration) {
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = (input, options={}) => nativeFetch(input, {...options, credentials:'include'});
+}
+
 const STEPS = [
   ['IntakeAgent',               'Intake',         'Form & doc checklist'],
   ['DocumentIntelligenceAgent', 'Doc intelligence','Extract & verify'],
@@ -3007,18 +3157,27 @@ const STEPS = [
 ];
 
 function loanApp() {
+  const portalLoginUrl = new URL(window.location.href);
+  if (!appBase) portalLoginUrl.port = '8000';
+  portalLoginUrl.pathname = '/';
+  portalLoginUrl.search = '';
+  portalLoginUrl.hash = '';
   return {
     loggedIn: false,
+    portalMode: true,
+    portalAuthError: '',
+    portalLoginUrl: portalLoginUrl.href,
     userRole: '',        // 'admin' | 'applicant'
     currentUser: {},     // {name, username, role, approver_role?}
     myApplications: [],  // applicant's submitted apps [{app_id, status, decision, submitted_at}]
     trackId: '', trackError: '',
     decisionLog: [],     // admin decision history
     policyDocs: [], policyDoc: null, policyDocContent: '', policyDocDirty: false, policyDocSaving: false, policyDocMsg: null, policySearch: '', policyViewMode: 'preview',
+    assistantMessages: [], assistantQuestion: '', assistantBusy: false, assistantError: '',
     loginForm: {user:'', pass:'', error:'', showPass:false},
     view: 'home',
     ov: {}, ragSt: {}, cases: [], caseFilter: 'all', caseSearch: '',
-    caseId: null, detail: null, results: null, audit: null,
+    caseId: null, detail: null, results: null, audit: null, review: null,
     tab: 'checks', docName: null, docLine: null, docModal: false,
     llmMode: 'auto', approverMode: 'web',
     sessionId: null, sessionStatus: 'idle',
@@ -3101,6 +3260,15 @@ function loanApp() {
       } catch(e) { this.loginForm.error = 'Network error — is the server running?'; }
     },
     logout() {
+      if (this.portalMode) {
+        const portalOrigin = new URL(this.portalLoginUrl).origin;
+        if (window.parent !== window) {
+          window.parent.postMessage({type:'northstar:workbench-logout'}, portalOrigin);
+        } else {
+          window.location.assign(this.portalLoginUrl);
+        }
+        return;
+      }
       sessionStorage.removeItem('lc_auth');
       sessionStorage.removeItem('lc_user');
       this.loggedIn = false;
@@ -3133,21 +3301,23 @@ function loanApp() {
     // ── Init ──────────────────────────────────────────────────────────
     async init() {
       try {
-        const auth = sessionStorage.getItem('lc_auth');
-        if (!auth) return;
-        const saved = sessionStorage.getItem('lc_user');
-        if (!saved) { sessionStorage.clear(); return; }
-        const user = JSON.parse(saved);
-        if (!user || !user.role) { sessionStorage.clear(); return; }
-        this.currentUser = user;
-        this.userRole = user.role;
+        const response = await fetch('/api/auth/workbench-session');
+        const payload = await response.json().catch(()=>({}));
+        if (!response.ok || !payload.user) throw new Error(payload.detail || 'Administrator access is required.');
+        const user = payload.user;
+        this.currentUser = {
+          role:'admin',
+          name:user.full_name,
+          username:user.email,
+          approver_roles:payload.approver_roles||[],
+          approver_role:(payload.approver_roles||[]).join(', ')||'Administrator'
+        };
+        this.portalAuthError = '';
+        this.userRole = 'admin';
         this.loggedIn = true;
-        if (this.userRole === 'admin') await this.loadApp();
-        else await Promise.allSettled([this.loadApprovers(), this._loadMyApps()]);
-      } catch(e) {
-        sessionStorage.clear();
-        this.loggedIn = false;
-        this.userRole = '';
+        await this.loadApp();
+      } catch(error) {
+        this.portalAuthError = error.message || 'Sign in through the Northstar administrator portal.';
       }
     },
     async loadApp() {
@@ -3156,7 +3326,7 @@ function loanApp() {
       this.startPendingPoll();
       const h = location.hash.slice(1);
       if (h.startsWith('case/')) this.openCase(h.slice(5));
-      else if (h && ['home','cases','evals','demos'].includes(h)) this.go(h);
+      else if (h && ['home','cases','evals','demos','assistant'].includes(h)) this.go(h);
       else this.go('home');
     },
     async loadOverview() {
@@ -3167,6 +3337,30 @@ function loanApp() {
     },
     async loadRagStatus() {
       try { this.ragSt = await (await fetch('/api/rag/status')).json(); } catch(e) { this.ragSt = {}; }
+    },
+    async askPolicy() {
+      const question = this.assistantQuestion.trim();
+      if (!question || this.assistantBusy) return;
+      this.assistantError = '';
+      this.assistantBusy = true;
+      this.assistantQuestion = '';
+      const message = {id:Date.now()+Math.random(), question, answer:'', sources:[], model:'', policy_version:'', retrieval_mode:''};
+      this.assistantMessages.push(message);
+      try {
+        const response = await fetch('/api/assistant/ask', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({question})
+        });
+        const payload = await response.json().catch(()=>({}));
+        if (!response.ok) throw new Error(payload.detail || 'The policy assistant could not answer this question.');
+        Object.assign(message, payload);
+      } catch(error) {
+        this.assistantError = error.message;
+        this.assistantMessages = this.assistantMessages.filter(item => item.id !== message.id);
+      } finally {
+        this.assistantBusy = false;
+      }
     },
     async loadCases() {
       try { this.cases = await (await fetch('/api/applications')).json(); } catch {}
@@ -3212,9 +3406,53 @@ function loanApp() {
       await this.loadResults(false);
       const s = await (await fetch('/api/session/'+id)).json();
       if (s.session_id && ['running','awaiting_approval'].includes(s.status)) {
+        this.results = null; this.audit = null;   // a saved result belongs to an earlier run of this case
         this.sessionId = s.session_id; this.sessionStatus = s.status;
+        await this.loadAgentActivity();
         if (s.pending_gate) { this.gate = s.pending_gate; if (this.canApproveGate()) this.openGate(); }
         this.connect();
+      }
+    },
+    async loadAgentActivity() {
+      // Someone opening a case late still sees what the agents have done so far
+      const r = await fetch('/api/audit/'+this.caseId);
+      if (r.ok) (await r.json()).forEach(data => this.onEvent({type:'progress', data}));
+    },
+    async loadReview() {
+      this.review = null;
+      const r = await fetch('/api/review/'+this.caseId);
+      if (r.ok) this.review = await r.json();
+    },
+    reviewValue(v) {
+      if (Array.isArray(v)) return v.map(d => d && d.name ? d.name : JSON.stringify(d)).join(', ');
+      return typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v);
+    },
+    agentSummary(e) {
+      const o = e.outputs || {};
+      const statuses = Object.values(o.checks || {});
+      const count = s => statuses.filter(x => x === s).length;
+      switch (e.action) {
+        case 'IntakeAgent':
+          return (o.form_gaps || []).length ? 'Form gaps: '+o.form_gaps.join(', ') : 'Form complete. '+(o.required_documents || []).length+' documents required for this loan.';
+        case 'DocumentIntelligenceAgent': {
+          const docs = o.documents || [];
+          const got = docs.reduce((n, d) => n + d.fields_extracted, 0), want = docs.reduce((n, d) => n + d.expected_fields, 0);
+          const other = (o.documents_not_naming_applicant || []).length;
+          return 'Read '+docs.length+' documents; extracted '+got+' of '+want+' fields, each traced to its source line; masked '+o.pii_tokens_masked+' personal details.'
+            + (other ? ' '+other+' documents do not name the applicant.' : '');
+        }
+        case 'CompletenessAgent':
+          return (o.missing_items || []).length ? 'Missing: '+o.missing_items.join('; ') : 'Nothing missing.';
+        case 'DueDiligenceAgent':
+          return 'Screened '+(o.screened || []).length+' names: '+o.sanctions_hits+' sanctions, '+o.pep_hits+' PEP and '+o.adverse_media_hits+' adverse media hits.';
+        case 'PolicyEligibilityAgent':
+          return statuses.length+' policy checks against '+o.kb_version+': '+count('PASS')+' passed, '+count('FLAG')+' flagged, '+count('FAIL')+' failed, '+count('NOT_EVALUATED')+' could not be run.';
+        case 'RiskAgent':
+          return o.rating == null ? 'Not assessed: the documents do not name the applicant.' : 'Internal rating '+o.rating+' of 10, grade '+o.grade+'.';
+        case 'ApprovalWorkflowAgent':
+          return 'Recommends '+o.recommendation+'. '+o.reason+' Routed to '+(o.gates || []).join(' then ')+'.';
+        default:
+          return '';
       }
     },
     resetRun() {
@@ -3537,7 +3775,9 @@ function loanApp() {
         return;
       }
       if (ev.type === 'progress') {
-        const d = ev.data; this.progressLog.push(d);
+        const d = ev.data;
+        if (this.progressLog.some(p => p.seq === d.seq)) return;
+        this.progressLog.push(d);
         this.$nextTick(() => { const el = document.getElementById('log'); if (el) el.scrollTop = el.scrollHeight; });
         const i = STEPS.findIndex(s => s[0] === d.action);
         if (i >= 0) {
@@ -3569,6 +3809,9 @@ function loanApp() {
         ['audit', 'Audit trail'],
         ['memo', 'Credit memo'],
       ];
+    },
+    notAssessed() {
+      return !!(this.results && this.results.risk && this.results.risk.assessed === false);
     },
     reliabilityScore() {
       if (!this.results || !this.results.extracted_fields) return {verified:0, total:0, pct:0, avgConf:0};
@@ -3610,17 +3853,23 @@ function loanApp() {
       load();
       this._pendingPollTimer = setInterval(load, 8000);
     },
-    canApproveItem(item) {
-      const myRole = this.currentUser.approver_role || '';
-      if (item.gate_type === 'compliance') return myRole === 'Compliance Officer';
-      if (item.gate_type === 'data_validation') return myRole === 'Senior Analyst';
+    roleForGate(gateType, requiredRole) {
+      // Display only: the server resolves and enforces the role on submit
+      const roles = this.currentUser.approver_roles || [];
+      if (gateType === 'compliance') return roles.includes('Compliance Officer') ? 'Compliance Officer' : '';
+      if (gateType === 'data_validation') return roles.includes('Senior Analyst') ? 'Senior Analyst' : '';
       const RANK = {'Senior Credit Manager':1,'Regional Credit Committee':2,'Board Credit Committee':3};
-      return (RANK[myRole] || 0) >= (RANK[item.required_role] || 0);
+      const best = roles.filter(r => RANK[r]).sort((a,b) => RANK[b]-RANK[a])[0];
+      return best && RANK[best] >= (RANK[requiredRole] || 0) ? best : '';
+    },
+    canApproveItem(item) {
+      return !!this.roleForGate(item.gate_type, item.required_role);
     },
     notifDecisionOptions(item) {
       if (!item) return [];
       if (item.gate_type === 'compliance') return ['EDD CLEARED','EDD NOT CLEARED'];
       if (item.gate_type === 'data_validation') return ['PROCEED','RETURN FOR RESUBMISSION'];
+      if (item.sanctions_match) return ['DECLINE'];
       return ['APPROVE WITH CONDITIONS','APPROVE','DECLINE','RETURN TO RM'];
     },
     openNotifItem(item) {
@@ -3628,8 +3877,8 @@ function loanApp() {
       this.notifExpandedId = item.app_id;
       this.notifApproval = {
         name: this.currentUser.name || '',
-        role: this.currentUser.approver_role || '',
-        decision: this.notifDecisionOptions(item)[0] || '',
+        role: this.roleForGate(item.gate_type, item.required_role),
+        decision: this.notifDecisionOptions(item).includes(item.recommendation) ? item.recommendation : '',
         rationale: '',
       };
       this.notifErrors = [];
@@ -3671,22 +3920,19 @@ function loanApp() {
     },
     canApproveGate() {
       if (!this.gate) return false;
-      const myRole = this.currentUser.approver_role || '';
-      if (this.gate.gate_type === 'compliance') return myRole === 'Compliance Officer';
-      if (this.gate.gate_type === 'data_validation') return myRole === 'Senior Analyst';
-      const RANK = {'Senior Credit Manager':1,'Regional Credit Committee':2,'Board Credit Committee':3};
-      return (RANK[myRole] || 0) >= (RANK[this.gate.required_role] || 0);
+      return !!this.roleForGate(this.gate.gate_type, this.gate.required_role);
     },
     openGate() {
       // Identity always comes from the logged-in admin — cannot be changed in the form
       this.approval = {
         name: this.currentUser.name || '',
-        role: this.currentUser.approver_role || '',
-        decision: this.decisionOptions()[0],
+        role: this.roleForGate(this.gate.gate_type, this.gate.required_role),
+        decision: this.decisionOptions().includes(this.gate.recommendation) ? this.gate.recommendation : '',
         rationale: ''
       };
       this.approvalErrors = [];
       this.showApproval = true;
+      this.loadReview();
       this.steps.forEach(s => { if (s.status==='running') s.status='waiting'; });
       if (this.demoMode) this.fillSuggested();
     },
@@ -3694,6 +3940,7 @@ function loanApp() {
       if (!this.gate) return [];
       if (this.gate.gate_type === 'compliance') return ['EDD CLEARED','EDD NOT CLEARED'];
       if (this.gate.gate_type === 'data_validation') return ['PROCEED','RETURN FOR RESUBMISSION'];
+      if (this.gate.sanctions_match) return ['DECLINE'];
       return ['APPROVE WITH CONDITIONS','APPROVE','DECLINE','RETURN TO RM'];
     },
     fillSuggested() {
@@ -3701,7 +3948,7 @@ function loanApp() {
       const c = this.gate.gate_type === 'compliance';
       this.approval.decision  = c ? 'EDD CLEARED' : this.gate.recommendation;
       this.approval.rationale = c ? 'EDD complete: source of wealth verified, no adverse findings on the individual.'
-                                  : 'Approved as recommended after reviewing the cited evidence and risk grade.';
+                                  : 'Decided as recommended after reviewing the cited evidence.';
     },
     async submitApprovalNew() {
       this.submitting = true; this.approvalErrors = [];

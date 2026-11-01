@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "2810c889-aea1-4898-b538-5b3884182c4b",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "C:\\Users\\Alok Ranjan\\Documents\\loan-lifecycle\\.archify\\architecture-loan-lifecycle-20261019-153000\\candidate.json",
+  "output": "C:\\Users\\Alok Ranjan\\Documents\\loan-lifecycle\\prototype\\docs\\architecture-diagram.html",
+  "specification": {
+    "sha256": "fb6e4dd383b5b99931f8bfae2254487026832db6a9cf3a7fef506934f73008e0",
+    "bytes": 10521
+  },
+  "artifact": {
+    "sha256": "6023843a23af9f02f851c414b90dcad4b7c9c303ea63d5493e7b6f8b57cefde0",
+    "bytes": 861942
+  }
+}

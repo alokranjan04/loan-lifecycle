@@ -1,22 +1,22 @@
-# Web app
+# Agentic workbench service
 
-One entry point for the whole prototype: run any case, decide at the human gates, see the decision with its evidence and approval route, run the eval suite and the control demos.
+The Northstar administrator portal embeds this workbench for agentic document analysis, KYC/due diligence, policy checks, risk analysis, human gates, audit/replay, evaluations, and control demos. A cited policy Q&A assistant uses the policy retrieval layer.
 
 ## Start (Windows)
 
-From the `prototype` folder, double-click `start_web.bat`, or:
+Start the Northstar portal first. Then, from the `prototype` folder, run `start_web.bat`, or:
 
 ```bat
 cd "C:\Users\Alok Ranjan\Documents\loan-lifecycle\prototype"
 python -m pip install -r web\requirements.txt
-python web\app.py
+python -m uvicorn web.app:app --host 127.0.0.1 --port 8001
 ```
 
-Then open http://localhost:8000. To use Claude instead of the offline mock, set the key in the same window before starting (never put it in a file):
+Open http://127.0.0.1:8000 and sign in as an administrator. The workbench service is loopback-only on port 8001, and its API validates the Northstar administrator session. For an AI provider, set the key in the same window before starting (never commit it):
 
 ```bat
 set ANTHROPIC_API_KEY=your-key-here
-python web\app.py
+python -m uvicorn web.app:app --host 127.0.0.1 --port 8001
 ```
 
 ## Screens
@@ -26,5 +26,10 @@ python web\app.py
 - **Case**: run the agents with "I decide at each gate" (you approve in the browser; try approving as the case's analyst or too junior a role to see the controls block it) or "Recorded approvers". Tabs show policy checks with clause text and clickable source lines, extracted fields with verified citations, findings and conditions, human decisions and blocked attempts, the documents, the hash-chained audit trail and the credit memo. Golden cases also show the comparison with ground truth.
 - **Evals**: runs `evals/run_evals.py` and rebuilds the report; compares every saved run side by side, overall and by category.
 - **Control demos**: prompt-injection red team, policy change v3.2 to v3.3, tamper-evident audit log, decision replay, and the unit tests.
+- **Policy Assistant**: asks policy questions against retrieved clauses, displays clause citations and source lines, and refuses to answer when no relevant clause is found.
 
-Everything is served locally (Tailwind, Alpine and marked are in `static/vendor`), so it works without internet. The previous screen is kept at `/classic.html`.
+The interface assets are served locally. When no model provider key is configured, the workflow uses its deterministic offline mock; the policy assistant still retrieves and displays source clauses.
+
+## Approver identity
+
+The name and role on a human decision come from the signed-in portal session, not from the browser. `data/approver_assignments.json` (not committed; see `approver_assignments.example.json`) maps each portal account email to its approver roles, and an account with no entry cannot decide at any gate. Set `LOAN_APPROVER_ASSIGNMENTS` to use a different file. The audit log records the authenticated account on each decision and marks scripted approvals as `recorded`. Recorded approvers are refused for applications submitted through the web portal.
